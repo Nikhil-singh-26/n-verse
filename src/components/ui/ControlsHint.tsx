@@ -22,7 +22,7 @@ export function ControlsHint({ isExploring }: ControlsHintProps) {
               Active Controls
             </span>
           </div>
-          <span className="text-[10px] text-slate-400">WASD + Space + E</span>
+          <span className="text-[10px] text-slate-400">WASD + Mouse Orbit</span>
         </div>
 
         {/* Directional Pad Visualization */}
@@ -71,7 +71,7 @@ export function ControlsHint({ isExploring }: ControlsHintProps) {
         </div>
 
         {/* Action Keys */}
-        <div className="flex items-center gap-1.5 pt-1 text-[11px] flex-wrap justify-center">
+        <div className="flex items-center gap-1.5 pt-1 text-[11px] flex-wrap justify-center mb-2">
           <div
             className={`px-2 py-1 rounded-md border font-mono transition-all ${
               keys.sprint
@@ -93,6 +93,14 @@ export function ControlsHint({ isExploring }: ControlsHintProps) {
           <div className="px-2 py-1 rounded-md border font-mono bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-semibold">
             E: Door
           </div>
+        </div>
+
+        {/* Mouse Orbit Hint */}
+        <div className="pt-2 border-t border-slate-800/80 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          <span>Drag mouse to orbit camera 360°</span>
         </div>
       </div>
     </div>

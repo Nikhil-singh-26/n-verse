@@ -10,7 +10,11 @@ interface ExperienceProps {
 
 export function Experience({ isExploring }: ExperienceProps) {
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden bg-sky-200">
+    <div
+      className={`absolute inset-0 w-full h-full overflow-hidden bg-sky-200 select-none ${
+        isExploring ? "cursor-grab active:cursor-grabbing touch-none" : ""
+      }`}
+    >
       <Canvas
         shadows
         camera={{ position: [0, 8, 14], fov: 50, near: 0.1, far: 150 }}
