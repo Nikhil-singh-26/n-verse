@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "N-VERSE | NIKHIL'S INTERACTIVE UNIVERSE",
-  description:
-    "A 3D portfolio made by Nikhil.",
+  title: "Nikhil | Portfolio",
+  description: "Portfolio of Nikhil",
 };
 
 export default function RootLayout({
@@ -26,9 +25,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="h-full w-full overflow-hidden bg-slate-950 text-slate-100 select-none">
+      <body className="min-h-screen bg-slate-950 text-slate-100 font-sans">
         {children}
       </body>
     </html>
