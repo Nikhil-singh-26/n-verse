@@ -5,41 +5,30 @@ import React from 'react';
 export function SceneLighting() {
   return (
     <>
-      {/* Base ambient lighting with cool cyan-slate tint */}
-      <ambientLight color="#081426" intensity={1.5} />
+      {/* Warm natural ambient illumination */}
+      <ambientLight color="#fff6eb" intensity={1.1} />
 
-      {/* Main architectural overhead lights */}
+      {/* Primary architectural window / sunlight direction */}
       <directionalLight
-        position={[2, 7, 3]}
-        color="#cce7ff"
-        intensity={1.2}
+        position={[-3.5, 4.5, 4.0]}
+        color="#fffaf0"
+        intensity={1.3}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
-        shadow-camera-far={30}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
+        shadow-camera-far={25}
+        shadow-camera-left={-6}
+        shadow-camera-right={6}
+        shadow-camera-top={6}
+        shadow-camera-bottom={-6}
+        shadow-bias={-0.0001}
       />
 
-      {/* Secondary fill light */}
-      <directionalLight position={[-4, 5, -2]} color="#0055aa" intensity={0.8} />
+      {/* Secondary warm bounce fill light */}
+      <directionalLight position={[4.0, 3.2, -2.0]} color="#eddcc9" intensity={0.65} />
 
-      {/* Gate Cyan Neon Glow */}
-      <pointLight position={[0, 3.2, 10.5]} color="#00f0ff" intensity={3.5} distance={12} decay={2} />
-
-      {/* Workstation Computer Glow */}
-      <pointLight position={[-3.2, 1.6, 4.2]} color="#00a3ff" intensity={2.5} distance={6} decay={2} />
-
-      {/* Skills Planet Core Light */}
-      <pointLight position={[3.5, 2.2, 0.5]} color="#00f0ff" intensity={4.0} distance={9} decay={2} />
-
-      {/* Telemetry Board Wall Light */}
-      <pointLight position={[7.5, 2.5, -3.5]} color="#38bdf8" intensity={2.8} distance={8} decay={2} />
-
-      {/* Telephone / Comms Console Light */}
-      <pointLight position={[0, 1.6, 1.5]} color="#00e5ff" intensity={2.2} distance={5} decay={2} />
+      {/* Ceiling recessed warm ambient spots */}
+      <pointLight position={[0, 3.8, 1.0]} color="#fffaed" intensity={1.2} distance={8} decay={2} />
     </>
   );
 }

@@ -11,8 +11,10 @@ interface ExperienceContextType {
   activeSection: SectionId;
   activeIndex: number;
   scrollProgress: number; // 0 to 1
-  doorOpenProgress: number; // 0 (closed) to 1 (fully open)
-  characterFade: number; // 1 (visible) to 0 (faded)
+  doorOpenProgress: number; // backward compatibility
+  characterFade: number; // backward compatibility
+  isIntroFinished: boolean;
+  isResumeOpen: boolean;
   isExplorationMode: boolean;
   isReducedMotion: boolean;
   isMuted: boolean;
@@ -24,6 +26,19 @@ interface ExperienceContextType {
   isReady: boolean;
   activeSkillCategoryId: string;
   isSkillsPanelOpen: boolean;
+  selectedSkill: string | null;
+  isTelephoneActive: boolean;
+  isContactCardRevealed: boolean;
+  isMailOpen: boolean;
+  // Windows desktop window management
+  isAboutWindowOpen: boolean;
+  isResumeWindowOpen: boolean;
+  isAboutMinimized: boolean;
+  isResumeMinimized: boolean;
+  isAboutMaximized: boolean;
+  isResumeMaximized: boolean;
+  activeZIndex: 'about' | 'resume';
+  isLeetCodeModalOpen: boolean;
   terminalHistory: { cmd: string; output: string | string[] }[];
   selectedTerminalPrompt: string;
   // Actions
@@ -31,6 +46,8 @@ interface ExperienceContextType {
   setScrollProgress: (progress: number) => void;
   setDoorOpenProgress: (val: number) => void;
   setCharacterFade: (val: number) => void;
+  setIsIntroFinished: (val: boolean) => void;
+  setIsResumeOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   setIsTerminalExpanded: (expanded: boolean | ((prev: boolean) => boolean)) => void;
   toggleExplorationMode: (enabled?: boolean) => void;
   toggleReducedMotion: () => void;
@@ -40,20 +57,36 @@ interface ExperienceContextType {
   setActiveAchievementId: (id: string | null) => void;
   setActiveSkillCategoryId: (id: string) => void;
   setIsSkillsPanelOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  setSelectedSkill: (skill: string | null) => void;
+  setIsTelephoneActive: (val: boolean) => void;
+  setIsContactCardRevealed: (val: boolean) => void;
+  setIsMailOpen: (val: boolean) => void;
+  openAboutWindow: () => void;
+  closeAboutWindow: () => void;
+  minimizeAboutWindow: () => void;
+  toggleMaximizeAboutWindow: () => void;
+  openResumeWindow: () => void;
+  closeResumeWindow: () => void;
+  minimizeResumeWindow: () => void;
+  toggleMaximizeResumeWindow: () => void;
+  bringWindowToFront: (win: 'about' | 'resume') => void;
   runTerminalCommand: (cmd: string) => void;
   jumpToSection: (id: SectionId) => void;
   nextSection: () => void;
   prevSection: () => void;
   setIsReady: (ready: boolean) => void;
+  setIsLeetCodeModalOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
 }
 
 const ExperienceContext = createContext<ExperienceContextType | null>(null);
 
 export function ExperienceProvider({ children }: { children: React.ReactNode }) {
-  const [activeSection, setActiveSectionState] = useState<SectionId>('gate');
+  const [activeSection, setActiveSectionState] = useState<SectionId>('intro');
   const [scrollProgress, setScrollProgressState] = useState<number>(0);
   const [doorOpenProgress, setDoorOpenProgress] = useState<number>(0);
   const [characterFade, setCharacterFade] = useState<number>(1);
+  const [isIntroFinished, setIsIntroFinished] = useState<boolean>(false);
+  const [isResumeOpen, setIsResumeOpenState] = useState<boolean>(false);
   const [isExplorationMode, setIsExplorationMode] = useState<boolean>(false);
   const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -64,7 +97,22 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
   const [hasWebGl, setHasWebGl] = useState<boolean>(true);
   const [isReady, setIsReady] = useState<boolean>(false);
   const [activeSkillCategoryId, setActiveSkillCategoryIdState] = useState<string>('languages');
-  const [isSkillsPanelOpen, setIsSkillsPanelOpen] = useState<boolean>(true);
+  const [isSkillsPanelOpen, setIsSkillsPanelOpen] = useState<boolean>(false);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [isTelephoneActive, setIsTelephoneActive] = useState<boolean>(false);
+  const [isContactCardRevealed, setIsContactCardRevealed] = useState<boolean>(false);
+  const [isMailOpen, setIsMailOpen] = useState<boolean>(false);
+
+  // Desktop Window State
+  const [isAboutWindowOpen, setIsAboutWindowOpen] = useState<boolean>(false);
+  const [isResumeWindowOpen, setIsResumeWindowOpen] = useState<boolean>(false);
+  const [isAboutMinimized, setIsAboutMinimized] = useState<boolean>(false);
+  const [isResumeMinimized, setIsResumeMinimized] = useState<boolean>(false);
+  const [isAboutMaximized, setIsAboutMaximized] = useState<boolean>(false);
+  const [isResumeMaximized, setIsResumeMaximized] = useState<boolean>(false);
+  const [activeZIndex, setActiveZIndex] = useState<'about' | 'resume'>('about');
+  const [isLeetCodeModalOpen, setIsLeetCodeModalOpen] = useState<boolean>(false);
+
   const [selectedTerminalPrompt, setSelectedTerminalPrompt] = useState<string>('about');
   const [terminalHistory, setTerminalHistory] = useState<
     { cmd: string; output: string | string[] }[]
@@ -72,8 +120,8 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     {
       cmd: 'about',
       output: [
-        'Nikhil Singh — Computer Science Engineering student & aspiring software engineer / full-stack developer.',
-        'Learning, experimenting, and building practical projects across web and mobile technologies.',
+        'Nikhil Singh — Computer Science Engineering student & aspiring software engineer.',
+        'Institution: Government Engineering College Bilaspur (2022 — 2026).',
         'Philosophy: Strong engineering fundamentals, clean modular code, and creating genuinely useful products.'
       ]
     }
@@ -102,12 +150,75 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     if (sec) {
       announceToScreenReader(`Arrived at ${sec.label}: ${sec.stationName}`);
     }
+    if (id === 'contact') {
+      setIsMailOpen(true);
+      setIsContactCardRevealed(true);
+    }
   }, []);
 
   const setActiveSkillCategoryId = useCallback((id: string) => {
     setActiveSkillCategoryIdState(id);
     announceToScreenReader(`Selected skills category: ${id}`);
   }, []);
+
+  const openAboutWindow = useCallback(() => {
+    setIsAboutWindowOpen(true);
+    setIsAboutMinimized(false);
+    setActiveZIndex('about');
+  }, []);
+
+  const closeAboutWindow = useCallback(() => {
+    setIsAboutWindowOpen(false);
+  }, []);
+
+  const minimizeAboutWindow = useCallback(() => {
+    setIsAboutMinimized(true);
+  }, []);
+
+  const toggleMaximizeAboutWindow = useCallback(() => {
+    setIsAboutMaximized((prev) => !prev);
+  }, []);
+
+  const openResumeWindow = useCallback(() => {
+    setIsResumeWindowOpen(true);
+    setIsResumeMinimized(false);
+    setIsResumeOpenState(true);
+    setActiveZIndex('resume');
+  }, []);
+
+  const closeResumeWindow = useCallback(() => {
+    setIsResumeWindowOpen(false);
+    setIsResumeOpenState(false);
+  }, []);
+
+  const minimizeResumeWindow = useCallback(() => {
+    setIsResumeMinimized(true);
+  }, []);
+
+  const toggleMaximizeResumeWindow = useCallback(() => {
+    setIsResumeMaximized((prev) => !prev);
+  }, []);
+
+  const bringWindowToFront = useCallback((win: 'about' | 'resume') => {
+    setActiveZIndex(win);
+    if (win === 'about') setIsAboutMinimized(false);
+    if (win === 'resume') setIsResumeMinimized(false);
+  }, []);
+
+  const setIsResumeOpen = useCallback(
+    (open: boolean | ((prev: boolean) => boolean)) => {
+      setIsResumeOpenState((prev) => {
+        const nextVal = typeof open === 'function' ? open(prev) : open;
+        if (nextVal) {
+          openResumeWindow();
+        } else {
+          closeResumeWindow();
+        }
+        return nextVal;
+      });
+    },
+    [openResumeWindow, closeResumeWindow]
+  );
 
   const runTerminalCommand = useCallback((cmd: string) => {
     const trimmed = cmd.trim().toLowerCase();
@@ -116,6 +227,18 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     if (trimmed === 'clear') {
       setTerminalHistory([]);
       setSelectedTerminalPrompt('');
+      return;
+    }
+
+    if (trimmed === 'resume') {
+      openResumeWindow();
+      setTerminalHistory((prev) => [
+        ...prev,
+        {
+          cmd: 'resume',
+          output: 'Opening resume.pdf in dedicated desktop window...'
+        }
+      ]);
       return;
     }
 
@@ -133,27 +256,22 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         ...prev,
         {
           cmd: trimmed,
-          output: `Command not recognized: "${trimmed}". Available commands: about, education, stack, focus, links, help, clear.`
+          output: `Command not recognized: "${trimmed}". Available commands: about, education, stack, focus, links, resume, help, clear.`
         }
       ]);
       announceToScreenReader(`Command ${trimmed} not recognized.`);
     }
-  }, []);
+  }, [openResumeWindow]);
 
   const setScrollProgress = useCallback((progress: number) => {
     startTransition(() => {
       setScrollProgressState(progress);
-      // Continuous, reversible gate opening & character dissolve logic
-      if (progress <= 0.02) {
-        setDoorOpenProgress(0);
-        setCharacterFade(1);
-      } else if (progress < 0.16) {
-        const doorT = Math.min(1, Math.max(0, (progress - 0.02) / 0.12));
-        setDoorOpenProgress(doorT);
-        setCharacterFade(Math.max(0, 1 - doorT * 1.25));
-      } else {
-        setDoorOpenProgress(1);
-        setCharacterFade(0);
+      if (progress >= 0.04) {
+        setIsIntroFinished(true);
+      }
+      if (progress >= 0.90) {
+        setIsMailOpen(true);
+        setIsContactCardRevealed(true);
       }
     });
   }, []);
@@ -163,7 +281,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       const nextVal = enabled !== undefined ? enabled : !prev;
       announceToScreenReader(
         nextVal
-          ? 'Exploration mode activated. Drag to look around the 360 degree laboratory.'
+          ? 'Exploration mode activated. Drag to look around the study room.'
           : 'Returned to cinematic timeline.'
       );
       return nextVal;
@@ -226,6 +344,8 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         scrollProgress,
         doorOpenProgress,
         characterFade,
+        isIntroFinished,
+        isResumeOpen,
         isExplorationMode,
         isReducedMotion,
         isMuted,
@@ -237,12 +357,25 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         isReady,
         activeSkillCategoryId,
         isSkillsPanelOpen,
+        selectedSkill,
+        isTelephoneActive,
+        isContactCardRevealed,
+        isMailOpen,
+        isAboutWindowOpen,
+        isResumeWindowOpen,
+        isAboutMinimized,
+        isResumeMinimized,
+        isAboutMaximized,
+        isResumeMaximized,
+        activeZIndex,
         terminalHistory,
         selectedTerminalPrompt,
         setActiveSection,
         setScrollProgress,
         setDoorOpenProgress,
         setCharacterFade,
+        setIsIntroFinished,
+        setIsResumeOpen,
         setIsTerminalExpanded,
         toggleExplorationMode,
         toggleReducedMotion,
@@ -252,11 +385,26 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         setActiveAchievementId,
         setActiveSkillCategoryId,
         setIsSkillsPanelOpen,
+        setSelectedSkill,
+        setIsTelephoneActive,
+        setIsContactCardRevealed,
+        setIsMailOpen,
+        openAboutWindow,
+        closeAboutWindow,
+        minimizeAboutWindow,
+        toggleMaximizeAboutWindow,
+        openResumeWindow,
+        closeResumeWindow,
+        minimizeResumeWindow,
+        toggleMaximizeResumeWindow,
+        bringWindowToFront,
         runTerminalCommand,
         jumpToSection,
         nextSection,
         prevSection,
-        setIsReady
+        setIsReady,
+        isLeetCodeModalOpen,
+        setIsLeetCodeModalOpen
       }}
     >
       {children}

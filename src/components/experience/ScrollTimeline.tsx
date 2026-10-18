@@ -5,11 +5,15 @@ import { useExperience } from '@/context/ExperienceContext';
 import { SECTIONS, SECTION_IDS } from '@/lib/experience-config';
 import { gsap, ScrollTrigger, registerGsapPlugins } from '@/lib/motion';
 import { SectionId } from '@/types';
+import { projectsData } from '@/data/projects';
 
 export function ScrollTimeline() {
   const {
     setScrollProgress,
     setActiveSection,
+    setActiveProjectIndex,
+    setIsContactCardRevealed,
+    setIsMailOpen,
     isExplorationMode,
     nextSection,
     prevSection
@@ -17,7 +21,8 @@ export function ScrollTimeline() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef<number | null>(null);
-  const currentSectionRef = useRef<SectionId>('gate');
+  const currentSectionRef = useRef<SectionId>('intro');
+  const currentProjectRef = useRef<number>(0);
 
   // Master GSAP ScrollTrigger timeline configuration
   useEffect(() => {
@@ -27,12 +32,12 @@ export function ScrollTimeline() {
 
     // Define section threshold intervals for all 7 ordered stops
     const getSectionFromProgress = (p: number): SectionId => {
-      if (p < 0.08) return 'gate';
-      if (p < 0.22) return 'welcome';
+      if (p < 0.08) return 'intro';
+      if (p < 0.22) return 'room';
       if (p < 0.38) return 'about';
       if (p < 0.54) return 'skills';
-      if (p < 0.70) return 'projects';
-      if (p < 0.86) return 'achievements';
+      if (p < 0.76) return 'projects';
+      if (p < 0.88) return 'achievements';
       return 'contact';
     };
 
@@ -52,19 +57,53 @@ export function ScrollTimeline() {
           currentSectionRef.current = newSection;
           setActiveSection(newSection);
         }
+
+        // Sequential Projector presentation driven by scrolling through projects section [0.54, 0.76]
+        if (progress >= 0.54 && progress <= 0.76) {
+          const projT = (progress - 0.54) / (0.76 - 0.54);
+          const pIdx = Math.min(
+            projectsData.length - 1,
+            Math.max(0, Math.floor(projT * projectsData.length))
+          );
+          if (pIdx !== currentProjectRef.current) {
+            currentProjectRef.current = pIdx;
+            setActiveProjectIndex(pIdx);
+          }
+        }
+
+        // Contact Section: Reveal Display B Mail client and contact channels
+        if (progress >= 0.88) {
+          setIsMailOpen(true);
+          setIsContactCardRevealed(true);
+        } else {
+          setIsMailOpen(false);
+          setIsContactCardRevealed(false);
+        }
       }
     });
 
     return () => {
       trigger.kill();
     };
-  }, [setScrollProgress, setActiveSection, isExplorationMode]);
+  }, [
+    setScrollProgress,
+    setActiveSection,
+    setActiveProjectIndex,
+    setIsContactCardRevealed,
+    setIsMailOpen,
+    isExplorationMode
+  ]);
 
-  // Mobile Swipe Gesture Listener (without trapping inner scrollable modal panels)
+  // Mobile Swipe Gesture Listener
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
       const target = e.target as HTMLElement | null;
-      if (target?.closest('.overflow-y-auto') || target?.closest('button') || target?.closest('a') || target?.closest('input')) {
+      if (
+        target?.closest('.overflow-y-auto') ||
+        target?.closest('button') ||
+        target?.closest('a') ||
+        target?.closest('input')
+      ) {
         touchStartY.current = null;
         return;
       }
@@ -96,7 +135,7 @@ export function ScrollTimeline() {
     };
   }, [isExplorationMode, nextSection, prevSection]);
 
-  // Accessible Keyboard Navigation (Arrow Keys, PageUp/PageDown, Space)
+  // Accessible Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {

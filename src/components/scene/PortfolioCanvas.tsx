@@ -4,13 +4,10 @@ import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { SceneLighting } from './SceneLighting';
 import { DeveloperRoom } from './DeveloperRoom';
-import { Gate } from './Gate';
-import { Character } from './Character';
 import { Workstation } from './Workstation';
-import { SkillsPlanet } from './SkillsPlanet';
+import { SkillsGlobe } from './SkillsGlobe';
 import { Projector } from './Projector';
-import { AchievementBoard } from './AchievementBoard';
-import { Telephone } from './Telephone';
+import { AchievementArea } from './AchievementArea';
 import { CameraController } from './CameraController';
 
 export function PortfolioCanvas() {
@@ -22,7 +19,7 @@ export function PortfolioCanvas() {
           fov: 48,
           near: 0.1,
           far: 50,
-          position: [0, 1.75, 15.2]
+          position: [0, 2.1, 7.2]
         }}
         gl={{
           antialias: true,
@@ -33,20 +30,17 @@ export function PortfolioCanvas() {
         dpr={[1, 2]}
         className="pointer-events-auto"
       >
-        <color attach="background" args={['#05070b']} />
-        <fog attach="fog" args={['#05070b', 12, 45]} />
+        <color attach="background" args={['#0e121a']} />
+        <fog attach="fog" args={['#0e121a', 14, 45]} />
 
         <Suspense fallback={null}>
           <CameraController />
           <SceneLighting />
           <DeveloperRoom />
-          <Gate />
-          <Character />
           <Workstation />
-          <SkillsPlanet />
+          <SkillsGlobe />
           <Projector />
-          <AchievementBoard />
-          <Telephone />
+          <AchievementArea />
         </Suspense>
       </Canvas>
     </div>

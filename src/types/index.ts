@@ -1,4 +1,4 @@
-export type SectionId = 'gate' | 'welcome' | 'about' | 'skills' | 'projects' | 'achievements' | 'contact';
+export type SectionId = 'intro' | 'room' | 'about' | 'skills' | 'projects' | 'achievements' | 'contact' | 'gate' | 'welcome';
 
 export interface SectionConfig {
   id: SectionId;
@@ -80,6 +80,7 @@ export interface AchievementItem {
   category?: string;
   description: string;
   badge?: string;
+  image?: string;
   credentialUrl?: string;
   status?: string;
   featured?: boolean;

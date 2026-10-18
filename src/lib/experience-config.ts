@@ -2,74 +2,74 @@ import { SectionConfig, SectionId } from '@/types';
 
 export const SECTIONS: SectionConfig[] = [
   {
-    id: 'gate',
-    label: 'Gate',
-    stationName: 'N/VERSE Gateway',
+    id: 'intro',
+    label: 'Intro',
+    stationName: 'Welcome',
     order: 0,
-    cameraPosition: [0, 1.75, 15.2],
-    cameraTarget: [0, 1.6, 10.5],
+    cameraPosition: [0, 2.1, 7.2],
+    cameraTarget: [0, 1.7, 0],
     fov: 48
   },
   {
-    id: 'welcome',
-    label: 'Welcome',
-    stationName: 'Lab Threshold',
+    id: 'room',
+    label: 'Studio',
+    stationName: 'Creative Study Room',
     order: 1,
-    cameraPosition: [0, 1.7, 9.8],
-    cameraTarget: [0, 1.6, 2.0],
-    fov: 48
+    cameraPosition: [0.2, 2.2, 5.8],
+    cameraTarget: [-0.3, 1.6, -1.5],
+    fov: 50
   },
   {
     id: 'about',
     label: 'About',
-    stationName: 'Computer Terminal',
+    stationName: 'Workstation Desktop',
     order: 2,
-    cameraPosition: [-2.85, 1.42, 5.25],
-    cameraTarget: [-3.22, 1.35, 3.85],
-    fov: 44
+    cameraPosition: [-1.2, 2.22, -0.6],
+    cameraTarget: [-1.2, 2.22, -4.45],
+    fov: 50
   },
   {
     id: 'skills',
     label: 'Skills',
-    stationName: 'Orbital Core',
+    stationName: 'Skills Planet & Portrait',
     order: 3,
-    cameraPosition: [1.6, 2.2, 2.8],
-    cameraTarget: [3.5, 2.1, 0.4],
-    fov: 46
+    cameraPosition: [0.4, 1.8, 0.4],
+    cameraTarget: [3.2, 1.6, 0.5],
+    fov: 50
   },
   {
     id: 'projects',
     label: 'Projects',
-    stationName: 'Holo-Projector',
+    stationName: 'Projector Presentation',
     order: 4,
-    cameraPosition: [-1.2, 1.8, -2.2],
-    cameraTarget: [-2.8, 2.4, -8.2],
+    cameraPosition: [-1.5, 2.05, 0.8],
+    cameraTarget: [-4.96, 2.1, 0.8],
     fov: 46
   },
   {
     id: 'achievements',
-    label: 'Timeline',
-    stationName: 'Telemetry Board',
+    label: 'Milestones',
+    stationName: 'Achievements & Milestones',
     order: 5,
-    cameraPosition: [4.6, 2.2, -3.5],
-    cameraTarget: [8.0, 2.4, -3.5],
-    fov: 45
+    cameraPosition: [0, 2.1, 2.6],
+    cameraTarget: [0, 2.15, 6.74],
+    fov: 48
   },
   {
     id: 'contact',
     label: 'Contact',
-    stationName: 'Comms Console',
+    stationName: 'Wall Monitor & Mail',
     order: 6,
-    cameraPosition: [0, 1.45, 3.4],
-    cameraTarget: [0, 1.05, 1.5],
-    fov: 46
+    cameraPosition: [-1.2, 2.22, -0.6],
+    cameraTarget: [-1.2, 2.22, -4.45],
+    fov: 50
   }
 ];
 
 export const OVERVIEW_CAMERA = {
-  position: [0, 3.4, 0.5] as [number, number, number],
-  target: [0, 1.6, -4.0] as [number, number, number],
-  fov: 55
+  position: [0, 2.5, 2.8] as [number, number, number],
+  target: [0, 1.5, -0.5] as [number, number, number],
+  fov: 56
 };
 
 export const SECTION_MAP: Record<SectionId, SectionConfig> = SECTIONS.reduce(
@@ -79,5 +79,9 @@ export const SECTION_MAP: Record<SectionId, SectionConfig> = SECTIONS.reduce(
   },
   {} as Record<SectionId, SectionConfig>
 );
+
+// Map old ids to prevent any regressions
+SECTION_MAP['gate'] = SECTIONS[0];
+SECTION_MAP['welcome'] = SECTIONS[1];
 
 export const SECTION_IDS: SectionId[] = SECTIONS.map((s) => s.id);

@@ -35,8 +35,8 @@ The portfolio is structured as **one persistent 3D engineering laboratory room**
      - **RoadVision** — Computer vision road hazard intelligence & safer routes.
    - Dedicated case-study drawer and standalone deep-link routes (`/projects/[slug]`).
 6. **Achievement Board (Stop 5: `achievements`)**
-   - Wall-mounted illuminated telemetry board with timeline track and milestone markers.
-   - Verified timeline covering B.Tech CSE degree, DSA mastery, full-stack development, and competitive sprints.
+   - Wall-mounted illuminated telemetry board with Achievements and milestone markers.
+   - Verified achievements covering LeetCode Profile, Hackathons and GDG.
 7. **Telephone / Comms Console (Stop 6: `contact`)**
    - Physical telephone unit with pulse indicator LED, receiver handset, and holographic comms ring signal.
    - Direct communication channels: Email (with instant copy & mailto), LinkedIn, GitHub, LeetCode, Resume PDF (`/resume.pdf`).

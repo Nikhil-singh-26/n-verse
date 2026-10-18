@@ -1,212 +1,417 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useExperience } from '@/context/ExperienceContext';
-import { Text } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 import { projectsData } from '@/data/projects';
+import { ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, X, FileText, ArrowRight } from 'lucide-react';
+import { GithubIcon } from '@/components/ui/Icons';
+import Link from 'next/link';
 
 export function Projector() {
-  const { activeSection, activeProjectIndex, isReducedMotion } = useExperience();
+  const {
+    activeSection,
+    activeProjectIndex,
+    setActiveProjectIndex,
+    activeProjectSlug,
+    setActiveProjectSlug,
+    isReducedMotion
+  } = useExperience();
+
+  const isProjects = activeSection === 'projects';
+  const currentProject = projectsData[activeProjectIndex] || projectsData[0];
+  const detailedProject = projectsData.find((p) => p.slug === activeProjectSlug);
+
   const beamRef = useRef<THREE.MeshBasicMaterial>(null);
   const lensRef = useRef<THREE.MeshBasicMaterial>(null);
-  const wallDisplayRef = useRef<THREE.MeshBasicMaterial>(null);
-  const lightRef = useRef<THREE.SpotLight>(null);
-  const isProjects = activeSection === 'projects';
+  const projectorLightRef = useRef<THREE.SpotLight>(null);
 
-  const currentProject = projectsData[activeProjectIndex] || projectsData[0];
-
+  // Smooth projector lamp warmup / cooldown
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    const lerpSpeed = isReducedMotion ? 0.3 : 0.08;
+    const targetIntensity = isProjects ? 2.4 : 0.05;
+    const targetBeam = isProjects ? 0.22 + Math.sin(t * 5) * 0.02 : 0.0;
+    const targetLens = isProjects ? 0.95 : 0.15;
+    const lerpSpeed = isReducedMotion ? 0.35 : 0.06;
 
-    // Smooth volumetric beam opacity
-    const targetBeamOpacity = isProjects
-      ? 0.32 + Math.sin(t * 7) * 0.04
-      : 0.02;
-
-    if (beamRef.current) {
-      beamRef.current.opacity = THREE.MathUtils.lerp(
-        beamRef.current.opacity,
-        targetBeamOpacity,
+    if (projectorLightRef.current) {
+      projectorLightRef.current.intensity = THREE.MathUtils.lerp(
+        projectorLightRef.current.intensity,
+        targetIntensity,
         lerpSpeed
       );
     }
 
-    // Lens glow
+    if (beamRef.current) {
+      beamRef.current.opacity = THREE.MathUtils.lerp(
+        beamRef.current.opacity,
+        targetBeam,
+        lerpSpeed
+      );
+    }
+
     if (lensRef.current) {
-      const targetLens = isProjects ? 0.95 + Math.sin(t * 5) * 0.05 : 0.2;
       lensRef.current.opacity = THREE.MathUtils.lerp(
         lensRef.current.opacity,
         targetLens,
         lerpSpeed
       );
     }
-
-    // Wall projection illumination
-    if (wallDisplayRef.current) {
-      const targetWall = isProjects ? 0.85 : 0.08;
-      wallDisplayRef.current.opacity = THREE.MathUtils.lerp(
-        wallDisplayRef.current.opacity,
-        targetWall,
-        lerpSpeed
-      );
-    }
-
-    // Spotlight intensity
-    if (lightRef.current) {
-      const targetLight = isProjects ? 2.4 : 0.1;
-      lightRef.current.intensity = THREE.MathUtils.lerp(
-        lightRef.current.intensity,
-        targetLight,
-        lerpSpeed
-      );
-    }
   });
 
+  const nextProject = () => {
+    if (activeProjectIndex < projectsData.length - 1) {
+      setActiveProjectIndex(activeProjectIndex + 1);
+    }
+  };
+
+  const prevProject = () => {
+    if (activeProjectIndex > 0) {
+      setActiveProjectIndex(activeProjectIndex - 1);
+    }
+  };
+
   return (
-    <group position={[-2.5, 0, -4.5]}>
-      {/* ================= PROJECTOR DESK STAND ================= */}
-      <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.45, 0.52, 0.9, 24]} />
-        <meshStandardMaterial color="#0c121e" metalness={0.8} roughness={0.4} />
-      </mesh>
-      {/* Table accent cyan ring */}
-      <mesh position={[0, 0.88, 0]}>
-        <cylinderGeometry args={[0.46, 0.46, 0.04, 24]} />
-        <meshBasicMaterial color="#00f0ff" opacity={0.6} transparent />
-      </mesh>
-
-      {/* ================= DETAILED COMPACT PROJECTOR UNIT ================= */}
-      <group position={[0, 0.98, 0]}>
-        {/* Main Chassis - Graphite metallic body */}
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[0.54, 0.18, 0.42]} />
-          <meshStandardMaterial color="#0e1420" metalness={0.9} roughness={0.25} />
+    <group>
+      {/* ================= PHYSICAL PROJECTOR UNIT ================= */}
+      {/* Projector Table / Low Credenza on Right Side */}
+      <group position={[1.2, 0, 1.4]} rotation={[0, -Math.PI * 0.65, 0]}>
+        {/* Tabletop */}
+        <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
+          <boxGeometry args={[0.72, 0.04, 0.52]} />
+          <meshStandardMaterial color="#3a2a1e" roughness={0.4} metalness={0.06} />
         </mesh>
-
-        {/* Chassis Top Panel Accent */}
-        <mesh position={[0, 0.091, 0]}>
-          <planeGeometry args={[0.48, 0.36]} />
-          <meshStandardMaterial color="#162032" metalness={0.8} roughness={0.3} />
-        </mesh>
-
-        {/* Optical Lens Barrel facing towards -Z */}
-        <group position={[0, 0, -0.22]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.085, 0.095, 0.07, 24]} />
-            <meshStandardMaterial color="#080c14" metalness={0.9} roughness={0.2} />
+        {/* Table Legs */}
+        {[
+          [-0.32, -0.22],
+          [0.32, -0.22],
+          [-0.32, 0.22],
+          [0.32, 0.22]
+        ].map(([lx, lz], li) => (
+          <mesh key={`p-leg-${li}`} position={[lx, 0.35, lz]} castShadow>
+            <cylinderGeometry args={[0.018, 0.015, 0.7, 8]} />
+            <meshStandardMaterial color="#1a1c22" roughness={0.3} metalness={0.8} />
           </mesh>
-          {/* Glowing Lens Glass */}
-          <mesh position={[0, 0, -0.036]} rotation={[Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[0.075, 24]} />
-            <meshBasicMaterial ref={lensRef} color="#00f0ff" transparent opacity={0.3} />
+        ))}
+
+        {/* Projector Chassis */}
+        <group position={[0, 0.83, 0]}>
+          {/* Main Housing */}
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[0.42, 0.14, 0.32]} />
+            <meshStandardMaterial color="#1c202a" roughness={0.3} metalness={0.85} />
+          </mesh>
+
+          {/* Lens Barrel facing toward Left Wall */}
+          <group position={[0, 0, -0.17]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.065, 0.075, 0.06, 24]} />
+              <meshStandardMaterial color="#0d1017" metalness={0.9} roughness={0.2} />
+            </mesh>
+            {/* Glowing Optical Lens Element */}
+            <mesh position={[0, 0, -0.032]} rotation={[Math.PI / 2, 0, 0]}>
+              <circleGeometry args={[0.058, 24]} />
+              <meshBasicMaterial ref={lensRef} color="#e0f2fe" transparent opacity={0.15} />
+            </mesh>
+          </group>
+
+          {/* Indicator LED */}
+          <mesh position={[-0.14, 0.072, 0.08]}>
+            <sphereGeometry args={[0.008, 12, 12]} />
+            <meshBasicMaterial color={isProjects ? '#38bdf8' : '#64748b'} />
           </mesh>
         </group>
 
-        {/* Status Indicators & Vent Slits */}
-        <mesh position={[-0.16, 0.092, 0]}>
-          <boxGeometry args={[0.08, 0.005, 0.015]} />
-          <meshBasicMaterial color="#00f0ff" />
-        </mesh>
-        <mesh position={[-0.06, 0.092, 0]}>
-          <boxGeometry args={[0.08, 0.005, 0.015]} />
-          <meshBasicMaterial color="#38bdf8" />
-        </mesh>
-        <mesh position={[0.12, 0.092, 0]}>
-          <boxGeometry args={[0.12, 0.005, 0.01]} />
-          <meshBasicMaterial color="#64748b" />
-        </mesh>
-      </group>
+        {/* Projector Spotlight Aimed at Projection Wall */}
+        <spotLight
+          ref={projectorLightRef}
+          position={[0, 0.83, -0.2]}
+          target-position={[-4.96, 2.1, 0.8]}
+          color="#f0f9ff"
+          intensity={0.05}
+          angle={0.48}
+          penumbra={0.4}
+          distance={10}
+        />
 
-      {/* Focused Projection Spotlight */}
-      <spotLight
-        ref={lightRef}
-        position={[0, 0.98, -0.25]}
-        target-position={[0, 2.8, -6.38]}
-        color="#a5f3fc"
-        intensity={0.2}
-        angle={0.52}
-        penumbra={0.5}
-        distance={9}
-      />
-
-      {/* ================= VOLUMETRIC-STYLE LIGHT BEAM ================= */}
-      {/* Frustum light cone starting from lens [0, 0.98, -0.22] to wall [0, 2.8, -6.38] */}
-      <group position={[0, 1.89, -3.3]} rotation={[0.29, 0, 0]}>
-        <mesh>
-          {/* Tapered open-ended cylinder: radiusTop=2.25 (at wall), radiusBottom=0.085 (at lens), height=6.2 */}
-          <cylinderGeometry args={[2.25, 0.085, 6.2, 32, 1, true]} />
-          <meshBasicMaterial
-            ref={beamRef}
-            color="#00f0ff"
-            transparent
-            opacity={0.05}
-            side={THREE.DoubleSide}
-            depthWrite={false}
-          />
-        </mesh>
-      </group>
-
-      {/* ================= 3D WALL PROJECTION SURFACE ================= */}
-      <group position={[0, 2.8, -6.36]}>
-        {/* Projection Backplane Surface */}
-        <mesh>
-          <planeGeometry args={[7.0, 4.0]} />
-          <meshBasicMaterial
-            ref={wallDisplayRef}
-            color="#021424"
-            transparent
-            opacity={0.1}
-          />
-        </mesh>
-
-        {/* Projection Wireframe Grid */}
-        <lineSegments position={[0, 0, 0.005]}>
-          <edgesGeometry args={[new THREE.PlaneGeometry(6.9, 3.9)]} />
-          <lineBasicMaterial color="#00f0ff" opacity={isProjects ? 0.6 : 0.15} transparent />
-        </lineSegments>
-
-        {/* 3D Dynamic Title Projection on Wall */}
-        <group position={[0, 1.55, 0.02]}>
-          <Text
-            fontSize={0.22}
-            color="#00f0ff"
-            anchorX="center"
-            anchorY="middle"
-            letterSpacing={0.14}
-          >
-            N/VERSE // PROJECT ARCHIVE
-          </Text>
-        </group>
-
-        {/* Projected Active Project Title */}
-        <group position={[0, 1.15, 0.02]}>
-          <Text
-            fontSize={0.28}
-            color="#ffffff"
-            anchorX="center"
-            anchorY="middle"
-            letterSpacing={0.06}
-          >
-            {currentProject.title.toUpperCase()}
-          </Text>
-        </group>
-
-        {/* Projected Category & Status */}
-        <group position={[0, 0.8, 0.02]}>
-          <Text
-            fontSize={0.13}
-            color="#38bdf8"
-            anchorX="center"
-            anchorY="middle"
-            letterSpacing={0.08}
-          >
-            {`${currentProject.category.toUpperCase()} • ${currentProject.status.toUpperCase()}`}
-          </Text>
+        {/* Restrained Soft Volumetric Light Beam Frustum */}
+        <group position={[0, 0.83, -2.8]} rotation={[0.18, 0, 0]}>
+          <mesh>
+            <cylinderGeometry args={[1.8, 0.07, 5.2, 24, 1, true]} />
+            <meshBasicMaterial
+              ref={beamRef}
+              color="#e0f2fe"
+              transparent
+              opacity={0.0}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+            />
+          </mesh>
         </group>
       </group>
+
+      {/* ================= PROJECTION ON LEFT WALL ================= */}
+      <group position={[-4.96, 2.1, 0.8]} rotation={[0, Math.PI / 2, 0]}>
+        {/* Active Projection Screen Area */}
+        <Html
+          transform
+          distanceFactor={1.42}
+          position={[0, 0, 0.01]}
+          className="pointer-events-auto select-none"
+        >
+          <div className="w-[840px] h-[480px] flex flex-col justify-between p-7 text-white font-sans overflow-hidden">
+            {!isProjects ? (
+              /* Idle Wall Standby State */
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-2 opacity-40">
+                <div className="font-mono text-xs uppercase tracking-widest text-[#78716c]">
+                  ARCHITECTURAL PROJECTION WALL // STANDBY
+                </div>
+                <div className="text-[11px] font-mono text-[#a8a29e]">
+                  Scroll into Projects section to illuminate projector and present verified works.
+                </div>
+              </div>
+            ) : (
+              /* Active Sequential Project Presentation */
+              <div className="flex-1 flex flex-col justify-between bg-[#0a0f18]/92 border border-white/10 rounded-2xl p-6 sm:p-7 shadow-[0_12px_45px_rgba(0,0,0,0.85)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-400">
+                {/* Header: Project Index & Category */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#38bdf8] animate-ping" />
+                    <span className="font-mono text-xs font-bold text-[#38bdf8] uppercase tracking-wider">
+                      PROJECT {activeProjectIndex + 1} OF {projectsData.length}
+                    </span>
+                    <span className="text-white/30">&bull;</span>
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-white/10 text-white/90">
+                      {currentProject.category}
+                    </span>
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {currentProject.status}
+                    </span>
+                  </div>
+
+                  {/* Navigation Arrows for Sequential Presentation */}
+                  <div className="flex items-center gap-1.5 font-mono text-xs">
+                    <button
+                      onClick={prevProject}
+                      disabled={activeProjectIndex === 0}
+                      className={`p-1.5 rounded-lg border transition-all ${
+                        activeProjectIndex > 0
+                          ? 'border-white/20 text-white hover:bg-white/10 hover:border-white/40'
+                          : 'border-white/5 text-white/20 cursor-not-allowed'
+                      }`}
+                      aria-label="Previous Project"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs text-[#94a3b8] px-1">
+                      {activeProjectIndex + 1} / {projectsData.length}
+                    </span>
+                    <button
+                      onClick={nextProject}
+                      disabled={activeProjectIndex === projectsData.length - 1}
+                      className={`p-1.5 rounded-lg border transition-all ${
+                        activeProjectIndex < projectsData.length - 1
+                          ? 'border-white/20 text-white hover:bg-white/10 hover:border-white/40'
+                          : 'border-white/5 text-white/20 cursor-not-allowed'
+                      }`}
+                      aria-label="Next Project"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Main Project Typography & Visual Content */}
+                <div className="py-4 space-y-3.5 flex-1">
+                  <div>
+                    <h3 className="text-3xl sm:text-4xl font-extrabold text-white font-['Outfit'] tracking-tight">
+                      {currentProject.title}
+                    </h3>
+                    <p className="text-sm font-mono text-[#38bdf8] mt-0.5">
+                      {currentProject.tagline}
+                    </p>
+                  </div>
+
+                  <p className="text-sm text-[#cbd5e1] leading-relaxed max-w-2xl">
+                    {currentProject.purpose}
+                  </p>
+
+                  {/* Key Verified Functionality */}
+                  <div className="bg-black/40 p-3.5 rounded-xl border border-white/5 space-y-1.5">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#94a3b8] block">
+                      Core Implementation Highlights:
+                    </span>
+                    <ul className="grid grid-cols-2 gap-2 text-xs text-[#cbd5e1]">
+                      {currentProject.keyFunctionality.slice(0, 4).map((feat, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#38bdf8] flex-shrink-0 mt-0.5" />
+                          <span className="truncate">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Technologies Implemented */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <span className="text-[11px] font-mono text-[#64748b] mr-1">Stack:</span>
+                    {currentProject.technologies.map((tech, ti) => (
+                      <span
+                        key={ti}
+                        className="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 text-[#94a3b8] border border-white/10"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Footer Controls & Direct Links */}
+                <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                  <div className="flex items-center gap-2">
+                    {(currentProject.repositoryUrl || currentProject.links.github) && (
+                      <a
+                        href={currentProject.repositoryUrl || currentProject.links.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141a24] hover:bg-[#1e2634] text-xs font-mono text-white border border-white/15 hover:border-white/30 transition-colors"
+                      >
+                        <GithubIcon className="w-3.5 h-3.5 text-[#38bdf8]" />
+                        <span>Source Code</span>
+                      </a>
+                    )}
+                    {(currentProject.liveDemoUrl || currentProject.links.live) && (
+                      <a
+                        href={currentProject.liveDemoUrl || currentProject.links.live}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38bdf8]/20 hover:bg-[#38bdf8]/30 text-xs font-mono text-[#38bdf8] hover:text-white border border-[#38bdf8]/40 transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Live Demo</span>
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setActiveProjectSlug(currentProject.slug)}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#38bdf8] hover:bg-white text-black font-semibold text-xs font-mono transition-all shadow-md"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Case Study Details</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </Html>
+      </group>
+
+      {/* ================= STANDALONE CASE STUDY MODAL ================= */}
+      {detailedProject && (
+        <Html fullscreen className="z-50 pointer-events-auto">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Detailed Case Study: ${detailedProject.title}`}
+            className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          >
+            <div className="w-full max-w-2xl bg-[#0e1420] border border-white/20 rounded-2xl p-6 sm:p-8 max-h-[88vh] overflow-y-auto space-y-5 text-white shadow-2xl relative">
+              <button
+                onClick={() => setActiveProjectSlug(null)}
+                className="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-[#cbd5e1] hover:text-white transition-colors"
+                aria-label="Return to Projector"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-wider">
+                    {detailedProject.category}
+                  </span>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/10 text-[#94a3b8]">
+                    {detailedProject.status}
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-['Outfit']">
+                  {detailedProject.title}
+                </h2>
+                <p className="text-sm font-mono text-[#94a3b8] mt-0.5">
+                  {detailedProject.tagline}
+                </p>
+              </div>
+
+              <div className="space-y-4 text-xs sm:text-sm text-[#cbd5e1] leading-relaxed">
+                <div className="bg-[#080d16] p-4 rounded-xl border border-white/10">
+                  <h4 className="font-mono text-xs font-bold text-[#38bdf8] uppercase mb-1">
+                    Problem Statement
+                  </h4>
+                  <p>{detailedProject.details.problemStatement}</p>
+                </div>
+
+                <div className="bg-[#080d16] p-4 rounded-xl border border-white/10">
+                  <h4 className="font-mono text-xs font-bold text-[#38bdf8] uppercase mb-1">
+                    Architecture & Implementation Status
+                  </h4>
+                  <p>{detailedProject.details.architectureOverview}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-mono text-xs font-bold text-white uppercase">
+                    Key Highlights
+                  </h4>
+                  <ul className="space-y-1.5 font-mono text-xs">
+                    {detailedProject.details.highlights.map((h, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[#cbd5e1]">
+                        <span className="text-[#38bdf8]">&bull;</span>
+                        <span>{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10 font-mono text-xs">
+                <div className="flex gap-2">
+                  {detailedProject.links.github && (
+                    <a
+                      href={detailedProject.links.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    >
+                      <GithubIcon className="w-3.5 h-3.5 text-[#38bdf8]" />
+                      <span>Code</span>
+                    </a>
+                  )}
+                  {detailedProject.links.live && (
+                    <a
+                      href={detailedProject.links.live}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38bdf8]/20 text-[#38bdf8] hover:bg-[#38bdf8]/30 transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Live</span>
+                    </a>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setActiveProjectSlug(null)}
+                  className="px-4 py-2 rounded-xl bg-[#38bdf8] text-black font-semibold hover:bg-white transition-colors"
+                >
+                  Return to Room (Esc)
+                </button>
+              </div>
+            </div>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

@@ -12,7 +12,8 @@ import {
   ExternalLink,
   RotateCcw,
   CheckCircle,
-  Clock
+  Clock,
+  Maximize2
 } from 'lucide-react';
 
 const typeIcons: Record<string, React.ReactNode> = {
@@ -24,7 +25,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 export function AchievementPanel() {
-  const { activeSection, activeAchievementId, setActiveAchievementId } = useExperience();
+  const { activeSection, activeAchievementId, setActiveAchievementId, setIsLeetCodeModalOpen } = useExperience();
   const [filterType, setFilterType] = useState<string>('all');
 
   if (activeSection !== 'achievements') return null;
@@ -58,7 +59,7 @@ export function AchievementPanel() {
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-[#00f0ff]" />
               <h2 className="text-lg sm:text-xl font-bold text-white font-['Outfit'] tracking-wide">
-                Telemetry & Milestone Timeline
+                Milestones
               </h2>
             </div>
             <p className="text-[11px] font-mono text-[#94a3b8] mt-0.5">
@@ -149,13 +150,55 @@ export function AchievementPanel() {
                   {item.description}
                 </p>
 
+                {/* Inspectable Screenshot / Badge Image */}
+                {item.image && (
+                  <div className="pl-10 pt-2.5">
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLeetCodeModalOpen(true);
+                      }}
+                      className="group relative max-w-sm rounded-xl overflow-hidden border border-white/10 bg-black/60 cursor-pointer p-1.5 transition-all hover:border-amber-500/40"
+                      title="Click to view full screen"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-28 object-contain rounded-lg transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
+                        <span className="text-[11px] font-mono text-white bg-black/80 px-2.5 py-1 rounded flex items-center gap-1.5 border border-white/20 shadow-lg">
+                          <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Inspect Full Screen</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="pl-10 pt-2 flex flex-wrap items-center justify-between gap-2">
-                  {item.badge && (
-                    <span className="text-[10px] font-mono text-[#00f0ff] tracking-wider uppercase flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" />
-                      <span>{item.badge}</span>
-                    </span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {item.badge && (
+                      <span className="text-[10px] font-mono text-[#00f0ff] tracking-wider uppercase flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>{item.badge}</span>
+                      </span>
+                    )}
+
+                    {item.image && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsLeetCodeModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] font-mono text-amber-400 hover:text-white transition-colors"
+                      >
+                        <Maximize2 className="w-3 h-3" />
+                        <span>Inspect Full Screen</span>
+                      </button>
+                    )}
+                  </div>
 
                   {item.credentialUrl && (
                     <a

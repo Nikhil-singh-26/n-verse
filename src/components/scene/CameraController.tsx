@@ -2,11 +2,9 @@
 
 import { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import * as THREE from 'three';
 import { useExperience } from '@/context/ExperienceContext';
-import { SECTIONS, OVERVIEW_CAMERA } from '@/lib/experience-config';
+import { SECTIONS } from '@/lib/experience-config';
 
 // Hermite cubic smoothstep interpolation
 function smooth(t: number): number {
@@ -15,23 +13,159 @@ function smooth(t: number): number {
 }
 
 export function CameraController() {
-  const { camera, size } = useThree();
-  const { scrollProgress, isExplorationMode, isReducedMotion } = useExperience();
-  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const { camera, size, gl } = useThree();
+  const { scrollProgress, isReducedMotion } = useExperience();
 
-  // Reusable pooled vectors to avoid garbage collection allocations inside animation frames
-  const currentPos = useRef(new THREE.Vector3(0, 1.75, 15.2));
-  const currentLookAt = useRef(new THREE.Vector3(0, 1.6, 10.5));
-  const destPos = useRef(new THREE.Vector3(0, 1.75, 15.2));
-  const destLookAt = useRef(new THREE.Vector3(0, 1.6, 10.5));
+  // Reusable pooled vectors to avoid garbage collection inside animation frames
+  const currentPos = useRef(new THREE.Vector3(0, 2.1, 7.2));
+  const currentLookAt = useRef(new THREE.Vector3(0, 1.7, 0));
+  const destPos = useRef(new THREE.Vector3(0, 2.1, 7.2));
+  const destLookAt = useRef(new THREE.Vector3(0, 1.7, 0));
+  const targetFov = useRef(48);
+
+  // Intentional mouse/trackpad zoom offset in Journey mode
+  const journeyZoomOffset = useRef(0);
+  const targetJourneyZoomOffset = useRef(0);
+  const lastProgressRef = useRef(scrollProgress);
+
+  // Natural 360° Drag-to-Look State
+  const targetYaw = useRef(0);
+  const targetPitch = useRef(0);
+  const currentYaw = useRef(0);
+  const currentPitch = useRef(0);
+  const isDraggingLook = useRef(false);
+  const lastPointer = useRef({ x: 0, y: 0 });
 
   // Determine mobile aspect ratio and screen width
   const isMobile = size.width < 768 || size.width / Math.max(1, size.height) < 1.0;
 
-  // Compute camera waypoints along the 6 trajectory segments (7 stations)
+  // Trackpad pinch gesture, Ctrl+Wheel zoom & Mobile touch gestures
   useEffect(() => {
-    if (isExplorationMode) return;
+    const canvasDom = gl.domElement;
+    if (!canvasDom) return;
 
+    let initialPinchDist: number | null = null;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Intentional zoom on trackpad pinch (ctrlKey) or when holding Ctrl
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const zoomDelta = -e.deltaY * 0.003;
+        targetJourneyZoomOffset.current = THREE.MathUtils.clamp(
+          targetJourneyZoomOffset.current + zoomDelta,
+          -2.0,
+          2.2
+        );
+      }
+    };
+
+    // Mobile two-finger pinch-to-zoom
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        isDraggingLook.current = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (initialPinchDist !== null) {
+          const delta = (dist - initialPinchDist) * 0.006;
+          targetJourneyZoomOffset.current = THREE.MathUtils.clamp(
+            targetJourneyZoomOffset.current + delta,
+            -2.0,
+            2.2
+          );
+        }
+        initialPinchDist = dist;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      initialPinchDist = null;
+    };
+
+    canvasDom.addEventListener('wheel', handleWheel, { passive: false });
+    canvasDom.addEventListener('touchmove', handleTouchMove, { passive: true });
+    canvasDom.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      canvasDom.removeEventListener('wheel', handleWheel);
+      canvasDom.removeEventListener('touchmove', handleTouchMove);
+      canvasDom.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gl]);
+
+  // Natural Drag-to-Look Pointer Listeners
+  useEffect(() => {
+    const canvasDom = gl.domElement;
+    if (!canvasDom) return;
+
+    const handlePointerDown = (e: PointerEvent) => {
+      // Check global flags for desktop window drag or globe rotation
+      if (typeof window !== 'undefined') {
+        const win = window as unknown as {
+          __isInteractingWithObject?: boolean;
+          __isDraggingWindow?: boolean;
+        };
+        if (win.__isInteractingWithObject || win.__isDraggingWindow) return;
+      }
+
+      // Only respond if pointer is directly on the canvas (not on an HTML overlay)
+      if (e.target !== canvasDom) return;
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+      isDraggingLook.current = true;
+      lastPointer.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isDraggingLook.current) return;
+
+      // Abort if another component started interacting
+      if (typeof window !== 'undefined') {
+        const win = window as unknown as {
+          __isInteractingWithObject?: boolean;
+          __isDraggingWindow?: boolean;
+        };
+        if (win.__isInteractingWithObject || win.__isDraggingWindow) {
+          isDraggingLook.current = false;
+          return;
+        }
+      }
+
+      const dx = e.clientX - lastPointer.current.x;
+      const dy = e.clientY - lastPointer.current.y;
+      lastPointer.current = { x: e.clientX, y: e.clientY };
+
+      const sensitivity = e.pointerType === 'touch' ? 0.004 : 0.0032;
+
+      targetYaw.current += dx * sensitivity;
+      // Sensible pitch limits: clamp looking up to ceiling / down to floor
+      targetPitch.current = THREE.MathUtils.clamp(
+        targetPitch.current - dy * sensitivity,
+        -0.65,
+        0.65
+      );
+    };
+
+    const handlePointerUp = () => {
+      isDraggingLook.current = false;
+    };
+
+    canvasDom.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+
+    return () => {
+      canvasDom.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  }, [gl]);
+
+  // Compute camera waypoints along the trajectory segments (7 stations)
+  useEffect(() => {
     const segmentCount = SECTIONS.length - 1; // 6 segments for 7 stations
     const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
     const floatIdx = clampedProgress * segmentCount;
@@ -43,8 +177,8 @@ export function CameraController() {
     const toSection = SECTIONS[endIndex];
 
     // Responsive mobile framing adjustments
-    const mobileZOffset = isMobile ? 0.85 : 0;
-    const mobileYOffset = isMobile ? 0.2 : 0;
+    const mobileZOffset = isMobile ? 0.65 : 0;
+    const mobileYOffset = isMobile ? 0.12 : 0;
 
     destPos.current.set(
       THREE.MathUtils.lerp(fromSection.cameraPosition[0], toSection.cameraPosition[0], localT),
@@ -57,37 +191,73 @@ export function CameraController() {
       THREE.MathUtils.lerp(fromSection.cameraTarget[1], toSection.cameraTarget[1], localT),
       THREE.MathUtils.lerp(fromSection.cameraTarget[2], toSection.cameraTarget[2], localT)
     );
-  }, [scrollProgress, isExplorationMode, isMobile]);
+
+    // Target cinematic FOV per section
+    targetFov.current = THREE.MathUtils.lerp(fromSection.fov, toSection.fov, localT);
+
+    // Smoothly settle manual zoom offset when moving to a new station
+    if (Math.abs(clampedProgress - lastProgressRef.current) > 0.05) {
+      targetJourneyZoomOffset.current = THREE.MathUtils.lerp(targetJourneyZoomOffset.current, 0, 0.25);
+    }
+    lastProgressRef.current = clampedProgress;
+  }, [scrollProgress, isMobile]);
 
   useFrame((_, delta) => {
-    if (isExplorationMode) {
-      if (controlsRef.current) {
-        controlsRef.current.update();
-      }
-      return;
+    // Smooth lerp factor based on motion preference
+    const lerpFactor = isReducedMotion ? 0.45 : Math.min(1, delta * 4.4);
+
+    // Settle drag look-offset gently when scrolling to a new station
+    if (Math.abs(scrollProgress - lastProgressRef.current) > 0.005) {
+      targetYaw.current = THREE.MathUtils.lerp(targetYaw.current, 0, 0.08);
+      targetPitch.current = THREE.MathUtils.lerp(targetPitch.current, 0, 0.08);
     }
 
-    // Smooth lerp factor based on motion preference
-    const lerpFactor = isReducedMotion ? 0.35 : Math.min(1, delta * 4.2);
+    // Damped interpolation of drag-to-look rotation
+    const lookDamping = Math.min(1, delta * 8.5);
+    currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, targetYaw.current, lookDamping);
+    currentPitch.current = THREE.MathUtils.lerp(currentPitch.current, targetPitch.current, lookDamping);
 
-    currentPos.current.lerp(destPos.current, lerpFactor);
-    currentLookAt.current.lerp(destLookAt.current, lerpFactor);
+    // Interpolate intentional zoom offset
+    journeyZoomOffset.current = THREE.MathUtils.lerp(
+      journeyZoomOffset.current,
+      targetJourneyZoomOffset.current,
+      lerpFactor
+    );
+
+    // Base view direction from camera to destination target
+    const baseDir = new THREE.Vector3().subVectors(destLookAt.current, destPos.current);
+    const lookDist = Math.max(1.0, baseDir.length());
+    baseDir.normalize();
+
+    // Rotate gaze naturally: Yaw around world Y axis, Pitch around camera local right axis
+    const rotatedDir = baseDir.clone();
+    rotatedDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), -currentYaw.current);
+    const rightAxis = new THREE.Vector3().crossVectors(rotatedDir, new THREE.Vector3(0, 1, 0)).normalize();
+    rotatedDir.applyAxisAngle(rightAxis, currentPitch.current);
+
+    const finalDestPos = destPos.current.clone().addScaledVector(rotatedDir, journeyZoomOffset.current);
+
+    // Safe room bounds clamping to prevent clipping through walls, floor, or ceiling
+    finalDestPos.x = THREE.MathUtils.clamp(finalDestPos.x, -3.8, 3.8);
+    finalDestPos.y = THREE.MathUtils.clamp(finalDestPos.y, 0.95, 3.4);
+    finalDestPos.z = THREE.MathUtils.clamp(finalDestPos.z, -3.8, 6.8);
+
+    currentPos.current.lerp(finalDestPos, lerpFactor);
+
+    // Final gaze look target with drag-to-look direction
+    const targetLookAt = currentPos.current.clone().addScaledVector(rotatedDir, lookDist);
+    currentLookAt.current.lerp(targetLookAt, lerpFactor);
 
     camera.position.copy(currentPos.current);
     camera.lookAt(currentLookAt.current);
+
+    // Interpolate cinematic camera field of view
+    const perspCamera = camera as THREE.PerspectiveCamera;
+    if (Math.abs(perspCamera.fov - targetFov.current) > 0.05) {
+      perspCamera.fov = THREE.MathUtils.lerp(perspCamera.fov, targetFov.current, lerpFactor);
+      perspCamera.updateProjectionMatrix();
+    }
   });
 
-  return isExplorationMode ? (
-    <OrbitControls
-      ref={controlsRef}
-      enableZoom={false}
-      enablePan={false}
-      minPolarAngle={Math.PI / 3}
-      maxPolarAngle={Math.PI / 1.85}
-      rotateSpeed={0.55}
-      enableDamping
-      dampingFactor={0.06}
-      target={OVERVIEW_CAMERA.target}
-    />
-  ) : null;
+  return null;
 }
