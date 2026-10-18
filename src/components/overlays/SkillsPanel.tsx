@@ -13,16 +13,52 @@ import {
   Globe,
   Eye,
   EyeOff,
-  RotateCcw
+  RotateCcw,
+  Sparkles,
+  Cloud
 } from 'lucide-react';
 
 const categoryIcons: Record<string, React.ReactNode> = {
   languages: <Code2 className="w-4 h-4" />,
   frontend: <Layout className="w-4 h-4" />,
+  graphics3d: <Sparkles className="w-4 h-4" />,
   backend: <Server className="w-4 h-4" />,
   databases: <Database className="w-4 h-4" />,
   mobile: <Smartphone className="w-4 h-4" />,
+  cloud: <Cloud className="w-4 h-4" />,
   tools: <Wrench className="w-4 h-4" />
+};
+
+const skillToIconMap: Record<string, string> = {
+  'Java': 'java',
+  'JavaScript': 'javascript',
+  'TypeScript': 'typescript',
+  'C': 'c',
+  'Dart': 'dart',
+  'HTML5': 'html5',
+  'CSS3': 'css3',
+  'Tailwind CSS': 'tailwindcss',
+  'Bootstrap': 'bootstrap',
+  'React.js': 'react',
+  'Next.js': 'nextjs',
+  'GSAP': 'gsap',
+  'Three.js': 'threejs',
+  'React Three Fiber': 'r3f',
+  'Drei': 'drei',
+  'Node.js': 'nodejs',
+  'Express.js': 'express',
+  'MongoDB': 'mongodb',
+  'Mongoose': 'mongoose',
+  'PostgreSQL': 'postgresql',
+  'Flutter': 'flutter',
+  'Firebase': 'firebase',
+  'Vercel': 'vercel',
+  'Render': 'render',
+  'Git': 'git',
+  'GitHub': 'github',
+  'VS Code': 'vscode',
+  'Android Studio': 'androidstudio',
+  'Postman': 'postman'
 };
 
 export function SkillsPanel() {
@@ -97,11 +133,11 @@ export function SkillsPanel() {
           </div>
         </div>
 
-        {/* 6 Category Tabs - Keyboard accessible & Touch friendly */}
+        {/* 8 Category Tabs - Keyboard accessible & Touch friendly */}
         <div
           role="tablist"
           aria-label="Skill categories"
-          className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 mb-4"
+          className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 mb-4"
         >
           {skillCategories.map((cat) => {
             const isActive = cat.id === activeSkillCategoryId;
@@ -159,17 +195,29 @@ export function SkillsPanel() {
               Verified Technologies:
             </span>
             <div className="flex flex-wrap gap-2">
-              {currentCategory.skills.map((skill, sIdx) => (
-                <div
-                  key={`skill-${sIdx}`}
-                  className="px-3 py-1.5 rounded-lg bg-[#0f172a] text-[#e2e8f0] text-xs font-mono border border-[#00f0ff]/25 hover:border-[#00f0ff] hover:text-[#00f0ff] transition-all flex items-center gap-1.5 shadow-sm hover:scale-105"
-                >
-                  <span className="text-[#00f0ff] text-xs font-bold">&bull;</span>
-                  <span>{skill}</span>
-                </div>
-              ))}
+              {currentCategory.skills.map((skill, sIdx) => {
+                const icon = skillToIconMap[skill];
+                return (
+                  <div
+                    key={`skill-${sIdx}`}
+                    className="px-3 py-1.5 rounded-lg bg-[#0f172a] text-[#e2e8f0] text-xs font-mono border border-[#00f0ff]/25 hover:border-[#00f0ff] hover:text-[#00f0ff] transition-all flex items-center gap-2 shadow-sm hover:scale-105"
+                  >
+                    {icon ? (
+                      <img
+                        src={`/skills/${icon}.svg`}
+                        alt={skill}
+                        className="w-4 h-4 object-contain"
+                      />
+                    ) : (
+                      <span className="text-[#00f0ff] text-xs font-bold">&bull;</span>
+                    )}
+                    <span>{skill}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
+
 
           {/* Footer verification note */}
           <div className="pt-3 border-t border-[#1e293b] flex items-center justify-between text-[10px] text-[#64748b] font-mono">
