@@ -5,7 +5,7 @@ import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useExperience } from '@/context/ExperienceContext';
 import { Html } from '@react-three/drei';
-import { RotateCcw, X, CheckCircle2, Globe2 } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 
 interface TechItem {
   id: string;
@@ -826,29 +826,6 @@ export function SkillsGlobe() {
           </Html>
         )}
 
-        {/* Reset Orientation Control */}
-        <Html
-          position={[0, -(radius + 0.28), 0]}
-          center
-          distanceFactor={8.8}
-          className="pointer-events-auto select-none"
-        >
-          <div className="flex items-center gap-2.5 bg-[#0b1018]/90 backdrop-blur-sm border border-white/15 px-3 py-1.5 rounded-full shadow-lg">
-            <button
-              onClick={resetOrientation}
-              className="flex items-center gap-1 text-[11px] font-mono text-[#94a3b8] hover:text-[#38bdf8] transition-colors"
-              aria-label="Reset Globe Rotation"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset View</span>
-            </button>
-            <span className="w-1 h-1 rounded-full bg-white/20" />
-            <div className="flex items-center gap-1 text-[10px] font-mono text-[#64748b]">
-              <Globe2 className="w-3 h-3 text-[#38bdf8]" />
-              <span>Drag to spin</span>
-            </div>
-          </div>
-        </Html>
       </group>
     </group>
   );

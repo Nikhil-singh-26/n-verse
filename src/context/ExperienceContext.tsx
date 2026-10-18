@@ -115,7 +115,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
   const [isMailOpen, setIsMailOpen] = useState<boolean>(false);
 
   // Desktop Window State
-  const [isAboutWindowOpen, setIsAboutWindowOpen] = useState<boolean>(false);
+  const [isAboutWindowOpen, setIsAboutWindowOpen] = useState<boolean>(true);
   const [isResumeWindowOpen, setIsResumeWindowOpen] = useState<boolean>(false);
   const [isAboutMinimized, setIsAboutMinimized] = useState<boolean>(false);
   const [isResumeMinimized, setIsResumeMinimized] = useState<boolean>(false);
@@ -137,6 +137,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       ]
     }
   ]);
+
   const [, startTransition] = useTransition();
 
   const activeIndex = SECTION_IDS.indexOf(activeSection);
@@ -160,6 +161,10 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     const sec = SECTIONS.find((s) => s.id === id);
     if (sec) {
       announceToScreenReader(`Arrived at ${sec.label}: ${sec.stationName}`);
+    }
+    if (id === 'about') {
+      setIsAboutWindowOpen(true);
+      setIsAboutMinimized(false);
     }
     if (id === 'contact') {
       setIsMailOpen(true);
@@ -292,7 +297,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       const nextVal = enabled !== undefined ? enabled : !prev;
       announceToScreenReader(
         nextVal
-          ? 'Exploration mode activated. Drag to look around the study room.'
+          ? 'Exploration mode activated.'
           : 'Returned to cinematic timeline.'
       );
       return nextVal;

@@ -40,11 +40,11 @@ export const SECTIONS: SectionConfig[] = [
   {
     id: 'projects',
     label: 'Projects',
-    stationName: 'Projector Presentation',
+    stationName: 'Vintage Projector & Ancient Folios',
     order: 4,
-    cameraPosition: [-1.8, 2.10, 0.8],
-    cameraTarget: [-4.96, 2.10, 0.8],
-    fov: 48
+    cameraPosition: [-1.05, 1.62, 1.95],
+    cameraTarget: [-4.96, 2.05, 0.70],
+    fov: 50
   },
   {
     id: 'achievements',
