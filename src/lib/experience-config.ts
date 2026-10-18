@@ -24,7 +24,7 @@ export const SECTIONS: SectionConfig[] = [
     label: 'About',
     stationName: 'Workstation Desktop',
     order: 2,
-    cameraPosition: [-1.2, 2.22, -0.6],
+    cameraPosition: [-1.2, 2.22, -1.80],
     cameraTarget: [-1.2, 2.22, -4.45],
     fov: 50
   },
@@ -33,25 +33,25 @@ export const SECTIONS: SectionConfig[] = [
     label: 'Skills',
     stationName: 'Skills Planet & Portrait',
     order: 3,
-    cameraPosition: [0.4, 1.8, 0.4],
-    cameraTarget: [3.2, 1.6, 0.5],
-    fov: 50
+    cameraPosition: [-0.6, 1.45, 0.0],
+    cameraTarget: [3.0, 1.45, 0.0],
+    fov: 46
   },
   {
     id: 'projects',
     label: 'Projects',
     stationName: 'Projector Presentation',
     order: 4,
-    cameraPosition: [-1.5, 2.05, 0.8],
-    cameraTarget: [-4.96, 2.1, 0.8],
-    fov: 46
+    cameraPosition: [-1.8, 2.10, 0.8],
+    cameraTarget: [-4.96, 2.10, 0.8],
+    fov: 48
   },
   {
     id: 'achievements',
     label: 'Milestones',
     stationName: 'Achievements & Milestones',
     order: 5,
-    cameraPosition: [0, 2.1, 2.6],
+    cameraPosition: [0, 2.15, 3.45],
     cameraTarget: [0, 2.15, 6.74],
     fov: 48
   },
@@ -60,7 +60,7 @@ export const SECTIONS: SectionConfig[] = [
     label: 'Contact',
     stationName: 'Wall Monitor & Mail',
     order: 6,
-    cameraPosition: [-1.2, 2.22, -0.6],
+    cameraPosition: [-1.2, 2.22, -1.80],
     cameraTarget: [-1.2, 2.22, -4.45],
     fov: 50
   }

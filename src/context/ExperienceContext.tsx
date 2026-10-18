@@ -1,5 +1,16 @@
 'use client';
 
+// Safe DOM removeChild patch to prevent Drei / React fast refresh NotFoundError crashes
+if (typeof window !== 'undefined' && typeof Node !== 'undefined') {
+  const origRemoveChild = Node.prototype.removeChild;
+  Node.prototype.removeChild = function <T extends Node>(child: T): T {
+    if (child && child.parentNode !== this) {
+      return child;
+    }
+    return origRemoveChild.call(this, child) as T;
+  };
+}
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useTransition } from 'react';
 import { SectionId } from '@/types';
 import { SECTIONS, SECTION_IDS } from '@/lib/experience-config';

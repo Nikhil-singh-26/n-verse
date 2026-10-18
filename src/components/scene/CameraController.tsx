@@ -109,12 +109,16 @@ export function CameraController() {
         if (win.__isInteractingWithObject || win.__isDraggingWindow) return;
       }
 
-      // Only respond if pointer is directly on the canvas (not on an HTML overlay)
-      if (e.target !== canvasDom) return;
+      // If clicking interactive UI controls (buttons, links, inputs, window titlebars, folder icons), leave interaction to UI
+      const targetEl = e.target as HTMLElement | null;
+      if (targetEl && targetEl.closest('button, a, input, textarea, select, [role="button"], .cursor-move, [tabindex="0"]')) {
+        return;
+      }
       if (e.button !== 0 && e.pointerType === 'mouse') return;
 
       isDraggingLook.current = true;
       lastPointer.current = { x: e.clientX, y: e.clientY };
+      document.body.style.cursor = 'grabbing';
     };
 
     const handlePointerMove = (e: PointerEvent) => {
@@ -128,6 +132,7 @@ export function CameraController() {
         };
         if (win.__isInteractingWithObject || win.__isDraggingWindow) {
           isDraggingLook.current = false;
+          document.body.style.cursor = 'auto';
           return;
         }
       }
@@ -136,31 +141,35 @@ export function CameraController() {
       const dy = e.clientY - lastPointer.current.y;
       lastPointer.current = { x: e.clientX, y: e.clientY };
 
-      const sensitivity = e.pointerType === 'touch' ? 0.004 : 0.0032;
+      const sensitivity = e.pointerType === 'touch' ? 0.0042 : 0.0034;
 
+      // Continuous, full 360-degree azimuthal rotation around Y axis
       targetYaw.current += dx * sensitivity;
-      // Sensible pitch limits: clamp looking up to ceiling / down to floor
+
+      // Wide, natural vertical elevation range (up to ceiling lights, down to floor)
       targetPitch.current = THREE.MathUtils.clamp(
         targetPitch.current - dy * sensitivity,
-        -0.65,
-        0.65
+        -1.15,
+        1.15
       );
     };
 
     const handlePointerUp = () => {
       isDraggingLook.current = false;
+      document.body.style.cursor = 'auto';
     };
 
-    canvasDom.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointerdown', handlePointerDown);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointercancel', handlePointerUp);
 
     return () => {
-      canvasDom.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
+      document.body.style.cursor = 'auto';
     };
   }, [gl]);
 

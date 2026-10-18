@@ -14,8 +14,6 @@ export function DeveloperRoom() {
     });
   }, []);
 
-  // Books colors palette
-  const bookColors = ['#8c4636', '#2d4059', '#3b5360', '#d4a373', '#ccd5ae', '#4a4e69', '#34495e'];
 
   // Procedural leaves for the indoor potted plant
   const plantLeaves = useMemo(() => {
@@ -159,35 +157,58 @@ export function DeveloperRoom() {
         </group>
       ))}
 
-      {/* ================= FLOATING OAK BOOKSHELVES ON BACK WALL ================= */}
-      {/* Upper Shelf */}
-      <group position={[-1.2, 3.4, -4.38]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[3.2, 0.04, 0.28]} />
-          <meshStandardMaterial color="#553c29" roughness={0.5} metalness={0.05} />
+      {/* ================= FINE ART FRAMED PORTRAIT ON FRONT WALL ON BROWN WOOD SLAT FEATURE (NIKHIL SINGH) ================= */}
+      {/* Positioned directly on the vertical wood slats (X = 3.1, Y = 2.22, Z = -4.44) to the right of the main display */}
+      <group position={[3.1, 2.22, -4.44]}>
+        {/* Brass Picture Lamp overhead casting warm focused downlight onto portrait */}
+        <spotLight
+          position={[0, 1.15, 0.45]}
+          target-position={[0, 0, 0]}
+          color="#fff2df"
+          intensity={3.2}
+          angle={0.68}
+          penumbra={0.4}
+        />
+        {/* Brass Lamp Fixture Arm & Tube */}
+        <mesh position={[0, 1.05, 0.28]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.015, 0.015, 0.52, 16]} />
+          <meshStandardMaterial color="#c5a059" metalness={0.9} roughness={0.25} />
         </mesh>
-        {/* Books on Upper Shelf */}
-        <group position={[-1.2, 0.14, 0]}>
-          {bookColors.map((color, i) => (
-            <mesh key={`book-u-${i}`} position={[i * 0.065, 0, 0]} castShadow>
-              <boxGeometry args={[0.05, 0.24 + (i % 3) * 0.04, 0.2]} />
-              <meshStandardMaterial color={color} roughness={0.65} />
-            </mesh>
-          ))}
-        </group>
-        {/* Decorative small ceramic vase */}
-        <mesh position={[1.1, 0.12, 0]} castShadow>
-          <cylinderGeometry args={[0.06, 0.08, 0.2, 16]} />
-          <meshStandardMaterial color="#f4efe6" roughness={0.3} />
+        <mesh position={[0, 1.05, 0.14]} rotation={[Math.PI / 4, 0, 0]}>
+          <cylinderGeometry args={[0.008, 0.008, 0.28, 8]} />
+          <meshStandardMaterial color="#c5a059" metalness={0.9} roughness={0.25} />
         </mesh>
-        {/* Miniature desktop plant in ceramic pot on shelf */}
-        <mesh position={[0.75, 0.08, 0]} castShadow>
-          <cylinderGeometry args={[0.05, 0.04, 0.08, 16]} />
-          <meshStandardMaterial color="#e2d4c0" roughness={0.4} />
+
+        {/* Outer Heavy Beveled Dark Walnut & Brass Frame */}
+        <mesh castShadow>
+          <boxGeometry args={[1.18, 1.82, 0.04]} />
+          <meshStandardMaterial color="#1a1511" roughness={0.35} metalness={0.2} />
         </mesh>
-        <mesh position={[0.75, 0.15, 0]} castShadow>
-          <sphereGeometry args={[0.055, 12, 12]} />
-          <meshStandardMaterial color="#4a7c59" roughness={0.7} />
+        {/* Brass Fillet Inner Bevel */}
+        <mesh position={[0, 0, 0.012]}>
+          <boxGeometry args={[1.08, 1.72, 0.015]} />
+          <meshStandardMaterial color="#c5a059" metalness={0.88} roughness={0.3} />
+        </mesh>
+        {/* Off-White Archival Museum Matting */}
+        <mesh position={[0, 0, 0.018]}>
+          <planeGeometry args={[1.04, 1.68]} />
+          <meshStandardMaterial color="#f7f5f0" roughness={0.9} />
+        </mesh>
+
+        {/* Fine Art Portrait of Nikhil Singh: public/mypic.png */}
+        <mesh position={[0, 0.05, 0.022]}>
+          <planeGeometry args={[0.94, 1.52]} />
+          {portraitTex ? (
+            <meshBasicMaterial map={portraitTex} />
+          ) : (
+            <meshStandardMaterial color="#181b22" roughness={0.4} />
+          )}
+        </mesh>
+
+        {/* Engraved Museum Brass Nameplate */}
+        <mesh position={[0, -0.76, 0.024]}>
+          <planeGeometry args={[0.52, 0.075]} />
+          <meshStandardMaterial color="#c5a059" metalness={0.92} roughness={0.25} />
         </mesh>
       </group>
 
@@ -205,139 +226,6 @@ export function DeveloperRoom() {
         <boxGeometry args={[11, 0.14, 0.04]} />
         <meshStandardMaterial color="#cfc7bd" roughness={0.5} />
       </mesh>
-
-      {/* ================= FINE ART FRAMED PORTRAIT ON RIGHT WALL (NIKHIL SINGH) ================= */}
-      <group position={[4.96, 2.3, 2.0]} rotation={[0, -Math.PI / 2, 0]}>
-        {/* Brass Picture Lamp overhead casting downlight on portrait */}
-        <spotLight
-          position={[0, 1.35, 0.5]}
-          target-position={[0, 0, 0]}
-          color="#fff2df"
-          intensity={3.2}
-          angle={0.68}
-          penumbra={0.4}
-        />
-        {/* Brass Lamp Fixture Arm & Tube */}
-        <mesh position={[0, 1.3, 0.32]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.016, 0.016, 0.54, 16]} />
-          <meshStandardMaterial color="#c5a059" metalness={0.9} roughness={0.25} />
-        </mesh>
-        <mesh position={[0, 1.3, 0.16]} rotation={[Math.PI / 4, 0, 0]}>
-          <cylinderGeometry args={[0.008, 0.008, 0.32, 8]} />
-          <meshStandardMaterial color="#c5a059" metalness={0.9} roughness={0.25} />
-        </mesh>
-
-        {/* Outer Heavy Beveled Dark Walnut & Brass Frame */}
-        <mesh castShadow>
-          <boxGeometry args={[1.36, 2.26, 0.05]} />
-          <meshStandardMaterial color="#1a1511" roughness={0.35} metalness={0.2} />
-        </mesh>
-        {/* Brass Fillet Inner Bevel */}
-        <mesh position={[0, 0, 0.015]}>
-          <boxGeometry args={[1.24, 2.14, 0.02]} />
-          <meshStandardMaterial color="#c5a059" metalness={0.88} roughness={0.3} />
-        </mesh>
-        {/* Off-White Archival Museum Matting */}
-        <mesh position={[0, 0, 0.022]}>
-          <planeGeometry args={[1.2, 2.1]} />
-          <meshStandardMaterial color="#f7f5f0" roughness={0.9} />
-        </mesh>
-
-        {/* Fine Art Portrait of Nikhil Singh: public/mypic.png */}
-        <mesh position={[0, 0.06, 0.025]}>
-          <planeGeometry args={[1.08, 1.92]} />
-          {portraitTex ? (
-            <meshBasicMaterial map={portraitTex} />
-          ) : (
-            <meshStandardMaterial color="#181b22" roughness={0.4} />
-          )}
-        </mesh>
-
-        {/* Engraved Museum Brass Nameplate */}
-        <mesh position={[0, -0.96, 0.028]}>
-          <planeGeometry args={[0.55, 0.08]} />
-          <meshStandardMaterial color="#c5a059" metalness={0.92} roughness={0.25} />
-        </mesh>
-      </group>
-
-      {/* ================= COZY LOUNGE CORNER (Right Forefront) ================= */}
-      <group position={[3.3, 0, 3.6]} rotation={[0, -Math.PI * 0.72, 0]}>
-        {/* Armchair / Lounge Chair Base */}
-        <mesh position={[0, 0.38, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.88, 0.22, 0.85]} />
-          <meshStandardMaterial color="#3d4048" roughness={0.85} metalness={0.02} />
-        </mesh>
-        {/* Seat Cushion */}
-        <mesh position={[0, 0.52, 0.02]} castShadow receiveShadow>
-          <boxGeometry args={[0.78, 0.12, 0.74]} />
-          <meshStandardMaterial color="#505560" roughness={0.9} />
-        </mesh>
-        {/* Chair Backrest */}
-        <mesh position={[0, 0.82, 0.36]} rotation={[-0.15, 0, 0]} castShadow>
-          <boxGeometry args={[0.88, 0.65, 0.16]} />
-          <meshStandardMaterial color="#3d4048" roughness={0.85} />
-        </mesh>
-        {/* Left Armrest */}
-        <mesh position={[-0.42, 0.62, 0]} castShadow>
-          <boxGeometry args={[0.12, 0.36, 0.78]} />
-          <meshStandardMaterial color="#3d4048" roughness={0.85} />
-        </mesh>
-        {/* Right Armrest */}
-        <mesh position={[0.42, 0.62, 0]} castShadow>
-          <boxGeometry args={[0.12, 0.36, 0.78]} />
-          <meshStandardMaterial color="#3d4048" roughness={0.85} />
-        </mesh>
-        {/* Throw Pillow */}
-        <mesh position={[0.16, 0.64, 0.26]} rotation={[0.2, 0.25, 0.1]} castShadow>
-          <boxGeometry args={[0.34, 0.34, 0.12]} />
-          <meshStandardMaterial color="#d4a373" roughness={0.8} />
-        </mesh>
-        {/* Tapered Wooden Legs */}
-        {[
-          [-0.38, -0.34],
-          [0.38, -0.34],
-          [-0.38, 0.34],
-          [0.38, 0.34]
-        ].map(([lx, lz], i) => (
-          <mesh key={`leg-${i}`} position={[lx, 0.14, lz]} rotation={[0.08, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.025, 0.016, 0.28, 12]} />
-            <meshStandardMaterial color="#5c3d2e" roughness={0.4} />
-          </mesh>
-        ))}
-
-        {/* Small Round Side Table Beside Armchair */}
-        <group position={[-0.95, 0, 0.2]}>
-          {/* Tabletop */}
-          <mesh position={[0, 0.52, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.28, 0.28, 0.035, 24]} />
-            <meshStandardMaterial color="#6a4c38" roughness={0.4} metalness={0.05} />
-          </mesh>
-          {/* Tripod Legs */}
-          {[0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].map((rad, li) => (
-            <mesh
-              key={`table-leg-${li}`}
-              position={[Math.cos(rad) * 0.16, 0.25, Math.sin(rad) * 0.16]}
-              rotation={[Math.sin(rad) * 0.1, 0, -Math.cos(rad) * 0.1]}
-              castShadow
-            >
-              <cylinderGeometry args={[0.015, 0.012, 0.52, 8]} />
-              <meshStandardMaterial color="#2b231d" roughness={0.4} />
-            </mesh>
-          ))}
-          {/* Coffee Mug on Side Table */}
-          <group position={[0.06, 0.55, -0.04]} castShadow>
-            <mesh>
-              <cylinderGeometry args={[0.042, 0.036, 0.09, 16]} />
-              <meshStandardMaterial color="#f7f5f0" roughness={0.25} />
-            </mesh>
-            {/* Coffee inside */}
-            <mesh position={[0, 0.038, 0]}>
-              <circleGeometry args={[0.038, 16]} />
-              <meshBasicMaterial color="#301e12" />
-            </mesh>
-          </group>
-        </group>
-      </group>
 
       {/* ================= TALL INDOOR POTTED PLANT (Left Forefront) ================= */}
       <group position={[-4.2, 0, 3.8]}>

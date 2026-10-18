@@ -248,23 +248,18 @@ export function Workstation() {
         </mesh>
 
         {/* Large Cinematic Monitor Outer Bezel (4.56m length x 2.62m breadth) */}
-        <mesh position={[0, 0, 0]} castShadow>
-          <boxGeometry args={[4.56, 2.62, 0.05]} />
+        <mesh position={[0, 0, -0.02]} castShadow>
+          <boxGeometry args={[4.56, 2.62, 0.04]} />
           <meshStandardMaterial color="#121620" roughness={0.3} metalness={0.85} />
         </mesh>
 
-        {/* 3D Emissive Backlit Screen Mesh (4.40m x 2.475m - 16:9 ratio) */}
-        <mesh position={[0, 0, 0.022]}>
+        {/* 3D Emissive Backlit Screen Mesh (4.40m x 2.475m - 16:9 ratio, guaranteed 100% powered ON) */}
+        <mesh position={[0, 0, 0.008]}>
           <planeGeometry args={[4.40, 2.475]} />
           {wallpaperTexture ? (
             <meshBasicMaterial map={wallpaperTexture} toneMapped={false} />
           ) : (
-            <meshStandardMaterial
-              color="#182234"
-              emissive="#0284c7"
-              emissiveIntensity={0.6}
-              roughness={0.2}
-            />
+            <meshBasicMaterial color="#1e3a5f" />
           )}
         </mesh>
 
@@ -272,12 +267,20 @@ export function Workstation() {
         <Html
           transform
           distanceFactor={1.0}
-          position={[0, 0, 0.028]}
+          position={[0, 0, 0.016]}
           className="pointer-events-auto select-none"
         >
           {/* Desktop Screen Boundary (1760px x 990px 16:9 widescreen) */}
-          <div className="w-[1760px] h-[990px] bg-[#0c121e] rounded-sm flex flex-col overflow-hidden text-white font-sans relative shadow-[0_0_80px_rgba(0,0,0,0.95)] select-none">
-            {/* Desktop Wallpaper: public/background.jpg */}
+          <div
+            style={{
+              backgroundImage: 'url(/background.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: '#0c121e'
+            }}
+            className="w-[1760px] h-[990px] rounded-sm flex flex-col overflow-hidden text-white font-sans relative shadow-[0_0_80px_rgba(0,0,0,0.95)] select-none"
+          >
+            {/* Desktop Wallpaper: public/background.jpg fallback image tag */}
             <img
               src="/background.jpg"
               alt="Desktop Wallpaper"
@@ -290,15 +293,18 @@ export function Workstation() {
             <div className="absolute left-14 top-12 flex flex-col gap-6 pointer-events-auto z-30">
               {/* Folder 1: About */}
               <div
-                onDoubleClick={() => {
+                onPointerDown={(e) => e.stopPropagation()}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
                   openAboutWindow();
                   setActiveWindow('about');
                 }}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   openAboutWindow();
                   setActiveWindow('about');
                 }}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/80 hover:bg-white/20 border border-white/20 hover:border-amber-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-amber-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
                 role="button"
                 tabIndex={0}
                 aria-label="Open About Folder"
@@ -314,9 +320,16 @@ export function Workstation() {
 
               {/* Folder 2: Resume */}
               <div
-                onDoubleClick={handleOpenResume}
-                onClick={handleOpenResume}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/80 hover:bg-white/20 border border-white/20 hover:border-emerald-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                onPointerDown={(e) => e.stopPropagation()}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenResume();
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenResume();
+                }}
+                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-emerald-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
                 role="button"
                 tabIndex={0}
                 aria-label="Open Resume Document"
@@ -332,9 +345,16 @@ export function Workstation() {
 
               {/* Folder 3: Contact */}
               <div
-                onDoubleClick={handleOpenContact}
-                onClick={handleOpenContact}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/80 hover:bg-white/20 border border-white/20 hover:border-sky-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                onPointerDown={(e) => e.stopPropagation()}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenContact();
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenContact();
+                }}
+                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-sky-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
                 role="button"
                 tabIndex={0}
                 aria-label="Open Contact & Mail"
@@ -895,7 +915,8 @@ export function Workstation() {
       </group>
 
       {/* ================= ERGONOMIC WORKSTATION CHAIR ================= */}
-      <group position={[0, 0, 0.72]} rotation={[0, Math.PI, 0]}>
+      {/* Tucked neatly at desk side so it never blocks the large wall display */}
+      <group position={[0.42, 0, 0.28]} rotation={[0, Math.PI * 0.88, 0]}>
         {[0, 1, 2, 3, 4].map((ci) => {
           const angle = (ci * Math.PI * 2) / 5;
           return (

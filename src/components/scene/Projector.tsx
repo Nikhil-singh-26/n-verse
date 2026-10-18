@@ -24,43 +24,6 @@ export function Projector() {
   const currentProject = projectsData[activeProjectIndex] || projectsData[0];
   const detailedProject = projectsData.find((p) => p.slug === activeProjectSlug);
 
-  const beamRef = useRef<THREE.MeshBasicMaterial>(null);
-  const lensRef = useRef<THREE.MeshBasicMaterial>(null);
-  const projectorLightRef = useRef<THREE.SpotLight>(null);
-
-  // Smooth projector lamp warmup / cooldown
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    const targetIntensity = isProjects ? 2.4 : 0.05;
-    const targetBeam = isProjects ? 0.22 + Math.sin(t * 5) * 0.02 : 0.0;
-    const targetLens = isProjects ? 0.95 : 0.15;
-    const lerpSpeed = isReducedMotion ? 0.35 : 0.06;
-
-    if (projectorLightRef.current) {
-      projectorLightRef.current.intensity = THREE.MathUtils.lerp(
-        projectorLightRef.current.intensity,
-        targetIntensity,
-        lerpSpeed
-      );
-    }
-
-    if (beamRef.current) {
-      beamRef.current.opacity = THREE.MathUtils.lerp(
-        beamRef.current.opacity,
-        targetBeam,
-        lerpSpeed
-      );
-    }
-
-    if (lensRef.current) {
-      lensRef.current.opacity = THREE.MathUtils.lerp(
-        lensRef.current.opacity,
-        targetLens,
-        lerpSpeed
-      );
-    }
-  });
-
   const nextProject = () => {
     if (activeProjectIndex < projectsData.length - 1) {
       setActiveProjectIndex(activeProjectIndex + 1);
@@ -75,82 +38,16 @@ export function Projector() {
 
   return (
     <group>
-      {/* ================= PHYSICAL PROJECTOR UNIT ================= */}
-      {/* Projector Table / Low Credenza on Right Side */}
-      <group position={[1.2, 0, 1.4]} rotation={[0, -Math.PI * 0.65, 0]}>
-        {/* Tabletop */}
-        <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.72, 0.04, 0.52]} />
-          <meshStandardMaterial color="#3a2a1e" roughness={0.4} metalness={0.06} />
-        </mesh>
-        {/* Table Legs */}
-        {[
-          [-0.32, -0.22],
-          [0.32, -0.22],
-          [-0.32, 0.22],
-          [0.32, 0.22]
-        ].map(([lx, lz], li) => (
-          <mesh key={`p-leg-${li}`} position={[lx, 0.35, lz]} castShadow>
-            <cylinderGeometry args={[0.018, 0.015, 0.7, 8]} />
-            <meshStandardMaterial color="#1a1c22" roughness={0.3} metalness={0.8} />
-          </mesh>
-        ))}
-
-        {/* Projector Chassis */}
-        <group position={[0, 0.83, 0]}>
-          {/* Main Housing */}
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[0.42, 0.14, 0.32]} />
-            <meshStandardMaterial color="#1c202a" roughness={0.3} metalness={0.85} />
-          </mesh>
-
-          {/* Lens Barrel facing toward Left Wall */}
-          <group position={[0, 0, -0.17]}>
-            <mesh rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.065, 0.075, 0.06, 24]} />
-              <meshStandardMaterial color="#0d1017" metalness={0.9} roughness={0.2} />
-            </mesh>
-            {/* Glowing Optical Lens Element */}
-            <mesh position={[0, 0, -0.032]} rotation={[Math.PI / 2, 0, 0]}>
-              <circleGeometry args={[0.058, 24]} />
-              <meshBasicMaterial ref={lensRef} color="#e0f2fe" transparent opacity={0.15} />
-            </mesh>
-          </group>
-
-          {/* Indicator LED */}
-          <mesh position={[-0.14, 0.072, 0.08]}>
-            <sphereGeometry args={[0.008, 12, 12]} />
-            <meshBasicMaterial color={isProjects ? '#38bdf8' : '#64748b'} />
-          </mesh>
-        </group>
-
-        {/* Projector Spotlight Aimed at Projection Wall */}
-        <spotLight
-          ref={projectorLightRef}
-          position={[0, 0.83, -0.2]}
-          target-position={[-4.96, 2.1, 0.8]}
-          color="#f0f9ff"
-          intensity={0.05}
-          angle={0.48}
-          penumbra={0.4}
-          distance={10}
-        />
-
-        {/* Restrained Soft Volumetric Light Beam Frustum */}
-        <group position={[0, 0.83, -2.8]} rotation={[0.18, 0, 0]}>
-          <mesh>
-            <cylinderGeometry args={[1.8, 0.07, 5.2, 24, 1, true]} />
-            <meshBasicMaterial
-              ref={beamRef}
-              color="#e0f2fe"
-              transparent
-              opacity={0.0}
-              side={THREE.DoubleSide}
-              depthWrite={false}
-            />
-          </mesh>
-        </group>
-      </group>
+      {/* Soft Gallery Spotlight Focused on Left Wall Architectural Presentation */}
+      <spotLight
+        position={[-1.8, 3.8, 0.8]}
+        target-position={[-4.96, 2.1, 0.8]}
+        color="#f0f9ff"
+        intensity={isProjects ? 2.8 : 0.4}
+        angle={0.65}
+        penumbra={0.5}
+        distance={10}
+      />
 
       {/* ================= PROJECTION ON LEFT WALL ================= */}
       <group position={[-4.96, 2.1, 0.8]} rotation={[0, Math.PI / 2, 0]}>
