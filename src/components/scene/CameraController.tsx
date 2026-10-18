@@ -14,7 +14,7 @@ function smooth(t: number): number {
 
 export function CameraController() {
   const { camera, size, gl } = useThree();
-  const { scrollProgress, isReducedMotion } = useExperience();
+  const { scrollProgress, isReducedMotion, activeSection, setIsCameraAtProjector } = useExperience();
 
   // Reusable pooled vectors to avoid garbage collection inside animation frames
   const currentPos = useRef(new THREE.Vector3(0, 2.1, 7.2));
@@ -22,6 +22,7 @@ export function CameraController() {
   const destPos = useRef(new THREE.Vector3(0, 2.1, 7.2));
   const destLookAt = useRef(new THREE.Vector3(0, 1.7, 0));
   const targetFov = useRef(48);
+  const isCameraAtProjectorRef = useRef(false);
 
   // Intentional mouse/trackpad zoom offset in Journey mode
   const journeyZoomOffset = useRef(0);
@@ -173,43 +174,30 @@ export function CameraController() {
     };
   }, [gl]);
 
-  // Compute camera waypoints along the trajectory segments (7 stations)
+  // Compute camera waypoints along the journey destinations
   useEffect(() => {
-    const segmentCount = SECTIONS.length - 1; // 6 segments for 7 stations
-    const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
-    const floatIdx = clampedProgress * segmentCount;
-    const startIndex = Math.min(Math.floor(floatIdx), segmentCount - 1);
-    const endIndex = Math.min(startIndex + 1, segmentCount);
-    const localT = smooth(floatIdx - startIndex);
-
-    const fromSection = SECTIONS[startIndex];
-    const toSection = SECTIONS[endIndex];
-
     // Responsive mobile framing adjustments
     const mobileZOffset = isMobile ? 0.65 : 0;
     const mobileYOffset = isMobile ? 0.12 : 0;
 
+    const targetSection = SECTIONS.find((s) => s.id === activeSection) || SECTIONS[1];
+
     destPos.current.set(
-      THREE.MathUtils.lerp(fromSection.cameraPosition[0], toSection.cameraPosition[0], localT),
-      THREE.MathUtils.lerp(fromSection.cameraPosition[1] + mobileYOffset, toSection.cameraPosition[1] + mobileYOffset, localT),
-      THREE.MathUtils.lerp(fromSection.cameraPosition[2] + mobileZOffset, toSection.cameraPosition[2] + mobileZOffset, localT)
+      targetSection.cameraPosition[0],
+      targetSection.cameraPosition[1] + mobileYOffset,
+      targetSection.cameraPosition[2] + mobileZOffset
     );
-
     destLookAt.current.set(
-      THREE.MathUtils.lerp(fromSection.cameraTarget[0], toSection.cameraTarget[0], localT),
-      THREE.MathUtils.lerp(fromSection.cameraTarget[1], toSection.cameraTarget[1], localT),
-      THREE.MathUtils.lerp(fromSection.cameraTarget[2], toSection.cameraTarget[2], localT)
+      targetSection.cameraTarget[0],
+      targetSection.cameraTarget[1],
+      targetSection.cameraTarget[2]
     );
-
-    // Target cinematic FOV per section
-    targetFov.current = THREE.MathUtils.lerp(fromSection.fov, toSection.fov, localT);
+    targetFov.current = targetSection.fov;
 
     // Smoothly settle manual zoom offset when moving to a new station
-    if (Math.abs(clampedProgress - lastProgressRef.current) > 0.05) {
-      targetJourneyZoomOffset.current = THREE.MathUtils.lerp(targetJourneyZoomOffset.current, 0, 0.25);
-    }
-    lastProgressRef.current = clampedProgress;
-  }, [scrollProgress, isMobile]);
+    targetJourneyZoomOffset.current = THREE.MathUtils.lerp(targetJourneyZoomOffset.current, 0, 0.4);
+    lastProgressRef.current = scrollProgress;
+  }, [scrollProgress, isMobile, activeSection]);
 
   useFrame((_, delta) => {
     // Smooth lerp factor based on motion preference
@@ -259,6 +247,23 @@ export function CameraController() {
 
     camera.position.copy(currentPos.current);
     camera.lookAt(currentLookAt.current);
+
+    // Report camera arrival at Projector Station
+    if (activeSection === 'projects') {
+      const distToDest = currentPos.current.distanceTo(finalDestPos);
+      const lookDistDiff = currentLookAt.current.distanceTo(targetLookAt);
+      if (distToDest < 0.14 && lookDistDiff < 0.18) {
+        if (!isCameraAtProjectorRef.current) {
+          isCameraAtProjectorRef.current = true;
+          setIsCameraAtProjector(true);
+        }
+      }
+    } else {
+      if (isCameraAtProjectorRef.current) {
+        isCameraAtProjectorRef.current = false;
+        setIsCameraAtProjector(false);
+      }
+    }
 
     // Interpolate cinematic camera field of view
     const perspCamera = camera as THREE.PerspectiveCamera;

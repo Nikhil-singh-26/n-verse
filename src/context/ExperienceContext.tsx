@@ -17,6 +17,16 @@ import { SECTIONS, SECTION_IDS } from '@/lib/experience-config';
 import { checkPrefersReducedMotion, announceToScreenReader } from '@/lib/accessibility';
 import { gsap, registerGsapPlugins } from '@/lib/motion';
 import { profileData } from '@/data/profile';
+import { projectsData } from '@/data/projects';
+
+export type ProjectPresentationState =
+  | 'ENTERING_PROJECTS'
+  | 'CAMERA_READY'
+  | `PROJECT_${number}`
+  | 'ACHIEVEMENTS'
+  | 'IDLE';
+
+export type PagePresentationState = 'waiting' | 'animating' | 'presented';
 
 interface ExperienceContextType {
   activeSection: SectionId;
@@ -41,6 +51,11 @@ interface ExperienceContextType {
   isTelephoneActive: boolean;
   isContactCardRevealed: boolean;
   isMailOpen: boolean;
+  // Project Presentation State Machine
+  projectPresentationState: ProjectPresentationState;
+  projectPageState: PagePresentationState;
+  isCameraAtProjector: boolean;
+  isProjectAnimating: boolean;
   // Windows desktop window management
   isAboutWindowOpen: boolean;
   isResumeWindowOpen: boolean;
@@ -65,6 +80,10 @@ interface ExperienceContextType {
   toggleMute: () => void;
   setActiveProjectSlug: (slug: string | null) => void;
   setActiveProjectIndex: (index: number) => void;
+  setProjectPresentationState: (state: ProjectPresentationState) => void;
+  setProjectPageState: (state: PagePresentationState) => void;
+  setIsCameraAtProjector: (val: boolean) => void;
+  setIsProjectAnimating: (val: boolean) => void;
   setActiveAchievementId: (id: string | null) => void;
   setActiveSkillCategoryId: (id: string) => void;
   setIsSkillsPanelOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
@@ -114,6 +133,12 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
   const [isContactCardRevealed, setIsContactCardRevealed] = useState<boolean>(false);
   const [isMailOpen, setIsMailOpen] = useState<boolean>(false);
 
+  // Project Presentation State Machine
+  const [projectPresentationState, setProjectPresentationState] = useState<ProjectPresentationState>('IDLE');
+  const [projectPageState, setProjectPageState] = useState<PagePresentationState>('waiting');
+  const [isCameraAtProjector, setIsCameraAtProjector] = useState<boolean>(false);
+  const [isProjectAnimating, setIsProjectAnimating] = useState<boolean>(false);
+
   // Desktop Window State
   const [isAboutWindowOpen, setIsAboutWindowOpen] = useState<boolean>(true);
   const [isResumeWindowOpen, setIsResumeWindowOpen] = useState<boolean>(false);
@@ -162,13 +187,44 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     if (sec) {
       announceToScreenReader(`Arrived at ${sec.label}: ${sec.stationName}`);
     }
-    if (id === 'about') {
+    if (id === 'projects') {
+      setIsCameraAtProjector(false);
+    } else {
+      setIsCameraAtProjector(false);
+      setIsProjectAnimating(false);
+      if (id === 'achievements') {
+        setProjectPresentationState('ACHIEVEMENTS');
+      } else {
+        setProjectPresentationState('IDLE');
+      }
+    }
+
+    // Workstation window interaction states per destination
+    if (id === 'workstation' || id === 'room') {
+      setIsAboutWindowOpen(false);
+      setIsResumeWindowOpen(false);
+      setIsMailOpen(false);
+    } else if (id === 'about') {
       setIsAboutWindowOpen(true);
       setIsAboutMinimized(false);
-    }
-    if (id === 'contact') {
+      setIsResumeWindowOpen(false);
+      setIsMailOpen(false);
+      setActiveZIndex('about');
+    } else if (id === 'resume') {
+      setIsResumeWindowOpen(true);
+      setIsResumeMinimized(false);
+      setIsAboutWindowOpen(false);
+      setIsMailOpen(false);
+      setActiveZIndex('resume');
+    } else if (id === 'contact') {
       setIsMailOpen(true);
       setIsContactCardRevealed(true);
+      setIsAboutWindowOpen(false);
+      setIsResumeWindowOpen(false);
+    } else if (['skills', 'projects', 'achievements', 'finale'].includes(id)) {
+      setIsAboutWindowOpen(false);
+      setIsResumeWindowOpen(false);
+      setIsMailOpen(false);
     }
   }, []);
 
@@ -318,7 +374,31 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
 
     setIsExplorationMode(false);
     setIsTerminalExpanded(false);
+
+    const prevSectionId = activeSection;
     setActiveSection(id);
+
+    if (id === 'projects') {
+      const prevIdx = SECTION_IDS.indexOf(prevSectionId);
+      const projIdx = SECTION_IDS.indexOf('projects');
+      if (prevIdx < projIdx) {
+        // Entering forward from skills or earlier -> initialize to project 1
+        setActiveProjectIndex(0);
+        setProjectPageState('waiting');
+        setProjectPresentationState('ENTERING_PROJECTS');
+      } else if (prevIdx > projIdx) {
+        // Entering backward from achievements -> restore last project
+        const lastIdx = projectsData.length - 1;
+        setActiveProjectIndex(lastIdx);
+        setProjectPageState('presented');
+        setProjectPresentationState(`PROJECT_${projectsData.length}`);
+      } else {
+        // Direct jump to projects when already in projects or re-trigger
+        setActiveProjectIndex(0);
+        setProjectPageState('waiting');
+        setProjectPresentationState('ENTERING_PROJECTS');
+      }
+    }
 
     const scrollContainer = document.getElementById('scroll-timeline-container');
     if (scrollContainer && typeof window !== 'undefined') {
@@ -336,21 +416,112 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         });
       }
     }
-  }, [setActiveSection, isReducedMotion]);
+  }, [setActiveSection, isReducedMotion, activeSection]);
 
   const nextSection = useCallback(() => {
-    const currentIndex = SECTION_IDS.indexOf(activeSection);
-    if (currentIndex < SECTION_IDS.length - 1) {
-      jumpToSection(SECTION_IDS[currentIndex + 1]);
+    if (activeSection === 'intro') {
+      setIsIntroFinished(true);
+      jumpToSection('room');
+      return;
     }
-  }, [activeSection, jumpToSection]);
+
+    if (activeSection === 'projects') {
+      if (isProjectAnimating || projectPageState === 'animating') return;
+      if (activeProjectIndex < projectsData.length - 1) {
+        const nextIdx = activeProjectIndex + 1;
+        setActiveProjectIndex(nextIdx);
+        setProjectPresentationState(`PROJECT_${nextIdx + 1}`);
+        setProjectPageState('animating');
+        setIsProjectAnimating(true);
+      } else {
+        setProjectPresentationState('ACHIEVEMENTS');
+        jumpToSection('achievements');
+      }
+      return;
+    }
+
+    const journeyOrder: SectionId[] = [
+      'room',
+      'workstation',
+      'about',
+      'resume',
+      'contact',
+      'skills',
+      'projects',
+      'achievements',
+      'finale'
+    ];
+
+    const curIdx = journeyOrder.indexOf(activeSection);
+    if (curIdx !== -1 && curIdx < journeyOrder.length - 1) {
+      jumpToSection(journeyOrder[curIdx + 1]);
+    }
+  }, [
+    activeSection,
+    activeProjectIndex,
+    isProjectAnimating,
+    projectPageState,
+    jumpToSection,
+    setIsIntroFinished
+  ]);
 
   const prevSection = useCallback(() => {
-    const currentIndex = SECTION_IDS.indexOf(activeSection);
-    if (currentIndex > 0) {
-      jumpToSection(SECTION_IDS[currentIndex - 1]);
+    if (activeSection === 'room' || activeSection === 'intro') {
+      return; // Do not return to intro
     }
-  }, [activeSection, jumpToSection]);
+
+    if (activeSection === 'finale') {
+      jumpToSection('achievements');
+      return;
+    }
+
+    if (activeSection === 'achievements') {
+      const lastIdx = projectsData.length - 1;
+      setActiveProjectIndex(lastIdx);
+      setProjectPageState('presented');
+      setProjectPresentationState(`PROJECT_${projectsData.length}`);
+      jumpToSection('projects');
+      return;
+    }
+
+    if (activeSection === 'projects') {
+      if (isProjectAnimating || projectPageState === 'animating') return;
+      if (activeProjectIndex > 0) {
+        const prevIdx = activeProjectIndex - 1;
+        setActiveProjectIndex(prevIdx);
+        setProjectPresentationState(`PROJECT_${prevIdx + 1}`);
+        setProjectPageState('animating');
+        setIsProjectAnimating(true);
+      } else {
+        setProjectPresentationState('IDLE');
+        jumpToSection('skills');
+      }
+      return;
+    }
+
+    const journeyOrder: SectionId[] = [
+      'room',
+      'workstation',
+      'about',
+      'resume',
+      'contact',
+      'skills',
+      'projects',
+      'achievements',
+      'finale'
+    ];
+
+    const curIdx = journeyOrder.indexOf(activeSection);
+    if (curIdx > 0) {
+      jumpToSection(journeyOrder[curIdx - 1]);
+    }
+  }, [
+    activeSection,
+    activeProjectIndex,
+    isProjectAnimating,
+    projectPageState,
+    jumpToSection
+  ]);
 
   return (
     <ExperienceContext.Provider
@@ -367,6 +538,10 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         isMuted,
         activeProjectSlug,
         activeProjectIndex,
+        projectPresentationState,
+        projectPageState,
+        isCameraAtProjector,
+        isProjectAnimating,
         activeAchievementId,
         isTerminalExpanded,
         hasWebGl,
@@ -398,6 +573,10 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         toggleMute,
         setActiveProjectSlug,
         setActiveProjectIndex,
+        setProjectPresentationState,
+        setProjectPageState,
+        setIsCameraAtProjector,
+        setIsProjectAnimating,
         setActiveAchievementId,
         setActiveSkillCategoryId,
         setIsSkillsPanelOpen,

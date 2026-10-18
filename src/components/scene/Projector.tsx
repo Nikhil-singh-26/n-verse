@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useExperience } from '@/context/ExperienceContext';
@@ -52,12 +52,17 @@ function easeInOutCubic(t: number): number {
 export function Projector() {
   const {
     activeSection,
-    scrollProgress,
     activeProjectIndex,
     setActiveProjectIndex,
     activeProjectSlug,
     setActiveProjectSlug,
-    isReducedMotion
+    isReducedMotion,
+    projectPresentationState,
+    setProjectPresentationState,
+    projectPageState,
+    setProjectPageState,
+    isCameraAtProjector,
+    setIsProjectAnimating
   } = useExperience();
 
   const isProjects = activeSection === 'projects';
@@ -73,6 +78,10 @@ export function Projector() {
   const flyingPageRef = useRef<THREE.Group>(null);
   const wallShadowRef = useRef<THREE.MeshBasicMaterial>(null);
 
+  // Flight progress ref (0 = on wooden table stack, 1 = settled flush on left wall)
+  const flightProgress = useRef<number>(0);
+  const prevIndexRef = useRef<number>(activeProjectIndex);
+
   // Flight trajectory definition (from table stack to left wall)
   const trajectory = useMemo(() => {
     return {
@@ -83,38 +92,55 @@ export function Projector() {
     };
   }, []);
 
-  // Calculate project index smoothly based on scroll position in [0.54, 0.76]
-  const { projectIndex, flightProgress } = useMemo(() => {
-    if (!isProjects && scrollProgress < 0.54) {
-      return { projectIndex: 0, flightProgress: 0 };
+  // When camera arrives at the projector station, begin first project flight
+  useEffect(() => {
+    if (isProjects && isCameraAtProjector && projectPageState === 'waiting') {
+      setProjectPresentationState('CAMERA_READY');
+      const timer = setTimeout(() => {
+        setProjectPresentationState('PROJECT_1');
+        setProjectPageState('animating');
+        setIsProjectAnimating(true);
+        flightProgress.current = 0;
+      }, 80);
+      return () => clearTimeout(timer);
     }
-    if (!isProjects && scrollProgress > 0.76) {
-      return { projectIndex: projectsData.length - 1, flightProgress: 1 };
-    }
+  }, [
+    isProjects,
+    isCameraAtProjector,
+    projectPageState,
+    setProjectPresentationState,
+    setProjectPageState,
+    setIsProjectAnimating
+  ]);
 
-    const relProgress = Math.max(0, Math.min(1, (scrollProgress - 0.54) / (0.76 - 0.54)));
-    const totalProjects = projectsData.length;
-    const pIdx = Math.min(totalProjects - 1, Math.floor(relProgress * totalProjects));
-    return { projectIndex: pIdx, flightProgress: 1 };
-  }, [scrollProgress, isProjects]);
-
-  // Keep activeProjectIndex synchronized with scroll
-  React.useEffect(() => {
-    if (isProjects && activeProjectIndex !== projectIndex) {
-      setActiveProjectIndex(projectIndex);
+  // When activeProjectIndex changes while in projects and camera ready, trigger page flight
+  useEffect(() => {
+    if (isProjects && isCameraAtProjector && prevIndexRef.current !== activeProjectIndex) {
+      prevIndexRef.current = activeProjectIndex;
+      if (projectPageState === 'animating') {
+        flightProgress.current = 0;
+      }
     }
-  }, [projectIndex, isProjects, activeProjectIndex, setActiveProjectIndex]);
+  }, [activeProjectIndex, isProjects, isCameraAtProjector, projectPageState]);
 
   // Navigation handlers
   const nextProject = () => {
-    if (activeProjectIndex < projectsData.length - 1) {
-      setActiveProjectIndex(activeProjectIndex + 1);
+    if (activeProjectIndex < projectsData.length - 1 && projectPageState !== 'animating') {
+      const nextIdx = activeProjectIndex + 1;
+      setActiveProjectIndex(nextIdx);
+      setProjectPresentationState(`PROJECT_${nextIdx + 1}`);
+      setProjectPageState('animating');
+      setIsProjectAnimating(true);
     }
   };
 
   const prevProject = () => {
-    if (activeProjectIndex > 0) {
-      setActiveProjectIndex(activeProjectIndex - 1);
+    if (activeProjectIndex > 0 && projectPageState !== 'animating') {
+      const prevIdx = activeProjectIndex - 1;
+      setActiveProjectIndex(prevIdx);
+      setProjectPresentationState(`PROJECT_${prevIdx + 1}`);
+      setProjectPageState('animating');
+      setIsProjectAnimating(true);
     }
   };
 
@@ -122,8 +148,30 @@ export function Projector() {
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
 
+    // Advance flight progress during animating state
+    if (isProjects) {
+      if (projectPageState === 'animating') {
+        const animSpeed = isReducedMotion ? 4.0 : 1.35;
+        flightProgress.current = Math.min(1.0, flightProgress.current + delta * animSpeed);
+        if (flightProgress.current >= 1.0) {
+          flightProgress.current = 1.0;
+          setProjectPageState('presented');
+          setIsProjectAnimating(false);
+        }
+      } else if (projectPageState === 'presented') {
+        flightProgress.current = 1.0;
+      } else if (projectPageState === 'waiting') {
+        flightProgress.current = 0.0;
+      }
+    } else {
+      flightProgress.current = 0.0;
+    }
+
+    const curFlightT = flightProgress.current;
+
     // 1. Vintage Film Reels Rotation
-    const reelSpeed = isProjects ? (flightProgress < 0.98 ? 3.8 : 0.85) : 0.08;
+    const isPageFlying = isProjects && projectPageState === 'animating';
+    const reelSpeed = isProjects ? (isPageFlying ? 3.8 : 0.85) : 0.08;
     if (upperReelRef.current) {
       upperReelRef.current.rotation.z += delta * reelSpeed;
     }
@@ -162,7 +210,7 @@ export function Projector() {
 
     // 3. 3D Flying Parchment Page Animation
     if (flyingPageRef.current) {
-      const curT = isProjects ? flightProgress : 0;
+      const curT = isProjects ? curFlightT : 0;
 
       // Calculate 3D position along Bezier curve
       const pos = getCubicBezierPoint(
@@ -561,10 +609,10 @@ export function Projector() {
           <div
             key={currentProject.id}
             style={{
-              opacity: isProjects ? 1 : 0,
-              pointerEvents: isProjects ? 'auto' : 'none',
-              transform: isProjects ? 'scale(1)' : 'scale(0.97)',
-              transition: 'opacity 0.4s ease, transform 0.4s ease',
+              opacity: isProjects && projectPageState !== 'waiting' ? 1 : 0,
+              pointerEvents: isProjects && projectPageState === 'presented' ? 'auto' : 'none',
+              transform: isProjects && projectPageState === 'presented' ? 'scale(1)' : 'scale(0.97)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
               boxShadow: '0 25px 65px rgba(18, 12, 6, 0.8), 0 4px 14px rgba(0,0,0,0.4), inset 0 0 90px rgba(110, 75, 35, 0.22)'
             }}
             className="w-[960px] h-[580px] bg-gradient-to-br from-[#f8f1de] via-[#eee0c1] to-[#ddcaa3] border border-[#7d6040]/70 rounded-xs p-8 flex flex-col justify-between text-[#241a10] font-serif relative overflow-hidden select-none animate-in fade-in duration-300"

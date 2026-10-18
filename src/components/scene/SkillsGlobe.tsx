@@ -75,147 +75,67 @@ function getTechForCell(row: number, col: number): TechItem {
   return TECH_DATABASE[index];
 }
 
-// Vector fallback drawing routines for all 29 skills
+// Vector drawing routines for all 29 official skills
 function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: number) {
   const r = size / 2;
 
   switch (type) {
-    case 'html5': {
-      ctx.fillStyle = '#e44d26';
-      ctx.beginPath();
-      ctx.moveTo(-r * 0.75, -r * 0.85);
-      ctx.lineTo(r * 0.75, -r * 0.85);
-      ctx.lineTo(r * 0.6, r * 0.6);
-      ctx.lineTo(0, r * 0.95);
-      ctx.lineTo(-r * 0.6, r * 0.6);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#f16529';
-      ctx.beginPath();
-      ctx.moveTo(0, -r * 0.72);
-      ctx.lineTo(r * 0.62, -r * 0.72);
-      ctx.lineTo(r * 0.5, r * 0.5);
-      ctx.lineTo(0, r * 0.8);
-      ctx.closePath();
-      ctx.fill();
-
+    case 'java': {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.round(size * 0.5)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('5', 0, r * 0.05);
-      break;
-    }
-
-    case 'css3': {
-      ctx.fillStyle = '#264de4';
       ctx.beginPath();
-      ctx.moveTo(-r * 0.75, -r * 0.85);
-      ctx.lineTo(r * 0.75, -r * 0.85);
-      ctx.lineTo(r * 0.6, r * 0.6);
-      ctx.lineTo(0, r * 0.95);
-      ctx.lineTo(-r * 0.6, r * 0.6);
-      ctx.closePath();
+      ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      ctx.fillStyle = '#5382a1';
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.2, r * 0.42, r * 0.22, 0, 0, Math.PI);
       ctx.fill();
 
-      ctx.fillStyle = '#2965f1';
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
-      ctx.moveTo(0, -r * 0.72);
-      ctx.lineTo(r * 0.62, -r * 0.72);
-      ctx.lineTo(r * 0.5, r * 0.5);
-      ctx.lineTo(0, r * 0.8);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.round(size * 0.5)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('3', 0, r * 0.05);
+      ctx.moveTo(-r * 0.16, -r * 0.52);
+      ctx.quadraticCurveTo(0, -r * 0.32, -r * 0.08, -r * 0.12);
+      ctx.moveTo(r * 0.12, -r * 0.6);
+      ctx.quadraticCurveTo(r * 0.26, -r * 0.36, r * 0.14, -r * 0.12);
+      ctx.stroke();
       break;
     }
 
     case 'js': {
       ctx.fillStyle = '#f7df1e';
-      drawRoundedRect(ctx, -r * 0.85, -r * 0.85, r * 1.7, r * 1.7, r * 0.22);
+      drawRoundedRect(ctx, -r * 0.8, -r * 0.8, r * 1.6, r * 1.6, r * 0.2);
       ctx.fill();
-
       ctx.fillStyle = '#000000';
-      ctx.font = `900 ${Math.round(size * 0.44)}px sans-serif`;
+      ctx.font = `900 ${Math.round(size * 0.46)}px sans-serif`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
-      ctx.fillText('JS', r * 0.72, r * 0.75);
+      ctx.fillText('JS', r * 0.68, r * 0.72);
       break;
     }
 
     case 'ts': {
       ctx.fillStyle = '#3178c6';
-      drawRoundedRect(ctx, -r * 0.85, -r * 0.85, r * 1.7, r * 1.7, r * 0.22);
+      drawRoundedRect(ctx, -r * 0.8, -r * 0.8, r * 1.6, r * 1.6, r * 0.2);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = `900 ${Math.round(size * 0.44)}px sans-serif`;
+      ctx.font = `900 ${Math.round(size * 0.46)}px sans-serif`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
-      ctx.fillText('TS', r * 0.72, r * 0.75);
-      break;
-    }
-
-    case 'react': {
-      ctx.fillStyle = '#20232a';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.88, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = '#00d8ff';
-      ctx.lineWidth = 2.2;
-      for (let angle = 0; angle < Math.PI; angle += Math.PI / 3) {
-        ctx.save();
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, r * 0.72, r * 0.28, 0, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      ctx.fillStyle = '#00d8ff';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.16, 0, Math.PI * 2);
-      ctx.fill();
-      break;
-    }
-
-    case 'java': {
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#5382a1';
-      ctx.beginPath();
-      ctx.arc(0, r * 0.15, r * 0.45, 0, Math.PI);
-      ctx.fill();
-
-      ctx.strokeStyle = '#e76f00';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(-r * 0.15, -r * 0.55);
-      ctx.quadraticCurveTo(0, -r * 0.35, -r * 0.1, -r * 0.15);
-      ctx.moveTo(r * 0.1, -r * 0.65);
-      ctx.quadraticCurveTo(r * 0.25, -r * 0.4, r * 0.12, -r * 0.15);
-      ctx.stroke();
+      ctx.fillText('TS', r * 0.68, r * 0.72);
       break;
     }
 
     case 'c': {
       ctx.fillStyle = '#659ad2';
       ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = `900 ${Math.round(size * 0.58)}px sans-serif`;
+      ctx.font = `900 ${Math.round(size * 0.56)}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('C', 0, 0);
@@ -225,39 +145,193 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
     case 'dart': {
       ctx.fillStyle = '#0175c2';
       ctx.beginPath();
-      ctx.moveTo(-r * 0.7, -r * 0.7);
-      ctx.lineTo(r * 0.7, -r * 0.7);
+      ctx.moveTo(-r * 0.6, -r * 0.7);
+      ctx.lineTo(r * 0.6, -r * 0.7);
       ctx.lineTo(0, r * 0.7);
       ctx.closePath();
       ctx.fill();
-
-      ctx.fillStyle = '#02569b';
+      ctx.fillStyle = '#00b4ab';
       ctx.beginPath();
       ctx.moveTo(0, -r * 0.7);
-      ctx.lineTo(r * 0.7, -r * 0.7);
+      ctx.lineTo(r * 0.6, -r * 0.7);
       ctx.lineTo(0, r * 0.7);
       ctx.closePath();
       ctx.fill();
       break;
     }
 
-    case 'flutter': {
-      ctx.fillStyle = '#02569b';
+    case 'html5': {
+      ctx.fillStyle = '#e44d26';
       ctx.beginPath();
-      ctx.moveTo(-r * 0.5, -r * 0.7);
-      ctx.lineTo(r * 0.7, -r * 0.7);
-      ctx.lineTo(-r * 0.2, 0.2);
+      ctx.moveTo(-r * 0.7, -r * 0.8);
+      ctx.lineTo(r * 0.7, -r * 0.8);
+      ctx.lineTo(r * 0.56, r * 0.58);
+      ctx.lineTo(0, r * 0.88);
+      ctx.lineTo(-r * 0.56, r * 0.58);
       ctx.closePath();
       ctx.fill();
+      ctx.fillStyle = '#f16529';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.7);
+      ctx.lineTo(r * 0.58, -r * 0.7);
+      ctx.lineTo(r * 0.46, r * 0.48);
+      ctx.lineTo(0, r * 0.76);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.48)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('5', 0, r * 0.05);
+      break;
+    }
 
-      ctx.fillStyle = '#0175c2';
+    case 'css3': {
+      ctx.fillStyle = '#264de4';
       ctx.beginPath();
-      ctx.moveTo(-r * 0.2, 0.2);
-      ctx.lineTo(r * 0.35, 0.75);
-      ctx.lineTo(r * 0.7, 0.75);
-      ctx.lineTo(r * 0.15, 0.2);
+      ctx.moveTo(-r * 0.7, -r * 0.8);
+      ctx.lineTo(r * 0.7, -r * 0.8);
+      ctx.lineTo(r * 0.56, r * 0.58);
+      ctx.lineTo(0, r * 0.88);
+      ctx.lineTo(-r * 0.56, r * 0.58);
       ctx.closePath();
       ctx.fill();
+      ctx.fillStyle = '#2965f1';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.7);
+      ctx.lineTo(r * 0.58, -r * 0.7);
+      ctx.lineTo(r * 0.46, r * 0.48);
+      ctx.lineTo(0, r * 0.76);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.48)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('3', 0, r * 0.05);
+      break;
+    }
+
+    case 'tailwind': {
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = `bold ${Math.round(size * 0.38)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('TW', 0, 0);
+      break;
+    }
+
+    case 'bootstrap': {
+      ctx.fillStyle = '#7952b3';
+      drawRoundedRect(ctx, -r * 0.8, -r * 0.8, r * 1.6, r * 1.6, r * 0.25);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.54)}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('B', 0, 0);
+      break;
+    }
+
+    case 'react': {
+      ctx.fillStyle = '#20232a';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#00d8ff';
+      ctx.lineWidth = 2.0;
+      for (let angle = 0; angle < Math.PI; angle += Math.PI / 3) {
+        ctx.save();
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 0.72, r * 0.26, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.fillStyle = '#00d8ff';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'nextjs': {
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.55)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('N', 0, 0);
+      break;
+    }
+
+    case 'gsap': {
+      ctx.fillStyle = '#0a0e17';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#88ce02';
+      ctx.font = `900 ${Math.round(size * 0.32)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('GSAP', 0, 0);
+      break;
+    }
+
+    case 'threejs': {
+      ctx.fillStyle = '#05070a';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.65);
+      ctx.lineTo(r * 0.65, r * 0.45);
+      ctx.lineTo(-r * 0.65, r * 0.45);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'r3f': {
+      ctx.fillStyle = '#0a0f1d';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.55, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = `bold ${Math.round(size * 0.32)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('R3F', 0, 0);
+      break;
+    }
+
+    case 'drei': {
+      ctx.fillStyle = '#ef4444';
+      drawRoundedRect(ctx, -r * 0.8, -r * 0.8, r * 1.6, r * 1.6, r * 0.25);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.32)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('DREI', 0, 0);
       break;
     }
 
@@ -273,7 +347,6 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       }
       ctx.closePath();
       ctx.fill();
-
       ctx.fillStyle = '#539e43';
       ctx.font = `bold ${Math.round(size * 0.32)}px sans-serif`;
       ctx.textAlign = 'center';
@@ -282,17 +355,16 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       break;
     }
 
-    case 'postgres': {
-      ctx.fillStyle = '#336791';
+    case 'express': {
+      ctx.fillStyle = '#18181b';
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = `900 ${Math.round(size * 0.38)}px sans-serif`;
+      ctx.font = `900 ${Math.round(size * 0.44)}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('SQL', 0, 0);
+      ctx.fillText('ex', 0, 0);
       break;
     }
 
@@ -303,7 +375,6 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       ctx.quadraticCurveTo(r * 0.75, 0, 0, r * 0.85);
       ctx.quadraticCurveTo(-r * 0.75, 0, 0, -r * 0.85);
       ctx.fill();
-
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.8;
       ctx.beginPath();
@@ -313,25 +384,118 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       break;
     }
 
+    case 'mongoose': {
+      ctx.fillStyle = '#e11d48';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('MG', 0, 0);
+      break;
+    }
+
+    case 'postgres': {
+      ctx.fillStyle = '#336791';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.38)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SQL', 0, 0);
+      break;
+    }
+
+    case 'flutter': {
+      ctx.fillStyle = '#02569b';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.5, -r * 0.7);
+      ctx.lineTo(r * 0.7, -r * 0.7);
+      ctx.lineTo(-r * 0.2, 0.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#0175c2';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.2, 0.2);
+      ctx.lineTo(r * 0.35, 0.75);
+      ctx.lineTo(r * 0.7, 0.75);
+      ctx.lineTo(r * 0.15, 0.2);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'firebase': {
+      ctx.fillStyle = '#1c1917';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffca28';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.7);
+      ctx.lineTo(r * 0.5, r * 0.6);
+      ctx.lineTo(-r * 0.5, r * 0.6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#f57c00';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.3);
+      ctx.lineTo(r * 0.45, r * 0.6);
+      ctx.lineTo(-r * 0.2, r * 0.6);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'vercel': {
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.55);
+      ctx.lineTo(r * 0.55, r * 0.45);
+      ctx.lineTo(-r * 0.55, r * 0.45);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+
+    case 'render': {
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `900 ${Math.round(size * 0.52)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('R', 0, 0);
+      break;
+    }
+
     case 'git': {
       ctx.save();
       ctx.rotate(Math.PI / 4);
       ctx.fillStyle = '#f05032';
-      drawRoundedRect(ctx, -r * 0.7, -r * 0.7, r * 1.4, r * 1.4, r * 0.2);
+      drawRoundedRect(ctx, -r * 0.68, -r * 0.68, r * 1.36, r * 1.36, r * 0.2);
       ctx.fill();
       ctx.restore();
-
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
-      ctx.moveTo(-r * 0.25, -r * 0.4);
-      ctx.lineTo(r * 0.25, r * 0.2);
+      ctx.moveTo(-r * 0.22, -r * 0.38);
+      ctx.lineTo(r * 0.22, r * 0.22);
       ctx.stroke();
-
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(-r * 0.25, -r * 0.4, r * 0.18, 0, Math.PI * 2);
-      ctx.arc(r * 0.25, r * 0.2, r * 0.18, 0, Math.PI * 2);
+      ctx.arc(-r * 0.22, -r * 0.38, r * 0.16, 0, Math.PI * 2);
+      ctx.arc(r * 0.22, r * 0.22, r * 0.16, 0, Math.PI * 2);
       ctx.fill();
       break;
     }
@@ -341,54 +505,36 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.round(size * 0.32)}px sans-serif`;
+      ctx.font = `bold ${Math.round(size * 0.3)}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('GIT', 0, 0);
       break;
     }
 
-    case 'tailwind': {
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#38bdf8';
-      ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('TW', 0, 0);
-      break;
-    }
-
-    case 'nextjs': {
-      ctx.fillStyle = '#000000';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `900 ${Math.round(size * 0.52)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('N', 0, 0);
-      break;
-    }
-
     case 'vscode': {
       ctx.fillStyle = '#0066b8';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      drawRoundedRect(ctx, -r * 0.8, -r * 0.8, r * 1.6, r * 1.6, r * 0.22);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.round(size * 0.32)}px sans-serif`;
+      ctx.font = `bold ${Math.round(size * 0.34)}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('VS', 0, 0);
+      break;
+    }
+
+    case 'androidstudio': {
+      ctx.fillStyle = '#3ddc84';
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('AS', 0, 0);
       break;
     }
 
@@ -397,40 +543,11 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+      ctx.font = `bold ${Math.round(size * 0.34)}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('PM', 0, 0);
-      break;
-    }
-
-    case 'gsap': {
-      ctx.fillStyle = '#0a0e17';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#88ce02';
-      ctx.font = `900 ${Math.round(size * 0.32)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('GSAP', 0, 0);
-      break;
-    }
-
-    case 'threejs': {
-      ctx.fillStyle = '#05070a';
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('3JS', 0, 0);
       break;
     }
 
@@ -439,7 +556,6 @@ function renderLogoIcon(ctx: CanvasRenderingContext2D, type: string, size: numbe
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${Math.round(size * 0.32)}px sans-serif`;
       ctx.textAlign = 'center';
@@ -486,7 +602,7 @@ export function SkillsGlobe() {
   // Radius of the planet globe (1.30m radius = 2.60m diameter)
   const radius = 1.30;
 
-  // Dedicated procedural canvas texture with preloaded official SVG logos
+  // Dedicated procedural canvas texture with clean vector rendering for all 29 skills
   const [globeCanvasTexture, setGlobeCanvasTexture] = useState<THREE.CanvasTexture | null>(null);
 
   useEffect(() => {
@@ -507,10 +623,8 @@ export function SkillsGlobe() {
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
 
-    const imagesMap = new Map<string, HTMLImageElement>();
-
     const drawGlobe = () => {
-      // 1. Base Globe Surface: soft oceanic pale cyan matching reference globe
+      // 1. Base Globe Surface: soft oceanic pale cyan
       ctx.fillStyle = '#cde7f6';
       ctx.fillRect(0, 0, width, height);
 
@@ -523,25 +637,28 @@ export function SkillsGlobe() {
           const tech = getTechForCell(r, c);
           const cx = c * cellW + cellW / 2;
           const cy = r * cellH + cellH / 2;
-          const size = Math.min(cellW, cellH) * 0.64;
+          const size = Math.min(cellW, cellH) * 0.54;
 
-          // Soft subtle contrasting emblem circular backing
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+          // Glowing badge circular backing
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
           ctx.beginPath();
-          ctx.arc(cx, cy, size * 0.58, 0, Math.PI * 2);
+          ctx.arc(cx, cy - cellH * 0.08, size * 0.65, 0, Math.PI * 2);
           ctx.fill();
+          ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
 
           ctx.save();
-          ctx.translate(cx, cy);
-
-          const img = imagesMap.get(tech.id);
-          if (img && img.complete && img.naturalWidth > 0) {
-            ctx.drawImage(img, -size / 2, -size / 2, size, size);
-          } else {
-            renderLogoIcon(ctx, tech.drawType, size);
-          }
-
+          ctx.translate(cx, cy - cellH * 0.08);
+          renderLogoIcon(ctx, tech.drawType, size);
           ctx.restore();
+
+          // High-contrast legible skill name label under the icon
+          ctx.fillStyle = '#0f172a';
+          ctx.font = `bold ${Math.max(10, Math.round(cellH * 0.16))}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(tech.name, cx, cy + cellH * 0.32);
         }
       }
 
@@ -583,25 +700,9 @@ export function SkillsGlobe() {
       texture.needsUpdate = true;
     };
 
-    // Immediate synchronous initial draw with vector emblems
+    // Immediate synchronous draw - 100% clean, untainted WebGL texture
     drawGlobe();
     setGlobeCanvasTexture(texture);
-
-    // Asynchronously preload all 29 official SVG logos from public/skills/
-    let loadedCount = 0;
-    TECH_DATABASE.forEach((tech) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = `/skills/${tech.icon}.svg`;
-      img.onload = () => {
-        imagesMap.set(tech.id, img);
-        loadedCount++;
-        // Batch redraw every 5 images or on completion
-        if (loadedCount % 5 === 0 || loadedCount === TECH_DATABASE.length) {
-          drawGlobe();
-        }
-      };
-    });
   }, []);
 
   // Pointer drag interactions around the tilted polar axis
@@ -610,6 +711,9 @@ export function SkillsGlobe() {
     isDragging.current = true;
     previousPointer.current = { x: e.clientX, y: e.clientY };
     rotationVelocity.current = 0;
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __isInteractingWithObject?: boolean }).__isInteractingWithObject = true;
+    }
     if (e.target && 'setPointerCapture' in e.target) {
       // @ts-expect-error ThreeEvent target
       e.target.setPointerCapture?.(e.pointerId);
@@ -631,6 +735,9 @@ export function SkillsGlobe() {
   const handlePointerUp = useCallback((e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     isDragging.current = false;
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __isInteractingWithObject?: boolean }).__isInteractingWithObject = false;
+    }
   }, []);
 
   // Raycasting click to inspect clicked technology cell

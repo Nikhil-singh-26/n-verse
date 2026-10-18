@@ -1,4 +1,16 @@
-export type SectionId = 'intro' | 'room' | 'about' | 'skills' | 'projects' | 'achievements' | 'contact' | 'gate' | 'welcome';
+export type SectionId =
+  | 'intro'
+  | 'room'
+  | 'workstation'
+  | 'about'
+  | 'resume'
+  | 'contact'
+  | 'skills'
+  | 'projects'
+  | 'achievements'
+  | 'finale'
+  | 'gate'
+  | 'welcome';
 
 export interface SectionConfig {
   id: SectionId;

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useExperience } from '@/context/ExperienceContext';
-import { SECTIONS, SECTION_IDS } from '@/lib/experience-config';
 import { gsap, ScrollTrigger, registerGsapPlugins } from '@/lib/motion';
 import { SectionId } from '@/types';
 import { projectsData } from '@/data/projects';
@@ -11,6 +10,7 @@ export function ScrollTimeline() {
   const {
     activeSection,
     activeProjectIndex,
+    isIntroFinished,
     setScrollProgress,
     setActiveSection,
     setActiveProjectIndex,
@@ -19,7 +19,12 @@ export function ScrollTimeline() {
     isExplorationMode,
     jumpToSection,
     nextSection,
-    prevSection
+    prevSection,
+    projectPageState,
+    setProjectPageState,
+    setProjectPresentationState,
+    isProjectAnimating,
+    setIsProjectAnimating
   } = useExperience();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +32,9 @@ export function ScrollTimeline() {
   const currentSectionRef = useRef<SectionId>('intro');
   const activeSectionRef = useRef<SectionId>(activeSection);
   const activeProjectIndexRef = useRef<number>(activeProjectIndex);
+  const projectPageStateRef = useRef(projectPageState);
+  const isProjectAnimatingRef = useRef(isProjectAnimating);
+  const isIntroFinishedRef = useRef(isIntroFinished);
   const lastGestureTimeRef = useRef<number>(0);
 
   // Synchronize ref values
@@ -38,16 +46,17 @@ export function ScrollTimeline() {
     activeProjectIndexRef.current = activeProjectIndex;
   }, [activeProjectIndex]);
 
-  // Helper to sync window scrollbar to discrete project progress
-  const syncScrollToProject = (idx: number) => {
-    const scrollContainer = document.getElementById('scroll-timeline-container');
-    if (!scrollContainer || typeof window === 'undefined') return;
-    const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
-    // Map project index evenly into [0.54, 0.76]
-    const projT = (idx + 0.5) / projectsData.length;
-    const targetP = 0.54 + projT * (0.76 - 0.54);
-    window.scrollTo({ top: targetP * maxScroll, behavior: 'smooth' });
-  };
+  useEffect(() => {
+    projectPageStateRef.current = projectPageState;
+  }, [projectPageState]);
+
+  useEffect(() => {
+    isProjectAnimatingRef.current = isProjectAnimating;
+  }, [isProjectAnimating]);
+
+  useEffect(() => {
+    isIntroFinishedRef.current = isIntroFinished;
+  }, [isIntroFinished]);
 
   // Master GSAP ScrollTrigger timeline configuration
   useEffect(() => {
@@ -55,15 +64,18 @@ export function ScrollTimeline() {
 
     if (!containerRef.current) return;
 
-    // Define section threshold intervals for all 7 ordered stops
+    // 10 ordered stops across progress (0.0 to 1.0)
     const getSectionFromProgress = (p: number): SectionId => {
-      if (p < 0.08) return 'intro';
-      if (p < 0.22) return 'room';
-      if (p < 0.38) return 'about';
-      if (p < 0.54) return 'skills';
-      if (p < 0.76) return 'projects';
-      if (p < 0.88) return 'achievements';
-      return 'contact';
+      if (p < 0.0556) return 'intro';
+      if (p < 0.1667) return 'room';
+      if (p < 0.2778) return 'workstation';
+      if (p < 0.3889) return 'about';
+      if (p < 0.5000) return 'resume';
+      if (p < 0.6111) return 'contact';
+      if (p < 0.7222) return 'skills';
+      if (p < 0.8333) return 'projects';
+      if (p < 0.9444) return 'achievements';
+      return 'finale';
     };
 
     const trigger = ScrollTrigger.create({
@@ -88,17 +100,21 @@ export function ScrollTimeline() {
             const lastIdx = projectsData.length - 1;
             activeProjectIndexRef.current = lastIdx;
             setActiveProjectIndex(lastIdx);
+            setProjectPageState('presented');
+            setProjectPresentationState(`PROJECT_${projectsData.length}`);
           } else if (prevSectionId === 'skills' && newSection === 'projects') {
             activeProjectIndexRef.current = 0;
             setActiveProjectIndex(0);
+            setProjectPageState('waiting');
+            setProjectPresentationState('ENTERING_PROJECTS');
           }
         }
 
         // Contact Section: Reveal Display B Mail client and contact channels
-        if (progress >= 0.88) {
+        if (newSection === 'contact') {
           setIsMailOpen(true);
           setIsContactCardRevealed(true);
-        } else {
+        } else if (newSection !== 'about' && newSection !== 'resume') {
           setIsMailOpen(false);
           setIsContactCardRevealed(false);
         }
@@ -112,15 +128,27 @@ export function ScrollTimeline() {
     setScrollProgress,
     setActiveSection,
     setActiveProjectIndex,
+    setProjectPageState,
+    setProjectPresentationState,
     setIsContactCardRevealed,
     setIsMailOpen,
     isExplorationMode
   ]);
 
-  // Discrete Wheel Controller for 1-Project-Per-Step Experience
+  // Discrete Wheel Controller for 1-Destination-Per-Gesture Game Navigation
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (isExplorationMode) return;
+      // Ignore during free exploration or before intro completes
+      if (isExplorationMode || !isIntroFinishedRef.current) return;
+
+      // Check global flags for desktop window drag or globe rotation
+      if (typeof window !== 'undefined') {
+        const win = window as unknown as {
+          __isInteractingWithObject?: boolean;
+          __isDraggingWindow?: boolean;
+        };
+        if (win.__isInteractingWithObject || win.__isDraggingWindow) return;
+      }
 
       // Allow native scrolling inside embedded windows, case study sheets, or textareas
       const target = e.target as HTMLElement | null;
@@ -133,71 +161,43 @@ export function ScrollTimeline() {
         return;
       }
 
-      if (activeSectionRef.current === 'projects') {
-        // Intentional scroll threshold to ignore minor trackpad jitter
-        if (Math.abs(e.deltaY) < 16) return;
-
-        // Sensible cooldown (~520ms) to absorb trackpad momentum / inertia flings
-        const now = Date.now();
-        if (now - lastGestureTimeRef.current < 520) {
-          e.preventDefault();
-          return;
-        }
-
+      // Block advancement while animations are in progress
+      if (isProjectAnimatingRef.current || projectPageStateRef.current === 'animating') {
         e.preventDefault();
-        lastGestureTimeRef.current = now;
+        return;
+      }
 
-        const curIdx = activeProjectIndexRef.current;
-        const total = projectsData.length;
+      // Intentional scroll threshold to ignore minor trackpad jitter
+      if (Math.abs(e.deltaY) < 16) return;
 
-        if (e.deltaY > 0) {
-          // Intentional downward gesture
-          if (curIdx < total - 1) {
-            const nextIdx = curIdx + 1;
-            activeProjectIndexRef.current = nextIdx;
-            setActiveProjectIndex(nextIdx);
-            syncScrollToProject(nextIdx);
-          } else {
-            // Past final project -> advance to Achievements station
-            jumpToSection('achievements');
-          }
-        } else {
-          // Intentional upward gesture
-          if (curIdx > 0) {
-            const prevIdx = curIdx - 1;
-            activeProjectIndexRef.current = prevIdx;
-            setActiveProjectIndex(prevIdx);
-            syncScrollToProject(prevIdx);
-          } else {
-            // Past first project -> return to Skills station
-            jumpToSection('skills');
-          }
-        }
-      } else if (activeSectionRef.current === 'achievements' && e.deltaY < 0) {
-        // Intentional upward scroll from achievements -> cleanly restore last project
-        if (Math.abs(e.deltaY) < 16) return;
-        const now = Date.now();
-        if (now - lastGestureTimeRef.current < 520) {
-          e.preventDefault();
-          return;
-        }
+      // Sensible cooldown (~480ms) to absorb trackpad momentum / inertia flings
+      const now = Date.now();
+      if (now - lastGestureTimeRef.current < 480) {
         e.preventDefault();
-        lastGestureTimeRef.current = now;
-        const lastIdx = projectsData.length - 1;
-        activeProjectIndexRef.current = lastIdx;
-        setActiveProjectIndex(lastIdx);
-        syncScrollToProject(lastIdx);
-        setActiveSection('projects');
+        return;
+      }
+
+      e.preventDefault();
+      lastGestureTimeRef.current = now;
+
+      if (e.deltaY > 0) {
+        nextSection();
+      } else {
+        prevSection();
       }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [isExplorationMode, setActiveProjectIndex, jumpToSection, setActiveSection]);
+  }, [isExplorationMode, nextSection, prevSection]);
 
-  // Mobile Swipe Gesture Listener (with 1-project-per-swipe in Projects)
+  // Mobile Swipe Gesture Listener (1-Destination-Per-Swipe)
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
+      if (!isIntroFinishedRef.current) {
+        touchStartY.current = null;
+        return;
+      }
       const target = e.target as HTMLElement | null;
       if (
         target?.closest('.overflow-y-auto') ||
@@ -213,54 +213,23 @@ export function ScrollTimeline() {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (touchStartY.current === null || isExplorationMode) return;
+      if (touchStartY.current === null || isExplorationMode || !isIntroFinishedRef.current) return;
       const touchEndY = e.changedTouches[0].clientY;
       const deltaY = touchStartY.current - touchEndY;
 
       // 40px swipe threshold
       if (Math.abs(deltaY) > 40) {
-        if (activeSectionRef.current === 'projects') {
-          const now = Date.now();
-          if (now - lastGestureTimeRef.current < 450) return;
-          lastGestureTimeRef.current = now;
+        if (isProjectAnimatingRef.current || projectPageStateRef.current === 'animating') {
+          return;
+        }
+        const now = Date.now();
+        if (now - lastGestureTimeRef.current < 450) return;
+        lastGestureTimeRef.current = now;
 
-          const curIdx = activeProjectIndexRef.current;
-          const total = projectsData.length;
-
-          if (deltaY > 0) {
-            // Swiped up -> advance
-            if (curIdx < total - 1) {
-              const nextIdx = curIdx + 1;
-              activeProjectIndexRef.current = nextIdx;
-              setActiveProjectIndex(nextIdx);
-              syncScrollToProject(nextIdx);
-            } else {
-              jumpToSection('achievements');
-            }
-          } else {
-            // Swiped down -> retreat
-            if (curIdx > 0) {
-              const prevIdx = curIdx - 1;
-              activeProjectIndexRef.current = prevIdx;
-              setActiveProjectIndex(prevIdx);
-              syncScrollToProject(prevIdx);
-            } else {
-              jumpToSection('skills');
-            }
-          }
-        } else if (activeSectionRef.current === 'achievements' && deltaY < 0) {
-          // Swiped down from achievements -> restore last project
-          const lastIdx = projectsData.length - 1;
-          activeProjectIndexRef.current = lastIdx;
-          setActiveProjectIndex(lastIdx);
-          syncScrollToProject(lastIdx);
-          setActiveSection('projects');
+        if (deltaY > 0) {
+          nextSection();
         } else {
-          if (deltaY > 0) {
-            nextSection();
-          } else {
-            prevSection();
-          }
+          prevSection();
         }
       }
       touchStartY.current = null;
@@ -273,57 +242,33 @@ export function ScrollTimeline() {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isExplorationMode, nextSection, prevSection, setActiveProjectIndex, jumpToSection, setActiveSection]);
+  }, [isExplorationMode, nextSection, prevSection]);
 
-  // Accessible Keyboard Navigation (One-Project-Per-Key in Projects)
+  // Accessible Keyboard Navigation (Arrow Keys / Page Keys)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
+      if (!isIntroFinishedRef.current) return;
 
-      if (activeSectionRef.current === 'projects') {
-        if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
-          e.preventDefault();
-          const curIdx = activeProjectIndexRef.current;
-          if (curIdx < projectsData.length - 1) {
-            const nextIdx = curIdx + 1;
-            activeProjectIndexRef.current = nextIdx;
-            setActiveProjectIndex(nextIdx);
-            syncScrollToProject(nextIdx);
-          } else {
-            jumpToSection('achievements');
-          }
-        } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
-          e.preventDefault();
-          const curIdx = activeProjectIndexRef.current;
-          if (curIdx > 0) {
-            const prevIdx = curIdx - 1;
-            activeProjectIndexRef.current = prevIdx;
-            setActiveProjectIndex(prevIdx);
-            syncScrollToProject(prevIdx);
-          } else {
-            jumpToSection('skills');
-          }
+      if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
+        e.preventDefault();
+        if (isProjectAnimatingRef.current || projectPageStateRef.current === 'animating') {
+          return;
         }
-        return;
-      }
-
-      if (activeSectionRef.current === 'achievements' && ['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
-        e.preventDefault();
-        const lastIdx = projectsData.length - 1;
-        activeProjectIndexRef.current = lastIdx;
-        setActiveProjectIndex(lastIdx);
-        syncScrollToProject(lastIdx);
-        setActiveSection('projects');
-        return;
-      }
-
-      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-        e.preventDefault();
+        const now = Date.now();
+        if (now - lastGestureTimeRef.current < 350) return;
+        lastGestureTimeRef.current = now;
         nextSection();
-      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
         e.preventDefault();
+        if (isProjectAnimatingRef.current || projectPageStateRef.current === 'animating') {
+          return;
+        }
+        const now = Date.now();
+        if (now - lastGestureTimeRef.current < 350) return;
+        lastGestureTimeRef.current = now;
         prevSection();
       }
     };
@@ -332,14 +277,14 @@ export function ScrollTimeline() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [nextSection, prevSection, setActiveProjectIndex, jumpToSection, setActiveSection]);
+  }, [nextSection, prevSection]);
 
   return (
     <div
       id="scroll-timeline-container"
       ref={containerRef}
       className="w-full pointer-events-none relative"
-      style={{ height: '700vh' }}
+      style={{ height: '900vh' }}
       aria-hidden="true"
     />
   );
