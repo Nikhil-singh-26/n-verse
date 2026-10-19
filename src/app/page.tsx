@@ -1,5 +1,6 @@
 'use client';
 
+import '@/lib/react-patch';
 import dynamic from 'next/dynamic';
 import { ExperienceProvider } from '@/context/ExperienceContext';
 

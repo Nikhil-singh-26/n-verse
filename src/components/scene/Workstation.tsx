@@ -1,5 +1,6 @@
 'use client';
 
+import '@/lib/react-patch';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { ThreeEvent } from '@react-three/fiber';
@@ -29,6 +30,8 @@ import {
   X
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
+
+const HTML_DESKTOP_POSITION: [number, number, number] = [0, 0, 0.02];
 
 export function Workstation() {
   const {
@@ -307,6 +310,209 @@ export function Workstation() {
       ctx.fillStyle = '#94a3b8';
       ctx.textAlign = 'left';
       ctx.fillText('Contact: singhnikhil2608@gmail.com  •  Location: India  •  GitHub: github.com/Nikhil-singh-26', wx + 48, wy + 465);
+    } else if (isResumeWindowOpen && !isResumeMinimized) {
+      const wx = 360;
+      const wy = 100;
+      const ww = 1180;
+      const wh = 760;
+
+      drawRRect(wx, wy, ww, wh, 18);
+      ctx.fillStyle = 'rgba(14, 20, 34, 0.96)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Title bar
+      drawRRect(wx, wy, ww, 52, 18);
+      ctx.fillStyle = '#132322';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(wx + 26, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Resume.pdf — Official Resume (Nikhil Singh)', wx + 42, wy + 26);
+
+      // Window controls
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(wx + ww - 30, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(wx + ww - 54, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(wx + ww - 78, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Header: Candidate Name & Education
+      ctx.font = '900 36px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Nikhil Singh', wx + 48, wy + 110);
+
+      ctx.font = 'bold 16px monospace';
+      ctx.fillStyle = '#10b981';
+      ctx.fillText('B.TECH COMPUTER SCIENCE & ENGINEERING (2022 — 2026)', wx + 48, wy + 152);
+
+      ctx.font = '15px sans-serif';
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillText('Government Engineering College Bilaspur (CG) • CGPA: 7.85 / 10', wx + 48, wy + 185);
+
+      // Section: Core Competencies
+      ctx.font = 'bold 18px monospace';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('// CORE COMPETENCIES & EXPERTISE', wx + 48, wy + 240);
+
+      const resumeSkills = [
+        'Data Structures & Algorithms',
+        'Full-Stack Web (MERN / Next.js)',
+        '3D Web Graphics (Three.js / WebGL)',
+        'Cloud & DevOps (Docker, CI/CD)',
+        'Database (MongoDB, PostgreSQL)',
+        'Mobile App (Flutter / Dart)'
+      ];
+      resumeSkills.forEach((item, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const ix = wx + 48 + col * 550;
+        const iy = wy + 280 + row * 45;
+        drawRRect(ix, iy, 510, 36, 8);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.stroke();
+        ctx.font = '14px sans-serif';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.textAlign = 'left';
+        ctx.fillText('• ' + item, ix + 16, iy + 18);
+      });
+
+      // Section: Leadership & Achievements
+      ctx.font = 'bold 18px monospace';
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillText('// LEADERSHIP & RECOGNITION', wx + 48, wy + 440);
+
+      ctx.font = '15px sans-serif';
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillText('• Google Developer Groups (GDG) On Campus — Technical Lead', wx + 48, wy + 480);
+      ctx.fillText('• Symbiosis Skill Hackathon — First Place Winner (Feb 2026)', wx + 48, wy + 515);
+      ctx.fillText('• 350+ LeetCode problems solved with verified ranking and badges', wx + 48, wy + 550);
+
+      // Download / Print hint
+      drawRRect(wx + 48, wy + 600, 340, 48, 10);
+      ctx.fillStyle = '#10b981';
+      ctx.fill();
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillStyle = '#061a14';
+      ctx.textAlign = 'center';
+      ctx.fillText('📥 Download Full Resume (PDF)', wx + 218, wy + 624);
+    } else if (isMailOpen && !isMailMinimized) {
+      const wx = 360;
+      const wy = 100;
+      const ww = 1180;
+      const wh = 760;
+
+      drawRRect(wx, wy, ww, wh, 18);
+      ctx.fillStyle = 'rgba(14, 20, 34, 0.96)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Title bar
+      drawRRect(wx, wy, ww, 52, 18);
+      ctx.fillStyle = '#152538';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(wx + 26, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Contact & Channels — Message Dispatcher', wx + 42, wy + 26);
+
+      // Window controls
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(wx + ww - 30, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(wx + ww - 54, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(wx + ww - 78, wy + 26, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Header: Let's Connect
+      ctx.font = '900 36px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Get in Touch', wx + 48, wy + 110);
+
+      ctx.font = 'bold 16px monospace';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('DIRECT COMMUNICATIONS & SOCIAL NETWORKS', wx + 48, wy + 152);
+
+      // Email Card
+      drawRRect(wx + 48, wy + 190, 1080, 80, 12);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.stroke();
+
+      ctx.font = 'bold 14px monospace';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('OFFICIAL INBOX', wx + 75, wy + 218);
+      ctx.font = 'bold 22px monospace';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('singhnikhil2608@gmail.com', wx + 75, wy + 248);
+
+      // Social Links
+      const channels = [
+        { label: 'GitHub', value: 'github.com/Nikhil-singh-26', color: '#f59e0b' },
+        { label: 'LinkedIn', value: 'linkedin.com/in/nikhil-singh-dev', color: '#0ea5e9' },
+        { label: 'Location', value: 'Chhattisgarh, India (Open to Remote / Relocation)', color: '#10b981' }
+      ];
+      channels.forEach((ch, idx) => {
+        const cy = wy + 300 + idx * 75;
+        drawRRect(wx + 48, cy, 1080, 62, 10);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.stroke();
+
+        ctx.font = 'bold 16px sans-serif';
+        ctx.fillStyle = ch.color;
+        ctx.textAlign = 'left';
+        ctx.fillText(ch.label, wx + 75, cy + 31);
+
+        ctx.font = '15px monospace';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(ch.value, wx + 240, cy + 31);
+      });
+
+      // Status indicator
+      ctx.font = '14px sans-serif';
+      ctx.fillStyle = '#10b981';
+      ctx.textAlign = 'left';
+      ctx.fillText('🟢 Currently open for Software Engineer Internships & New Grad Opportunities', wx + 48, wy + 550);
     }
 
     // 6. Windows Taskbar (y = 1076 to 1152)
@@ -374,7 +580,7 @@ export function Workstation() {
     currentDate
   ]);
 
-  // Initialize Canvas Texture synchronously on mount
+  // Initialize Canvas Texture once on mount
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
@@ -403,7 +609,12 @@ export function Workstation() {
       bgImgRef.current = img;
       renderScreenTexture();
     };
-  }, [renderScreenTexture]);
+
+    return () => {
+      texture.dispose();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Live Taskbar Clock
   useEffect(() => {
@@ -423,8 +634,10 @@ export function Workstation() {
 
   // Update canvas texture whenever window states or time change
   useEffect(() => {
-    renderScreenTexture();
-  }, [renderScreenTexture]);
+    if (screenCanvasTexture) {
+      renderScreenTexture();
+    }
+  }, [renderScreenTexture, screenCanvasTexture]);
 
   // Window drag handlers for all windows on the large monitor
   const handleMouseDown = (winName: 'about' | 'resume' | 'mail', initialPos: { x: number; y: number }, e: React.MouseEvent) => {
@@ -545,8 +758,10 @@ export function Workstation() {
     }
 
     // Window close button (u: 0.72 to 0.76, v: 0.82 to 0.88)
-    if (isAboutWindowOpen && !isAboutMinimized && u >= 0.72 && u <= 0.76 && v >= 0.82 && v <= 0.88) {
-      closeAboutWindow();
+    if (u >= 0.72 && u <= 0.76 && v >= 0.82 && v <= 0.88) {
+      if (isAboutWindowOpen) closeAboutWindow();
+      if (isResumeWindowOpen) closeResumeWindow();
+      if (isMailOpen) setIsMailOpen(false);
     }
   };
 
@@ -624,7 +839,7 @@ export function Workstation() {
         >
           <planeGeometry args={[4.40, 2.475]} />
           {screenCanvasTexture ? (
-            <meshBasicMaterial map={screenCanvasTexture} toneMapped={false} />
+            <meshBasicMaterial map={screenCanvasTexture} color="#ffffff" toneMapped={false} />
           ) : (
             <meshBasicMaterial color="#0c1524" toneMapped={false} />
           )}
@@ -652,7 +867,7 @@ export function Workstation() {
         <Html
           transform
           distanceFactor={1.0}
-          position={[0, 0, 0.02]}
+          position={HTML_DESKTOP_POSITION}
           className="pointer-events-auto select-none"
         >
           {/* Desktop Screen Boundary (1760px x 990px) */}

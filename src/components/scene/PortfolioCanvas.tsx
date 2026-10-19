@@ -1,7 +1,8 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import '@/lib/react-patch';
+import React, { Suspense, useEffect } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { SceneLighting } from './SceneLighting';
 import { DeveloperRoom } from './DeveloperRoom';
 import { Workstation } from './Workstation';
@@ -9,6 +10,17 @@ import { SkillsGlobe } from './SkillsGlobe';
 import { Projector } from './Projector';
 import { AchievementArea } from './AchievementArea';
 import { CameraController } from './CameraController';
+
+function SceneDebugger() {
+  const { scene, gl } = useThree();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __scene?: unknown; __gl?: unknown }).__scene = scene;
+      (window as unknown as { __scene?: unknown; __gl?: unknown }).__gl = gl;
+    }
+  }, [scene, gl]);
+  return null;
+}
 
 export function PortfolioCanvas() {
   return (
@@ -34,6 +46,7 @@ export function PortfolioCanvas() {
         <fog attach="fog" args={['#0e121a', 14, 45]} />
 
         <Suspense fallback={null}>
+          <SceneDebugger />
           <CameraController />
           <SceneLighting />
           <DeveloperRoom />

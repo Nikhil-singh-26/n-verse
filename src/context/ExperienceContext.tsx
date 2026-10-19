@@ -1,5 +1,7 @@
 'use client';
 
+import '@/lib/react-patch';
+
 // Safe DOM removeChild patch to prevent Drei / React fast refresh NotFoundError crashes
 if (typeof window !== 'undefined' && typeof Node !== 'undefined') {
   const origRemoveChild = Node.prototype.removeChild;
@@ -405,15 +407,24 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
       const targetScroll = (idx / (SECTION_IDS.length - 1)) * maxScroll;
 
+      (window as unknown as { __isNavigating?: boolean }).__isNavigating = true;
+
+      window.scrollTo({
+        top: targetScroll,
+        behavior: isReducedMotion ? 'instant' : 'smooth'
+      });
+
+      const clearNav = () => {
+        if (typeof window !== 'undefined') {
+          (window as unknown as { __isNavigating?: boolean }).__isNavigating = false;
+        }
+      };
+
       if (isReducedMotion) {
-        window.scrollTo({ top: targetScroll, behavior: 'auto' });
+        clearNav();
       } else {
-        gsap.to(window, {
-          scrollTo: targetScroll,
-          duration: 1.1,
-          ease: 'power2.inOut',
-          overwrite: 'auto'
-        });
+        window.addEventListener('scrollend', clearNav, { once: true });
+        setTimeout(clearNav, 1400);
       }
     }
   }, [setActiveSection, isReducedMotion, activeSection]);

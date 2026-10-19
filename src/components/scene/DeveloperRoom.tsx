@@ -199,7 +199,7 @@ export function DeveloperRoom() {
         <mesh position={[0, 0.05, 0.022]}>
           <planeGeometry args={[0.94, 1.52]} />
           {portraitTex ? (
-            <meshBasicMaterial map={portraitTex} />
+            <meshBasicMaterial map={portraitTex} color="#ffffff" />
           ) : (
             <meshStandardMaterial color="#181b22" roughness={0.4} />
           )}

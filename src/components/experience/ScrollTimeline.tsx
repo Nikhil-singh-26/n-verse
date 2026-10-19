@@ -40,6 +40,7 @@ export function ScrollTimeline() {
   // Synchronize ref values
   useEffect(() => {
     activeSectionRef.current = activeSection;
+    currentSectionRef.current = activeSection;
   }, [activeSection]);
 
   useEffect(() => {
@@ -88,6 +89,10 @@ export function ScrollTimeline() {
 
         const progress = Math.max(0, Math.min(1, self.progress));
         setScrollProgress(progress);
+
+        if (typeof window !== 'undefined' && (window as unknown as { __isNavigating?: boolean }).__isNavigating) {
+          return;
+        }
 
         const newSection = getSectionFromProgress(progress);
         if (newSection !== currentSectionRef.current) {

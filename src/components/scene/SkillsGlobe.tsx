@@ -617,6 +617,7 @@ export function SkillsGlobe() {
     if (!ctx) return;
 
     const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.generateMipmaps = true;
@@ -822,6 +823,7 @@ export function SkillsGlobe() {
             {globeCanvasTexture ? (
               <meshStandardMaterial
                 map={globeCanvasTexture}
+                color="#ffffff"
                 roughness={0.32}
                 metalness={0.08}
               />

@@ -26,10 +26,10 @@ export function WelcomeIntro() {
   const handleEnterStudio = () => {
     if (hasEntered) return;
     setHasEntered(true);
+    jumpToSection('room');
 
     if (!overlayRef.current || isReducedMotion) {
       setIsIntroFinished(true);
-      jumpToSection('room');
       return;
     }
 
@@ -37,7 +37,6 @@ export function WelcomeIntro() {
     const exitTl = gsap.timeline({
       onComplete: () => {
         setIsIntroFinished(true);
-        jumpToSection('room');
       }
     });
 
