@@ -27,6 +27,8 @@ import {
   Volume2,
   Sparkles,
   ArrowRight,
+  Terminal,
+  Share2,
   X
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
@@ -73,10 +75,58 @@ export function Workstation() {
 
   // Copy email feedback state
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedResumeLink, setCopiedResumeLink] = useState(false);
 
   // Mail form state
   const [contactSubject, setContactSubject] = useState('');
   const [contactMessage, setContactMessage] = useState('');
+
+  // Terminal Streaming & CLI State
+  const [terminalStreamIndex, setTerminalStreamIndex] = useState(0);
+  const [terminalHistory, setTerminalHistory] = useState<string[]>([]);
+  const [terminalInput, setTerminalInput] = useState('');
+  const [isTerminalStreamingComplete, setIsTerminalStreamingComplete] = useState(false);
+  const terminalScrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Full About Me Terminal Content Lines
+  const terminalFullBio = [
+    'nikhil@n-verse:~$ cat about.txt',
+    '',
+    '========================================================================',
+    '                    NIKHIL SINGH // ABOUT ME',
+    '========================================================================',
+    '',
+    '[STATUS]       Active • Software Engineer & Full-Stack Developer',
+    '[LOCATION]     Bilaspur, Chhattisgarh, India (Open to Remote / Relocate)',
+    '[DEGREE]       B.Tech in Computer Science & Engineering (2022 — 2026)',
+    '[INSTITUTION]  Government Engineering College Bilaspur (CG)',
+    '[CGPA]         7.85 / 10',
+    '',
+    '[CORE BIOGRAPHY]',
+    'Passionate Computer Science student and software engineer focused on building',
+    'robust, scalable digital experiences and interactive 3D web systems. With deep',
+    'experience in modern full-stack development, cloud architecture, and real-time',
+    '3D graphics, I transform complex ideas into intuitive, production-grade applications.',
+    '',
+    '[TECHNICAL SKILLS]',
+    '• Languages:      Java, TypeScript, JavaScript, SQL, HTML5, CSS3, Python, C++',
+    '• Frontend:       React.js, Next.js, Three.js, React Three Fiber, Tailwind CSS',
+    '• Backend:        Node.js, Express.js, RESTful APIs, Microservices Architecture',
+    '• Databases:      MongoDB, PostgreSQL, MySQL',
+    '• Tools & DevOps: Git, GitHub, Docker, Postman, Linux, Vercel',
+    '',
+    '[DEVELOPMENT VALUES]',
+    '1. Clean Architecture: Modular, maintainable, and type-safe code.',
+    '2. High Performance: Fluid 60fps rendering and sub-second response times.',
+    '3. Seamless UX: Thoughtfully crafted with precision micro-interactions.',
+    '',
+    '[CONTACT & CHANNELS]',
+    '• Email:     singhnikhil2608@gmail.com',
+    '• GitHub:    github.com/Nikhil-singh-26',
+    '• LinkedIn:  linkedin.com/in/nikhil-singh-dev',
+    '',
+    'Type "help", "skills", "education", "contact", "resume", or "clear" below.'
+  ];
 
   // 3D Screen Canvas Texture (Guaranteed 100% visibly ON with wallpaper & 3 folders)
   const [screenCanvasTexture, setScreenCanvasTexture] = useState<THREE.CanvasTexture | null>(null);
@@ -147,11 +197,13 @@ export function Workstation() {
     ctx.fillRect(0, 0, width, height);
 
     // 3. Desktop Folders on Left Side (About, Contact, Resume)
-    const drawFolderCard = (
+    // Draw Desktop Icon Cards (Terminal for About, Mail for Contact, Document Page for Resume)
+    const drawDesktopAppCard = (
       x: number,
       y: number,
       title: string,
       subtitle: string,
+      type: 'terminal' | 'mail' | 'file',
       mainColor: string,
       subColor: string
     ) => {
@@ -165,28 +217,72 @@ export function Workstation() {
       ctx.lineWidth = 2.2;
       ctx.stroke();
 
-      // Folder icon
       const cx = x + w / 2;
       const cy = y + 68;
-      // Tab
-      ctx.fillStyle = mainColor;
-      ctx.beginPath();
-      ctx.rect(cx - 36, cy - 36, 26, 10);
-      ctx.fill();
-      // Body
-      drawRRect(cx - 36, cy - 28, 72, 48, 8);
-      ctx.fillStyle = mainColor;
-      ctx.globalAlpha = 0.88;
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
 
-      // Inner fold line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(cx - 28, cy - 12);
-      ctx.lineTo(cx + 28, cy - 12);
-      ctx.stroke();
+      if (type === 'terminal') {
+        // Console badge with >_ prompt
+        drawRRect(cx - 36, cy - 32, 72, 54, 10);
+        ctx.fillStyle = '#061a14';
+        ctx.fill();
+        ctx.strokeStyle = mainColor;
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        ctx.font = 'bold 26px monospace';
+        ctx.fillStyle = mainColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('>_', cx, cy - 5);
+      } else if (type === 'mail') {
+        // Mail envelope
+        drawRRect(cx - 36, cy - 28, 72, 48, 8);
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.18)';
+        ctx.fill();
+        ctx.strokeStyle = mainColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Flap
+        ctx.beginPath();
+        ctx.moveTo(cx - 36, cy - 28);
+        ctx.lineTo(cx, cy);
+        ctx.lineTo(cx + 36, cy - 28);
+        ctx.stroke();
+      } else {
+        // Document page with folded top-right corner
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.18)';
+        ctx.beginPath();
+        ctx.moveTo(cx - 28, cy - 34);
+        ctx.lineTo(cx + 12, cy - 34);
+        ctx.lineTo(cx + 28, cy - 18);
+        ctx.lineTo(cx + 28, cy + 30);
+        ctx.lineTo(cx - 28, cy + 30);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = mainColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Corner fold
+        ctx.beginPath();
+        ctx.moveTo(cx + 12, cy - 34);
+        ctx.lineTo(cx + 12, cy - 18);
+        ctx.lineTo(cx + 28, cy - 18);
+        ctx.stroke();
+
+        // Text lines on document
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx - 18, cy - 4);
+        ctx.lineTo(cx + 18, cy - 4);
+        ctx.moveTo(cx - 18, cy + 8);
+        ctx.lineTo(cx + 18, cy + 8);
+        ctx.moveTo(cx - 18, cy + 20);
+        ctx.lineTo(cx + 8, cy + 20);
+        ctx.stroke();
+      }
 
       // Title
       ctx.font = 'bold 24px sans-serif';
@@ -201,33 +297,14 @@ export function Workstation() {
       ctx.fillText(subtitle, cx, y + 162);
     };
 
-    // Folder 1: About (y = 110)
-    drawFolderCard(85, 110, 'About', 'Profile & Bio', '#f59e0b', '#fde68a');
+    // Folder 1: About (Terminal Icon, y = 110)
+    drawDesktopAppCard(85, 110, 'About', 'Profile & Bio', 'terminal', '#10b981', '#a7f3d0');
 
-    // Folder 2: Contact (y = 340)
-    drawFolderCard(85, 340, 'Contact', 'Mail & Channels', '#38bdf8', '#bae6fd');
+    // Folder 2: Contact (Mail Envelope, y = 340)
+    drawDesktopAppCard(85, 340, 'Contact', 'Mail & Channels', 'mail', '#38bdf8', '#bae6fd');
 
-    // Folder 3: Resume (y = 570)
-    drawFolderCard(85, 570, 'Resume', 'Resume.pdf', '#10b981', '#a7f3d0');
-
-    // 4. System Status in Top Right
-    drawRRect(1600, 36, 380, 42, 10);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = '#10b981';
-    ctx.beginPath();
-    ctx.arc(1624, 57, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.font = 'bold 12px monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('MAIN WALL WORKSTATION // 4K DISPLAY', 1638, 57);
+    // Folder 3: Resume (Document Page, y = 570)
+    drawDesktopAppCard(85, 570, 'Resume', 'Resume.pdf', 'file', '#10b981', '#a7f3d0');
 
     // 5. Active Windows Drawn directly onto Screen
     if (isAboutWindowOpen && !isAboutMinimized) {
@@ -526,38 +603,49 @@ export function Workstation() {
     ctx.lineTo(width, tby);
     ctx.stroke();
 
-    // Start / Sparkles button
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.arc(42, tby + 38, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Search bar
-    drawRRect(78, tby + 18, 160, 40, 8);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-    ctx.fill();
-    ctx.font = '13px sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-    ctx.textAlign = 'left';
-    ctx.fillText('🔍 Search', 96, tby + 38);
-
-    // Quick Launch Buttons
-    const drawTaskbarButton = (bx: number, name: string, col: string) => {
-      drawRRect(bx, tby + 18, 100, 40, 8);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    // Active Applications in Taskbar (Shows only open windows)
+    let currentTabX = 24;
+    if (isAboutWindowOpen) {
+      drawRRect(currentTabX, tby + 16, 200, 44, 8);
+      ctx.fillStyle = !isAboutMinimized ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
       ctx.fill();
-      ctx.strokeStyle = col;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = '#10b981';
+      ctx.textAlign = 'center';
+      ctx.fillText('>_ Terminal — About', currentTabX + 100, tby + 38);
+      currentTabX += 215;
+    }
+
+    if (isMailOpen) {
+      drawRRect(currentTabX, tby + 16, 180, 44, 8);
+      ctx.fillStyle = !isMailMinimized ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1.2;
       ctx.stroke();
       ctx.font = 'bold 13px sans-serif';
-      ctx.fillStyle = col;
+      ctx.fillStyle = '#38bdf8';
       ctx.textAlign = 'center';
-      ctx.fillText(name, bx + 50, tby + 38);
-    };
+      ctx.fillText('✉ Mail — Contact', currentTabX + 90, tby + 38);
+      currentTabX += 195;
+    }
 
-    drawTaskbarButton(260, 'About', '#f59e0b');
-    drawTaskbarButton(375, 'Contact', '#38bdf8');
-    drawTaskbarButton(490, 'Resume', '#10b981');
+    if (isResumeWindowOpen) {
+      drawRRect(currentTabX, tby + 16, 180, 44, 8);
+      ctx.fillStyle = !isResumeMinimized ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.fill();
+      ctx.strokeStyle = '#a7f3d0';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillStyle = '#a7f3d0';
+      ctx.textAlign = 'center';
+      ctx.fillText('📄 Resume', currentTabX + 90, tby + 38);
+      currentTabX += 195;
+    }
 
     // Right Tray
     ctx.font = 'bold 14px monospace';
@@ -718,21 +806,152 @@ export function Workstation() {
     setActiveWindow('mail');
   };
 
+  // Stream terminal lines when About window opens
+  useEffect(() => {
+    if (!isAboutWindowOpen) {
+      setTerminalStreamIndex(0);
+      setIsTerminalStreamingComplete(false);
+      return;
+    }
+
+    if (isTerminalStreamingComplete) return;
+
+    const interval = setInterval(() => {
+      setTerminalStreamIndex((prev) => {
+        if (prev + 1 >= terminalFullBio.length) {
+          clearInterval(interval);
+          setIsTerminalStreamingComplete(true);
+          return terminalFullBio.length;
+        }
+        return prev + 1;
+      });
+    }, 35);
+
+    return () => clearInterval(interval);
+  }, [isAboutWindowOpen, isTerminalStreamingComplete, terminalFullBio.length]);
+
+  // Auto-scroll terminal viewport as new lines arrive
+  useEffect(() => {
+    if (terminalScrollRef.current) {
+      terminalScrollRef.current.scrollTop = terminalScrollRef.current.scrollHeight;
+    }
+  }, [terminalStreamIndex, terminalHistory]);
+
+  const handleSkipTerminalStream = () => {
+    setTerminalStreamIndex(terminalFullBio.length);
+    setIsTerminalStreamingComplete(true);
+  };
+
+  const handleTerminalCommand = (cmd: string) => {
+    const trimmed = cmd.trim();
+    if (!trimmed) return;
+
+    const lower = trimmed.toLowerCase();
+    const newEntry = [`nikhil@n-verse:~$ ${trimmed}`];
+
+    if (lower === 'clear' || lower === 'cls') {
+      setTerminalHistory([]);
+      setTerminalStreamIndex(terminalFullBio.length);
+      setIsTerminalStreamingComplete(true);
+      setTerminalInput('');
+      return;
+    } else if (lower === 'help') {
+      newEntry.push(
+        'Available terminal commands:',
+        '  about      - Display developer biography & career overview',
+        '  skills     - View core technology stack and tools',
+        '  education  - View B.Tech degree, university, and GPA stats',
+        '  resume     - Launch the official Resume document viewer',
+        '  contact    - Launch direct email & communication channels',
+        '  clear      - Clear terminal screen buffer'
+      );
+    } else if (lower === 'about' || lower === 'cat about.txt' || lower === 'bio') {
+      newEntry.push(
+        'Nikhil Singh — Software Engineer & Creative Developer',
+        'B.Tech CSE @ Government Engineering College Bilaspur (2022-2026) | CGPA: 7.85/10',
+        'Specializing in full-stack web applications and real-time 3D spatial graphics.',
+        'Email: singhnikhil2608@gmail.com | GitHub: github.com/Nikhil-singh-26'
+      );
+    } else if (lower === 'skills') {
+      newEntry.push(
+        'Core Technologies:',
+        '  • Languages: Java, TypeScript, JavaScript, SQL, Python, C++',
+        '  • Frontend: React.js, Next.js, Three.js, React Three Fiber, Tailwind CSS',
+        '  • Backend: Node.js, Express.js, MongoDB, PostgreSQL, REST APIs',
+        '  • DevOps & Tools: Git, GitHub, Docker, Postman, Linux, Vercel'
+      );
+    } else if (lower === 'education') {
+      newEntry.push(
+        'Academic Credentials:',
+        '  • Degree: Bachelor of Technology (B.Tech)',
+        '  • Major: Computer Science & Engineering (2022 — 2026)',
+        '  • College: Government Engineering College Bilaspur (CG)',
+        '  • Cumulative GPA: 7.85 / 10'
+      );
+    } else if (lower === 'resume') {
+      newEntry.push('Opening official Resume document viewer...');
+      handleOpenResume();
+    } else if (lower === 'contact') {
+      newEntry.push('Opening direct communication channels...');
+      handleOpenContact();
+    } else {
+      newEntry.push(`bash: command not found: ${trimmed}. Type "help" for available commands.`);
+    }
+
+    setTerminalHistory((prev) => [...prev, ...newEntry]);
+    setTerminalInput('');
+  };
+
+  const handleShareResume = async () => {
+    const resumeUrl = typeof window !== 'undefined' ? `${window.location.origin}/resume.pdf` : '/resume.pdf';
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Nikhil Singh — Resume',
+          text: 'Official Resume of Nikhil Singh (Full Stack Software Engineer)',
+          url: resumeUrl
+        });
+        return;
+      } catch {
+        // Fall back to clipboard
+      }
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(resumeUrl);
+        setCopiedResumeLink(true);
+        setTimeout(() => setCopiedResumeLink(false), 2200);
+      } catch {
+        setCopiedResumeLink(true);
+        setTimeout(() => setCopiedResumeLink(false), 2000);
+      }
+    }
+  };
+
   const handleMeshClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (!e.uv) return;
     const u = e.uv.x; // 0 (left) to 1 (right)
     const v = e.uv.y; // 0 (bottom) to 1 (top)
 
-    // Taskbar (v < 0.07)
+    // Taskbar (v < 0.07) - toggle active open window tabs
     if (v < 0.07) {
-      if (u >= 0.12 && u <= 0.18) {
-        openAboutWindow();
-        setActiveWindow('about');
-      } else if (u >= 0.18 && u <= 0.24) {
-        handleOpenContact();
-      } else if (u >= 0.24 && u <= 0.30) {
-        handleOpenResume();
+      if (u <= 0.18 && isAboutWindowOpen) {
+        if (isAboutMinimized) {
+          openAboutWindow();
+          setActiveWindow('about');
+        } else {
+          minimizeAboutWindow();
+        }
+      } else if (u > 0.18 && u <= 0.34 && isMailOpen) {
+        setIsMailMinimized((prev) => !prev);
+      } else if (u > 0.34 && u <= 0.50 && isResumeWindowOpen) {
+        if (isResumeMinimized) {
+          openResumeWindow();
+          setActiveWindow('resume');
+        } else {
+          minimizeResumeWindow();
+        }
       }
       return;
     }
@@ -887,7 +1106,7 @@ export function Workstation() {
 
             {/* Desktop Icons Area: Exactly Three Visible Folders (About, Contact, Resume) on the Left */}
             <div className="absolute left-14 top-14 flex flex-col gap-6 pointer-events-auto z-30">
-              {/* Folder 1: About */}
+              {/* Folder 1: About (Terminal Icon) */}
               <div
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => {
@@ -900,21 +1119,21 @@ export function Workstation() {
                   openAboutWindow();
                   setActiveWindow('about');
                 }}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-amber-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-emerald-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
                 role="button"
                 tabIndex={0}
-                aria-label="Open About Folder"
+                aria-label="Open Terminal About Me"
               >
-                <div className="p-3.5 rounded-2xl bg-amber-400/25 group-hover:bg-amber-400/40 text-amber-400 transition-transform group-hover:scale-110 shadow-lg">
-                  <Folder className="w-14 h-14 fill-amber-400/70" />
+                <div className="p-3.5 rounded-2xl bg-emerald-500/20 group-hover:bg-emerald-500/35 text-emerald-400 transition-transform group-hover:scale-110 shadow-lg border border-emerald-500/30">
+                  <Terminal className="w-14 h-14 text-emerald-400" />
                 </div>
                 <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2.5 tracking-wide">
                   About
                 </span>
-                <span className="text-xs font-mono text-amber-300/90 font-medium">Profile & Bio</span>
+                <span className="text-xs font-mono text-emerald-300 font-medium">Profile & Bio</span>
               </div>
 
-              {/* Folder 2: Contact */}
+              {/* Folder 2: Contact (Mail Envelope) */}
               <div
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => {
@@ -930,16 +1149,16 @@ export function Workstation() {
                 tabIndex={0}
                 aria-label="Open Contact & Mail"
               >
-                <div className="p-3.5 rounded-2xl bg-sky-400/25 group-hover:bg-sky-400/40 text-sky-400 transition-transform group-hover:scale-110 shadow-lg">
-                  <Folder className="w-14 h-14 fill-sky-400/70" />
+                <div className="p-3.5 rounded-2xl bg-sky-500/20 group-hover:bg-sky-500/35 text-sky-400 transition-transform group-hover:scale-110 shadow-lg border border-sky-500/30">
+                  <Mail className="w-14 h-14 text-sky-400" />
                 </div>
                 <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2.5 tracking-wide">
                   Contact
                 </span>
-                <span className="text-xs font-mono text-sky-300/90 font-medium">Mail & Channels</span>
+                <span className="text-xs font-mono text-sky-300 font-medium">Mail & Channels</span>
               </div>
 
-              {/* Folder 3: Resume */}
+              {/* Folder 3: Resume (Document Page File) */}
               <div
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => {
@@ -950,28 +1169,22 @@ export function Workstation() {
                   e.stopPropagation();
                   handleOpenResume();
                 }}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-emerald-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-amber-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
                 role="button"
                 tabIndex={0}
                 aria-label="Open Resume Document"
               >
-                <div className="p-3.5 rounded-2xl bg-emerald-400/25 group-hover:bg-emerald-400/40 text-emerald-400 transition-transform group-hover:scale-110 shadow-lg">
-                  <Folder className="w-14 h-14 fill-emerald-400/70" />
+                <div className="p-3.5 rounded-2xl bg-amber-500/20 group-hover:bg-amber-500/35 text-amber-400 transition-transform group-hover:scale-110 shadow-lg border border-amber-500/30">
+                  <FileText className="w-14 h-14 text-amber-400" />
                 </div>
                 <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2.5 tracking-wide">
                   Resume
                 </span>
-                <span className="text-xs font-mono text-emerald-300/90 font-medium">Resume.pdf</span>
+                <span className="text-xs font-mono text-amber-300 font-medium">Resume.pdf</span>
               </div>
             </div>
 
-            {/* System Status in Top Right */}
-            <div className="absolute top-8 right-8 flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs font-mono text-white/70 backdrop-blur-md pointer-events-none">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>MAIN WALL WORKSTATION // 4K DISPLAY</span>
-            </div>
-
-            {/* ================= 1. ABOUT ME WINDOW ================= */}
+            {/* ================= 1. ABOUT ME WINDOW (AUTHENTIC INTERACTIVE TERMINAL) ================= */}
             <div
               onMouseDown={() => setActiveWindow('about')}
               style={{
@@ -979,153 +1192,152 @@ export function Workstation() {
                 position: 'absolute',
                 left: isAboutMaximized ? 0 : `${aboutPos.x}px`,
                 top: isAboutMaximized ? 0 : `${aboutPos.y}px`,
-                width: isAboutMaximized ? '100%' : '880px',
-                height: isAboutMaximized ? 'calc(100% - 56px)' : '580px',
+                width: isAboutMaximized ? '100%' : '920px',
+                height: isAboutMaximized ? 'calc(100% - 56px)' : '620px',
                 zIndex: activeWindow === 'about' ? 40 : 30
               }}
-              className="bg-[#121824]/98 border border-white/20 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 pointer-events-auto"
+              className="bg-[#070b14]/98 border border-white/20 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 pointer-events-auto"
             >
-                {/* Draggable Title Bar */}
-                <div
-                  onMouseDown={(e) => handleMouseDown('about', aboutPos, e)}
-                  className="bg-[#1a2232] px-4 py-2.5 border-b border-white/10 flex items-center justify-between cursor-move select-none"
-                >
-                  <div className="flex items-center gap-2">
-                    <Folder className="w-4 h-4 text-amber-400" />
-                    <span className="text-xs font-semibold text-white tracking-wide">
-                      About Me — Nikhil Singh
-                    </span>
-                  </div>
-
-                  {/* Window Controls */}
-                  <div className="flex items-center">
-                    <button
-                      onClick={minimizeAboutWindow}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                      aria-label="Minimize Window"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={toggleMaximizeAboutWindow}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                      aria-label="Maximize or Restore Window"
-                    >
-                      <Square className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={closeAboutWindow}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-red-600 transition-colors"
-                      aria-label="Close Window"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+              {/* Draggable Terminal Title Bar */}
+              <div
+                onMouseDown={(e) => handleMouseDown('about', aboutPos, e)}
+                className="bg-[#0f172a] px-4 py-2.5 border-b border-white/10 flex items-center justify-between cursor-move select-none"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Terminal className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs font-mono font-semibold text-emerald-300 tracking-wide">
+                    Terminal — About Nikhil Singh (bash)
+                  </span>
                 </div>
 
-                {/* Window Content Layout */}
-                <div
-                  onWheel={(e) => e.stopPropagation()}
-                  className="flex-1 flex overflow-hidden bg-[#0c121d]"
-                >
-                  {/* Left Explorer Sidebar */}
-                  <div className="w-56 bg-[#0a0e17] border-r border-white/5 p-4 space-y-4 hidden sm:block">
-                    <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-                      <div className="w-10 h-10 rounded-full overflow-hidden border border-[#38bdf8]/50 shadow-sm flex-shrink-0">
-                        <img src="/mypic.png" alt={profileData.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="overflow-hidden">
-                        <div className="text-xs font-bold text-white truncate">{profileData.name}</div>
-                        <div className="text-[10px] text-white/60 truncate">{profileData.role}</div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5 text-xs font-mono">
-                      <div className="flex items-center gap-2 px-2 py-1 rounded bg-[#38bdf8]/15 text-[#38bdf8] font-medium">
-                        <User className="w-3.5 h-3.5" />
-                        <span>Profile</span>
-                      </div>
-                      <div className="flex items-center gap-2 px-2 py-1 rounded text-white/70 hover:bg-white/5 cursor-pointer">
-                        <GraduationCap className="w-3.5 h-3.5" />
-                        <span>Education</span>
-                      </div>
-                      <div className="flex items-center gap-2 px-2 py-1 rounded text-white/70 hover:bg-white/5 cursor-pointer">
-                        <Layers className="w-3.5 h-3.5" />
-                        <span>Tech Stack</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Main Viewport */}
-                  <div className="flex-1 p-4 overflow-y-auto space-y-3.5 text-xs font-sans">
-                    {/* Header Bio Card */}
-                    <div className="bg-[#141b2a] rounded-lg p-3.5 border border-white/10 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#38bdf8] bg-[#38bdf8]/10 px-2 py-0.5 rounded">
-                          Developer Overview
-                        </span>
-                        <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          {profileData.status}
-                        </span>
-                      </div>
-                      <p className="text-white/90 leading-relaxed">
-                        {Array.isArray(profileData.bio) ? profileData.bio.join(' ') : profileData.bio}
-                      </p>
-                    </div>
-
-                    {/* Education Card */}
-                    <div className="bg-[#141b2a] rounded-lg p-3.5 border border-white/10 space-y-1.5">
-                      <div className="flex items-center gap-2 text-amber-400 font-semibold">
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Education</span>
-                      </div>
-                      <div className="text-white font-medium">{profileData.degree}</div>
-                      <div className="text-white/70">{profileData.university}</div>
-                      <div className="text-[10px] text-white/50 font-mono">
-                        Class of {profileData.graduationYear} &bull; {profileData.location}
-                      </div>
-                    </div>
-
-                    {/* Technical Stack */}
-                    <div className="bg-[#141b2a] rounded-lg p-3.5 border border-white/10 space-y-2">
-                      <div className="flex items-center gap-2 text-[#38bdf8] font-semibold">
-                        <Layers className="w-4 h-4" />
-                        <span>Core Technologies</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {['Java', 'TypeScript', 'JavaScript', 'React.js', 'Next.js', 'Node.js', 'Express.js', 'MongoDB', 'PostgreSQL', 'Flutter', 'Tailwind CSS', 'Git'].map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/80 font-mono text-[10px]"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Quick Launchers to Other Windows */}
-                    <div className="flex items-center gap-2 pt-1">
-                      <button
-                        onClick={handleOpenResume}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#38bdf8] hover:bg-white text-black font-semibold text-xs transition-colors shadow-sm"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>Open Resume Viewer</span>
-                        <ArrowRight className="w-3 h-3 ml-0.5" />
-                      </button>
-                      <button
-                        onClick={handleOpenContact}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors"
-                      >
-                        <Mail className="w-3.5 h-3.5 text-sky-400" />
-                        <span>Contact Channels</span>
-                      </button>
-                    </div>
-                  </div>
+                {/* Window Controls (Minimize, Maximize, Close) */}
+                <div className="flex items-center">
+                  <button
+                    onClick={minimizeAboutWindow}
+                    className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label="Minimize Window"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={toggleMaximizeAboutWindow}
+                    className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label="Maximize or Restore Window"
+                  >
+                    <Square className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={closeAboutWindow}
+                    className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-red-600 transition-colors"
+                    aria-label="Close Window"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
+
+              {/* Quick CLI Actions Sub-Toolbar */}
+              <div className="bg-[#0b101c] px-4 py-1.5 border-b border-white/10 flex items-center justify-between text-xs font-mono">
+                <span className="text-white/50 text-[11px]">nikhil@desktop:~/about-me</span>
+                <div className="flex items-center gap-1.5">
+                  {!isTerminalStreamingComplete && (
+                    <button
+                      onClick={handleSkipTerminalStream}
+                      className="px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] transition-colors"
+                    >
+                      Skip Animation ⏩
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleTerminalCommand('skills')}
+                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 text-[11px] transition-colors"
+                  >
+                    skills
+                  </button>
+                  <button
+                    onClick={() => handleTerminalCommand('education')}
+                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 text-[11px] transition-colors"
+                  >
+                    education
+                  </button>
+                  <button
+                    onClick={() => handleTerminalCommand('clear')}
+                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 text-[11px] transition-colors"
+                  >
+                    clear
+                  </button>
+                </div>
+              </div>
+
+              {/* Authentic Terminal Body (Word-by-word Stream & Interactive CLI) */}
+              <div
+                ref={terminalScrollRef}
+                onWheel={(e) => e.stopPropagation()}
+                className="flex-1 p-5 overflow-y-auto space-y-2 bg-[#060a12] text-xs sm:text-[13px] font-mono leading-relaxed select-text"
+              >
+                {/* Streamed Bio Lines */}
+                {terminalFullBio.slice(0, terminalStreamIndex).map((line, idx) => (
+                  <div
+                    key={`stream-${idx}`}
+                    className={`whitespace-pre-wrap ${
+                      line.startsWith('nikhil@')
+                        ? 'text-emerald-400 font-bold'
+                        : line.startsWith('===')
+                        ? 'text-[#38bdf8] font-bold'
+                        : line.startsWith('[')
+                        ? 'text-amber-300 font-semibold'
+                        : 'text-white/85'
+                    }`}
+                  >
+                    {line}
+                  </div>
+                ))}
+
+                {/* Blinking Cursor during Streaming */}
+                {!isTerminalStreamingComplete && (
+                  <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse align-middle" />
+                )}
+
+                {/* Historical User Commands & Responses */}
+                {terminalHistory.map((item, idx) => (
+                  <div
+                    key={`hist-${idx}`}
+                    className={`whitespace-pre-wrap ${
+                      item.startsWith('nikhil@')
+                        ? 'text-emerald-400 font-bold'
+                        : item.startsWith('bash:')
+                        ? 'text-red-400'
+                        : 'text-white/85'
+                    }`}
+                  >
+                    {item}
+                  </div>
+                ))}
+
+                {/* Active Interactive Command Line Form */}
+                {isTerminalStreamingComplete && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleTerminalCommand(terminalInput);
+                    }}
+                    className="flex items-center gap-2 pt-2 border-t border-white/5"
+                  >
+                    <span className="text-emerald-400 font-bold select-none text-xs sm:text-[13px]">
+                      nikhil@n-verse:~$
+                    </span>
+                    <input
+                      type="text"
+                      value={terminalInput}
+                      onChange={(e) => setTerminalInput(e.target.value)}
+                      placeholder='type command (e.g. "skills", "education", "resume", "clear")...'
+                      className="flex-1 bg-transparent border-none outline-none text-white font-mono text-xs sm:text-[13px] focus:ring-0 p-0 placeholder-white/30"
+                      autoFocus
+                    />
+                  </form>
+                )}
+              </div>
+            </div>
 
             {/* ================= 2. RESUME DOCUMENT VIEWER WINDOW ================= */}
             <div
@@ -1199,6 +1411,18 @@ export function Workstation() {
                       <ExternalLink className="w-3 h-3" />
                       <span>Open in Tab</span>
                     </a>
+                    <button
+                      onClick={handleShareResume}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs transition-colors"
+                      title="Share or Copy Resume Link"
+                    >
+                      {copiedResumeLink ? (
+                        <Check className="w-3 h-3 text-emerald-400" />
+                      ) : (
+                        <Share2 className="w-3 h-3 text-amber-400" />
+                      )}
+                      <span>{copiedResumeLink ? 'Link Copied!' : 'Share / Copy'}</span>
+                    </button>
                     <a
                       href="/resume.pdf"
                       download="Nikhil_Singh_Resume.pdf"
@@ -1372,56 +1596,6 @@ export function Workstation() {
 
             {/* ================= WINDOWS TASKBAR (BOTTOM OF MAIN WALL SCREEN) ================= */}
             <div className="h-14 bg-[#0e131d]/95 border-t border-white/15 px-6 flex items-center justify-between z-40 select-none pointer-events-auto">
-              {/* Start Button & Search & Quick-Launch Folders */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    openAboutWindow();
-                    setActiveWindow('about');
-                  }}
-                  className="flex items-center justify-center p-1.5 rounded hover:bg-white/10 text-[#38bdf8] transition-colors group"
-                  title="N/VERSE Start Menu"
-                  aria-label="Start Menu"
-                >
-                  <Sparkles className="w-4 h-4 text-[#38bdf8] group-hover:rotate-12 transition-transform" />
-                </button>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-white/5 border border-white/10 text-white/50 text-xs font-mono">
-                  <Search className="w-3 h-3" />
-                  <span>Search</span>
-                </div>
-
-                {/* Quick Folder Shortcuts right in the Taskbar */}
-                <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-white/10">
-                  <button
-                    onClick={() => {
-                      openAboutWindow();
-                      setActiveWindow('about');
-                    }}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-400/10 hover:bg-amber-400/25 border border-amber-400/20 text-amber-300 text-[11px] font-mono transition-colors"
-                    title="Open About Folder"
-                  >
-                    <Folder className="w-3 h-3 fill-amber-400/60" />
-                    <span>About</span>
-                  </button>
-                  <button
-                    onClick={handleOpenContact}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-sky-400/10 hover:bg-sky-400/25 border border-sky-400/20 text-sky-300 text-[11px] font-mono transition-colors"
-                    title="Open Contact Folder"
-                  >
-                    <Folder className="w-3 h-3 fill-sky-400/60" />
-                    <span>Contact</span>
-                  </button>
-                  <button
-                    onClick={handleOpenResume}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-400/10 hover:bg-emerald-400/25 border border-emerald-400/20 text-emerald-300 text-[11px] font-mono transition-colors"
-                    title="Open Resume Document"
-                  >
-                    <Folder className="w-3 h-3 fill-emerald-400/60" />
-                    <span>Resume</span>
-                  </button>
-                </div>
-              </div>
-
               {/* Running Applications Tabs */}
               <div className="flex items-center gap-2">
                 {/* About Tab */}
@@ -1437,38 +1611,14 @@ export function Workstation() {
                         setActiveWindow('about');
                       }
                     }}
-                    className={`flex items-center gap-2 px-3 py-1 rounded text-xs transition-colors border ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border ${
                       activeWindow === 'about' && !isAboutMinimized
-                        ? 'bg-white/20 text-white border-white/30 font-semibold shadow-sm'
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-semibold shadow-sm'
                         : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
                     }`}
                   >
-                    <Folder className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs">About</span>
-                  </button>
-                )}
-
-                {/* Resume Tab */}
-                {isResumeWindowOpen && (
-                  <button
-                    onClick={() => {
-                      if (isResumeMinimized) {
-                        openResumeWindow();
-                        setActiveWindow('resume');
-                      } else if (activeWindow === 'resume') {
-                        minimizeResumeWindow();
-                      } else {
-                        setActiveWindow('resume');
-                      }
-                    }}
-                    className={`flex items-center gap-2 px-3 py-1 rounded text-xs transition-colors border ${
-                      activeWindow === 'resume' && !isResumeMinimized
-                        ? 'bg-white/20 text-white border-white/30 font-semibold shadow-sm'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-xs">Resume.pdf</span>
+                    <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="font-mono text-xs">Terminal — About</span>
                   </button>
                 )}
 
@@ -1485,14 +1635,38 @@ export function Workstation() {
                         setActiveWindow('mail');
                       }
                     }}
-                    className={`flex items-center gap-2 px-3 py-1 rounded text-xs transition-colors border ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border ${
                       activeWindow === 'mail' && !isMailMinimized
-                        ? 'bg-white/20 text-white border-white/30 font-semibold shadow-sm'
+                        ? 'bg-sky-500/20 text-sky-300 border-sky-500/40 font-semibold shadow-sm'
                         : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
                     }`}
                   >
                     <Mail className="w-3.5 h-3.5 text-sky-400" />
-                    <span className="text-xs">Contact</span>
+                    <span className="font-mono text-xs">Mail — Contact</span>
+                  </button>
+                )}
+
+                {/* Resume Tab */}
+                {isResumeWindowOpen && (
+                  <button
+                    onClick={() => {
+                      if (isResumeMinimized) {
+                        openResumeWindow();
+                        setActiveWindow('resume');
+                      } else if (activeWindow === 'resume') {
+                        minimizeResumeWindow();
+                      } else {
+                        setActiveWindow('resume');
+                      }
+                    }}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border ${
+                      activeWindow === 'resume' && !isResumeMinimized
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-semibold shadow-sm'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="font-mono text-xs">Resume</span>
                   </button>
                 )}
               </div>

@@ -17,10 +17,19 @@ export function SkipControl() {
 
   if (isExplorationMode) return null;
 
-  const isLast = activeIndex === SECTION_IDS.length - 1;
-  const isFirst = activeIndex <= 1; // Don't show prev to intro
-  const prevLabel = activeIndex > 0 ? SECTIONS[activeIndex - 1].label : '';
-  const nextLabel = !isLast ? SECTIONS[activeIndex + 1].label : '';
+  const journeySections = SECTIONS.filter(
+    (sec) => !['intro', 'about', 'resume', 'contact'].includes(sec.id)
+  );
+  const curIdx = journeySections.findIndex((s) => s.id === activeSection);
+  const isLast = curIdx === journeySections.length - 1;
+  const isFirst = curIdx <= 0 && activeSection !== 'intro';
+  const prevLabel = curIdx > 0 ? journeySections[curIdx - 1].label : '';
+  const nextLabel =
+    activeSection === 'intro'
+      ? 'Studio'
+      : curIdx >= 0 && !isLast
+      ? journeySections[curIdx + 1].label
+      : '';
 
   return (
     <div className="fixed bottom-6 right-4 sm:right-6 z-30 pointer-events-none flex items-center gap-2">

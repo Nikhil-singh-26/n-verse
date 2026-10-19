@@ -13,29 +13,14 @@ export function SectionNavigation() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Portfolio stations (skipping raw intro)
-  const portfolioSections = SECTIONS.filter((sec) => sec.id !== 'intro');
+  // Portfolio stations (skipping intro and desktop inner windows)
+  const portfolioSections = SECTIONS.filter(
+    (sec) => !['intro', 'about', 'resume', 'contact'].includes(sec.id)
+  );
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 p-3 sm:p-5 pointer-events-none">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-        {/* Brand Wordmark & Overview Reset */}
-        <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
-          <button
-            onClick={() => jumpToSection('room')}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#0f141d]/80 hover:bg-[#161d2b] border border-white/10 hover:border-white/30 transition-all text-left group focus:outline-none focus:ring-2 focus:ring-[#38bdf8] backdrop-blur-md"
-            title="Overview of Creative Study"
-            aria-label="Overview of Creative Study"
-          >
-            <div className="w-2.5 h-2.5 rounded-full bg-[#38bdf8] group-hover:shadow-[0_0_8px_#38bdf8]" />
-            <span className="font-extrabold text-white text-sm sm:text-base tracking-wider font-['Outfit']">
-              N/VERSE
-            </span>
-            <span className="hidden md:inline font-mono text-[11px] text-[#94a3b8]">
-              // STUDY
-            </span>
-          </button>
-        </div>
 
         {/* Desktop Station Jump Selector Pills */}
         <nav

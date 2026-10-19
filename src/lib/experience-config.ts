@@ -29,37 +29,10 @@ export const SECTIONS: SectionConfig[] = [
     fov: 50
   },
   {
-    id: 'about',
-    label: 'About',
-    stationName: 'About & Profile',
-    order: 3,
-    cameraPosition: [-1.2, 2.22, -1.80],
-    cameraTarget: [-1.2, 2.22, -4.45],
-    fov: 50
-  },
-  {
-    id: 'resume',
-    label: 'Resume',
-    stationName: 'Official Resume',
-    order: 4,
-    cameraPosition: [-1.15, 2.20, -1.85],
-    cameraTarget: [-1.15, 2.20, -4.45],
-    fov: 50
-  },
-  {
-    id: 'contact',
-    label: 'Contact',
-    stationName: 'Contact & Channels',
-    order: 5,
-    cameraPosition: [-1.15, 2.20, -1.85],
-    cameraTarget: [-1.15, 2.20, -4.45],
-    fov: 50
-  },
-  {
     id: 'skills',
     label: 'Skills',
     stationName: 'Technology Globe',
-    order: 6,
+    order: 3,
     cameraPosition: [-0.6, 1.45, 0.0],
     cameraTarget: [3.0, 1.45, 0.0],
     fov: 46
@@ -68,7 +41,7 @@ export const SECTIONS: SectionConfig[] = [
     id: 'projects',
     label: 'Projects',
     stationName: 'Vintage Projector & Folios',
-    order: 7,
+    order: 4,
     cameraPosition: [-1.05, 1.62, 1.95],
     cameraTarget: [-4.96, 2.05, 0.70],
     fov: 50
@@ -77,7 +50,7 @@ export const SECTIONS: SectionConfig[] = [
     id: 'achievements',
     label: 'Milestones',
     stationName: 'Achievements & Milestones',
-    order: 8,
+    order: 5,
     cameraPosition: [0, 2.15, 3.45],
     cameraTarget: [0, 2.15, 6.74],
     fov: 48
@@ -86,7 +59,7 @@ export const SECTIONS: SectionConfig[] = [
     id: 'finale',
     label: 'Finale',
     stationName: 'Studio Finale',
-    order: 9,
+    order: 6,
     cameraPosition: [0.0, 2.5, 5.6],
     cameraTarget: [0.0, 1.6, -1.0],
     fov: 52
@@ -107,7 +80,10 @@ export const SECTION_MAP: Record<SectionId, SectionConfig> = SECTIONS.reduce(
   {} as Record<SectionId, SectionConfig>
 );
 
-// Map old ids to prevent any regressions
+// Map old and inner desktop window ids to workstation
+SECTION_MAP['about'] = SECTIONS[2];
+SECTION_MAP['resume'] = SECTIONS[2];
+SECTION_MAP['contact'] = SECTIONS[2];
 SECTION_MAP['gate'] = SECTIONS[0];
 SECTION_MAP['welcome'] = SECTIONS[1];
 

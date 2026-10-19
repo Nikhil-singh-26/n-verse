@@ -65,17 +65,14 @@ export function ScrollTimeline() {
 
     if (!containerRef.current) return;
 
-    // 10 ordered stops across progress (0.0 to 1.0)
+    // Ordered stops across progress (0.0 to 1.0)
     const getSectionFromProgress = (p: number): SectionId => {
-      if (p < 0.0556) return 'intro';
-      if (p < 0.1667) return 'room';
-      if (p < 0.2778) return 'workstation';
-      if (p < 0.3889) return 'about';
-      if (p < 0.5000) return 'resume';
-      if (p < 0.6111) return 'contact';
-      if (p < 0.7222) return 'skills';
-      if (p < 0.8333) return 'projects';
-      if (p < 0.9444) return 'achievements';
+      if (p < 0.08) return 'intro';
+      if (p < 0.25) return 'room';
+      if (p < 0.42) return 'workstation';
+      if (p < 0.58) return 'skills';
+      if (p < 0.75) return 'projects';
+      if (p < 0.90) return 'achievements';
       return 'finale';
     };
 

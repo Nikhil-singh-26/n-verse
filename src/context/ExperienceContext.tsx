@@ -454,9 +454,6 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     const journeyOrder: SectionId[] = [
       'room',
       'workstation',
-      'about',
-      'resume',
-      'contact',
       'skills',
       'projects',
       'achievements',
@@ -513,9 +510,6 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     const journeyOrder: SectionId[] = [
       'room',
       'workstation',
-      'about',
-      'resume',
-      'contact',
       'skills',
       'projects',
       'achievements',
@@ -533,6 +527,18 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     projectPageState,
     jumpToSection
   ]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __experience?: unknown }).__experience = {
+        jumpToSection,
+        openAboutWindow,
+        openResumeWindow,
+        setIsMailOpen,
+        activeSection
+      };
+    }
+  }, [jumpToSection, openAboutWindow, openResumeWindow, setIsMailOpen, activeSection]);
 
   return (
     <ExperienceContext.Provider

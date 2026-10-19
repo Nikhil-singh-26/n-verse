@@ -5,12 +5,17 @@ import { useExperience } from '@/context/ExperienceContext';
 import { SECTIONS } from '@/lib/experience-config';
 
 export function ProgressIndicator() {
-  const { activeIndex, scrollProgress, isExplorationMode } = useExperience();
+  const { activeSection, activeIndex, scrollProgress, isExplorationMode } = useExperience();
 
   if (isExplorationMode) return null;
 
-  const currentSection = SECTIONS[activeIndex] || SECTIONS[0];
-  const totalCount = SECTIONS.length;
+  const journeySections = SECTIONS.filter(
+    (sec) => !['intro', 'about', 'resume', 'contact'].includes(sec.id)
+  );
+  const curIdx = journeySections.findIndex((s) => s.id === activeSection);
+  const currentSection =
+    curIdx >= 0 ? journeySections[curIdx] : SECTIONS.find((s) => s.id === activeSection) || SECTIONS[0];
+  const totalCount = journeySections.length;
   const progressPercent = Math.round(scrollProgress * 100);
 
   return (
@@ -18,7 +23,7 @@ export function ProgressIndicator() {
       <div className="bg-[#0c1017]/85 backdrop-blur-md px-3.5 py-2 rounded-xl flex items-center gap-3 border border-white/10 shadow-lg">
         <div className="font-mono text-xs">
           <span className="text-[#38bdf8] font-bold">
-            0{activeIndex + 1}
+            0{curIdx >= 0 ? curIdx + 1 : 1}
           </span>
           <span className="text-[#64748b]"> / 0{totalCount}</span>
         </div>

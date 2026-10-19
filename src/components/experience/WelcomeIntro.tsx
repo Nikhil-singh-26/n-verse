@@ -347,7 +347,7 @@ export function WelcomeIntro() {
       <div className="w-full max-w-6xl mx-auto flex justify-between items-center relative z-20">
         <div className="flex items-center gap-2.5 text-[11px] font-mono tracking-widest text-[#94a3b8] uppercase">
           <span className="w-2 h-2 rounded-full bg-[#00f0ff] animate-ping" />
-          <span>N/VERSE &bull; CINEMATIC UNIVERSE</span>
+          <span>N/VERSE</span>
         </div>
 
         {/* Discreet Skip Intro Button */}
