@@ -1,82 +1,122 @@
-# N/VERSE — Nikhil Universe
+# N/VERSE — My Interactive Portfolio
 
 > **CODE. LEARN. BUILD. REPEAT.**
 
-**N/VERSE** is a production-quality, cinematic 3D developer portfolio and personal engineering universe built for **Nikhil Singh** (Computer Science Engineering student & aspiring software engineer).
+[![Next.js](https://img.shields.io/badge/Next.js-16.4-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
+[![Three.js](https://img.shields.io/badge/Three.js-R3F-black?style=for-the-badge&logo=three.js)](https://threejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-The portfolio is structured as **one persistent 3D engineering laboratory room** featuring 6 continuous stations navigated through vertical scroll, touch gestures, keyboard arrows, or persistent HUD controls.
+**N/VERSE** is my interactive 3D portfolio: a personal engineering universe where I bring together my projects, skills, and milestones. I built it as one persistent 3D studio that visitors can explore through a guided sequence of spaces.
 
----
-
-## 🌟 The 7 Ordered Stations
-
-1. **The N/VERSE Gate (Stop 0: `gate`)**
-   - Industrial blast doors with emissive `N/VERSE` lintel wordmark and hydraulic hinges.
-   - Stylized humanoid engineer avatar standing before the gate.
-   - Initial understated prompt: `SCROLL TO ENTER`.
-2. **Welcome Reveal (Stop 1: `welcome`)**
-   - Hydraulic blast doors glide and pivot open outward as visitor scrolls.
-   - Engineer avatar strides forward into the threshold and dissolves smoothly.
-   - Real HTML typography reveals **`WELCOME TO N/VERSE`** with blur-to-sharp scaling transition.
-   - Atmospheric threshold light spills into the room as camera advances.
-3. **Computer / About Terminal (Stop 2: `about`)**
-   - Curved ultra-wide terminal monitor, mechanical keyboard, and liquid-cooled PC tower.
-   - Interactive terminal window with quick prompt execution (`about`, `stack`, `education`, `links`, `clear`) and custom command input.
-4. **Skills Planet (Stop 3: `skills`)**
-   - Floating procedural 3D planet with anti-gravity containment lasers, geometric wireframe cage, atmospheric glow, and rotating orbital rings with satellite data nodes.
-   - Interactive domain categories: Languages, Frontend, Backend, Databases, Mobile, DevOps.
-   - Verified technologies only (no fabricated proficiency percentages).
-5. **Projector / Project Showcase (Stop 4: `projects`)**
-   - Desk-mounted projector that powers on, casting a volumetric cyan light beam onto the back wall.
-   - Interactive project showcase cards:
-     - **The Brew Club** — Creator-support and community crowdfunding platform.
-     - **EcoTrack AI** — Energy consumption monitoring & carbon footprint insights.
-     - **Know Via** — Contextual knowledge management & linked research notes.
-     - **RoadVision** — Computer vision road hazard intelligence & safer routes.
-   - Dedicated case-study drawer and standalone deep-link routes (`/projects/[slug]`).
-6. **Achievement Board (Stop 5: `achievements`)**
-   - Wall-mounted illuminated telemetry board with Achievements and milestone markers.
-   - Verified achievements covering LeetCode Profile, Hackathons and GDG.
-7. **Telephone / Comms Console (Stop 6: `contact`)**
-   - Physical telephone unit with pulse indicator LED, receiver handset, and holographic comms ring signal.
-   - Direct communication channels: Email (with instant copy & mailto), LinkedIn, GitHub, LeetCode, Resume PDF (`/resume.pdf`).
-   - Concludes with the architectural mantra: `CODE. LEARN. BUILD. REPEAT.`
+The experience moves from the studio introduction to the workstation, skills globe, projector-based project showcase, achievements, and studio finale. Visitors can navigate with scrolling, touch gestures, keyboard arrows, or the on-screen controls.
 
 ---
 
-## 🎮 Navigation & Exploration
+## About Me
 
-- **Desktop**: Vertical mouse wheel / trackpad scroll drives the camera forward and backward smoothly.
-- **Mobile**: Vertical swipe gestures advance or reverse the journey without trapping inner text panel scrolling.
-- **Persistent Controls**:
-  - Direct station jumper pills (Gate, About, Skills, Projects, Timeline, Contact).
-  - **Skip Control**: Jump forward to the next station instantly without scrubbing through intermediate frames.
-  - **360° Free-Look Exploration Mode**: Toggle with one click to elevate the camera and freely drag around the entire 3D laboratory.
-  - **Audio Mute Toggle** & **Reduced-Motion Toggle**.
-  - Accessible **2D WebGL Fallback** for low-power hardware or screen readers.
+I’m **Nikhil Singh**, a full-stack software engineer and creative developer. I’m studying Computer Science and Engineering at Government Engineering College Bilaspur (2024–2028), and I use this portfolio to share what I’m learning and building.
+
+- **Email:** [nikhilsingh260406@gmail.com](mailto:nikhilsingh260406@gmail.com)
+- **GitHub:** [github.com/Nikhil-singh-26](https://github.com/Nikhil-singh-26)
+- **LinkedIn:** [linkedin.com/in/nikhil-singh-dev](https://linkedin.com/in/nikhil-singh-dev)
+- **Resume:** available in the workstation’s Resume window at `/resume.pdf`
 
 ---
 
-## 🛠️ Technology Stack
+## Explore the Experience
 
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **3D Graphics**: Three.js, React Three Fiber (`@react-three/fiber`), Drei (`@react-three/drei`)
-- **Animation**: GSAP (GreenSock) & ScrollTrigger
-- **Styling**: Tailwind CSS v4, PostCSS
-- **Icons**: Lucide React & Custom SVG brand icons
-- **Deployment**: Vercel / Cloudflare Pages compatible
+### 1. Studio Entry — My Verse
+
+- I open with a cinematic welcome animation and threshold light reveal.
+- I built a persistent 3D study room with ambient lighting, desk lamps, and floor textures.
+- Visitors can drag to look around the room with a smoothly damped camera.
+
+### 2. Workstation — Desktop
+
+The workstation features a wall-mounted 3D monitor with a dynamic canvas. Its desktop includes three interactive folders:
+
+- **About Me:** I built a terminal-style interface with commands for my profile, skills, education, resume, contact details, page navigation, and clearing the terminal. A profile view presents my bio and skills.
+- **Contact:** Visitors can copy my email, open a pre-filled email message, or visit my GitHub and LinkedIn profiles.
+- **Resume:** Visitors can view a scrollable resume preview, adjust its zoom, open the PDF in a new tab, or download it.
+
+I also implemented draggable windows, click-to-focus window layering, and a Windows-style taskbar with running app indicators and a live clock.
+
+### 3. Skills Globe — Skills
+
+- I created a procedural 3D sphere with glowing orbital rings and data nodes.
+- I group my listed technologies into Languages, Frontend, Backend, Databases, Mobile, and DevOps & Tools.
+- I show skills as badges without percentage-based proficiency claims.
+
+### 4. Projector — Projects
+
+- I built a desk-mounted projector that casts a cyan light beam onto the wall.
+- Project cards include demo links, source repositories, and technology tags.
+- The projects featured are **The Brew Club**, **EcoTrack AI**, **Know Via**, and **RoadVision**.
+- I provide case-study routes at `/projects/[slug]`.
+
+### 5. Achievements — Milestones
+
+- I present milestones, certifications, and academic information on a telemetry-style wall display.
+- I include a fullscreen LeetCode inspection modal for problem-solving statistics.
+
+### 6. Studio Finale — Outro
+
+- I close with a personal statement, career objectives, and contact channels.
 
 ---
 
-## 🚀 Getting Started
+## Navigation & Accessibility
 
-### Prerequisites
+- I connect the six stations to vertical wheel or trackpad scrolling.
+- I provide top navigation pills and bottom controls for progress, previous/next steps, and skipping.
+- Visitors can hold and drag to inspect the room in 360°.
+- I support touch gestures, including pinch-to-zoom and swiping, with responsive viewport framing.
+- I provide a high-contrast 2D fallback for low-power devices and screen readers.
 
-- Node.js 18.x or 20.x+ (Tested on Node v24.12.0)
-- npm 9+ or 11+
+---
 
-### Installation
+## Technology Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Core framework** | [Next.js 16](https://nextjs.org/) with App Router, Turbopack, and React 19 |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **3D engine** | [Three.js](https://threejs.org/), [React Three Fiber](https://r3f.docs.pmnd.rs/), and [Drei](https://github.com/pmndrs/drei) |
+| **Animation and motion** | [GSAP 3](https://greensock.com/gsap/) with ScrollTrigger |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/), PostCSS, and CSS Modules |
+| **Icons and UI** | [Lucide React](https://lucide.dev/) and custom SVG icons |
+| **Deployment** | Vercel and Cloudflare Pages compatible |
+
+---
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── layout.tsx                 # Root layout, metadata, and fonts
+│   ├── page.tsx                   # Application entry point
+│   ├── globals.css                # Design tokens and utility styles
+│   └── projects/[slug]/page.tsx   # Dynamic project case studies
+├── components/
+│   ├── scene/                     # 3D room, workstation, skills, projects, milestones
+│   ├── experience/                # Journey timeline, navigation, intro, and fallback
+│   ├── overlays/                  # LeetCode inspection modal
+│   └── ui/                        # Shared SVG icons
+├── context/                       # Shared experience state
+├── data/                          # Profile, skills, projects, contact, achievements
+├── lib/                           # Experience configuration and motion setup
+└── types/                         # TypeScript data definitions
+```
+
+---
+
+## Run Locally
+
+### Clone and install
 
 ```bash
 git clone https://github.com/Nikhil-singh-26/N-VERSE.git
@@ -84,15 +124,15 @@ cd N-VERSE
 npm install
 ```
 
-### Development Server
+### Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to experience the 3D universe.
+Then open [http://localhost:3000](http://localhost:3000).
 
-### Production Build
+### Build and run for production
 
 ```bash
 npm run build
@@ -101,74 +141,6 @@ npm run start
 
 ---
 
-## 📁 Architecture
+## License
 
-```text
-src/
-├── app/
-│   ├── layout.tsx                 # Root layout with SEO metadata & Google Fonts
-│   ├── page.tsx                   # SSR-safe dynamic entry point for 3D universe
-│   ├── globals.css                # Futuristic design tokens & laboratory styles
-│   └── projects/[slug]/page.tsx   # Standalone project case-study route
-├── components/
-│   ├── scene/
-│   │   ├── PortfolioCanvas.tsx    # R3F Canvas root & scene wrapper
-│   │   ├── CameraController.tsx   # Cinematic waypoint lerping & 360 OrbitControls
-│   │   ├── SceneLighting.tsx      # Atmospheric directional, point & spotlights
-│   │   ├── DeveloperRoom.tsx      # Persistent floor, walls, ceiling & dust motes
-│   │   ├── Gate.tsx               # Blast doors with N/VERSE lintel wordmark
-│   │   ├── Character.tsx          # Stylized walking & dissolving engineer avatar
-│   │   ├── Workstation.tsx        # Desk, curved terminal monitor, PC tower
-│   │   ├── SkillsPlanet.tsx       # Procedural planet with orbital rings & nodes
-│   │   ├── Projector.tsx          # Optical projector & volumetric light beam
-│   │   ├── AchievementBoard.tsx   # Telemetry wall timeline with milestone nodes
-│   │   └── Telephone.tsx          # Physical telephone console with comms beacon
-│   ├── experience/
-│   │   ├── ExperienceController.tsx # Master controller assembling canvas & UI
-│   │   ├── ScrollTimeline.tsx     # Scroll, swipe, and keyboard event driver
-│   │   ├── SectionNavigation.tsx  # Top HUD with station pills & utility toggles
-│   │   ├── ProgressIndicator.tsx  # Station counter & progress percentage
-│   │   ├── SkipControl.tsx        # Skip-to-next and previous buttons
-│   │   ├── LoadingScreen.tsx      # Initialization progress screen
-│   │   ├── WebGLFallback.tsx      # High-contrast 2D accessible fallback
-│   │   └── ExplorationControls.tsx# 360 free-look HUD banner
-│   ├── overlays/
-│   │   ├── WelcomeOverlay.tsx     # Opening titles & enter prompt
-│   │   ├── TerminalPanel.tsx      # Interactive About terminal with quick prompts
-│   │   ├── SkillsPanel.tsx        # Categorized technology grid
-│   │   ├── ProjectShowcase.tsx    # Project carousel and case study modal
-│   │   ├── AchievementPanel.tsx   # Filterable milestone timeline
-│   │   └── ContactPanel.tsx       # Direct transmission card & profile links
-│   └── ui/
-│       └── Icons.tsx              # Clean SVG brand icons (GitHub, LinkedIn)
-├── context/
-│   └── ExperienceContext.tsx      # Centralized state provider for camera & stations
-├── data/
-│   ├── profile.ts                 # Developer identity, bio & terminal prompts
-│   ├── skills.ts                  # Categorized technical stack
-│   ├── projects.ts                # Verified project details & case studies
-│   └── achievements.ts            # Education, certifications & hackathons
-├── lib/
-│   ├── experience-config.ts       # Camera waypoints & station coordinates
-│   ├── accessibility.ts           # Screen reader announcements & reduced motion
-│   └── motion.ts                  # GSAP registration & interpolation helpers
-└── types/
-    └── index.ts                   # Core TypeScript data definitions
-```
-
----
-
-## ⚙️ Configuration & Customization
-
-All personal and technical content is isolated in `src/data/`:
-
-- **Profile & Terminal**: Edit [profile.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/profile.ts) to adjust bio, education, or terminal command responses.
-- **Skills**: Edit [skills.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/skills.ts) to update languages, frameworks, or databases.
-- **Projects**: Edit [projects.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/projects.ts) to add or configure projects, GitHub URLs, or live demo links.
-- **Achievements**: Edit [achievements.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/achievements.ts) to update timeline entries and certifications.
-
----
-
-## 📄 License
-
-MIT © [Nikhil Singh](https://github.com/Nikhil-singh-26)
+I release this project under the MIT License.
