@@ -29,7 +29,10 @@ import {
   ArrowRight,
   Terminal,
   Share2,
-  X
+  X,
+  ZoomIn,
+  ZoomOut,
+  Maximize2
 } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 
@@ -66,8 +69,13 @@ export function Workstation() {
   const [resumePos, setResumePos] = useState({ x: 420, y: 70 });
   const [mailPos, setMailPos] = useState({ x: 380, y: 80 });
 
+  // Virtual desktop reference for accurate 3D scale tracking
+  const desktopScreenRef = useRef<HTMLDivElement | null>(null);
   const isDragging = useRef<string | null>(null);
-  const dragStart = useRef({ x: 0, y: 0, initialX: 0, initialY: 0 });
+  const dragStart = useRef({ clientX: 0, clientY: 0, initialX: 0, initialY: 0 });
+
+  // Resume document viewer zoom state (60% to 180%)
+  const [resumeZoom, setResumeZoom] = useState<number>(100);
 
   // Clock state for the taskbar
   const [currentTime, setCurrentTime] = useState('12:00 PM');
@@ -730,17 +738,40 @@ export function Workstation() {
     }
   }, [renderScreenTexture, screenCanvasTexture]);
 
-  // Window drag handlers for all windows on the large monitor
-  const handleMouseDown = (winName: 'about' | 'resume' | 'mail', initialPos: { x: number; y: number }, e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) return;
+  // Window drag handlers for all windows on the large monitor (synchronous 1:1 Windows behavior)
+  const handleMouseDown = (
+    winName: 'about' | 'resume' | 'mail',
+    initialPos: { x: number; y: number },
+    e: React.MouseEvent
+  ) => {
+    // Ignore clicks on buttons, links, inputs, or textareas
+    if (
+      (e.target as HTMLElement).closest('button') ||
+      (e.target as HTMLElement).closest('a') ||
+      (e.target as HTMLElement).closest('input') ||
+      (e.target as HTMLElement).closest('textarea')
+    ) {
+      return;
+    }
+
     setActiveWindow(winName);
+
+    // If window is currently maximized, restore it on drag just like native Windows OS
+    if (winName === 'about' && isAboutMaximized) {
+      toggleMaximizeAboutWindow();
+    } else if (winName === 'resume' && isResumeMaximized) {
+      toggleMaximizeResumeWindow();
+    } else if (winName === 'mail' && isMailMaximized) {
+      setIsMailMaximized(false);
+    }
+
     isDragging.current = winName;
     if (typeof window !== 'undefined') {
       (window as unknown as { __isDraggingWindow?: boolean }).__isDraggingWindow = true;
     }
     dragStart.current = {
-      x: e.clientX,
-      y: e.clientY,
+      clientX: e.clientX,
+      clientY: e.clientY,
       initialX: initialPos.x,
       initialY: initialPos.y
     };
@@ -749,10 +780,24 @@ export function Workstation() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
-      const dx = e.clientX - dragStart.current.x;
-      const dy = e.clientY - dragStart.current.y;
-      const newX = Math.max(10, Math.min(840, dragStart.current.initialX + dx));
-      const newY = Math.max(10, Math.min(340, dragStart.current.initialY + dy));
+
+      // Calculate real scale factor between viewport pixels and virtual desktop (1760px x 990px)
+      const rect = desktopScreenRef.current?.getBoundingClientRect();
+      const scaleX = rect && rect.width > 0 ? 1760 / rect.width : 1;
+      const scaleY = rect && rect.height > 0 ? 990 / rect.height : 1;
+
+      const dx = (e.clientX - dragStart.current.clientX) * scaleX;
+      const dy = (e.clientY - dragStart.current.clientY) * scaleY;
+
+      // Virtual Desktop boundaries (1760 width x 990 height, 56px taskbar at bottom)
+      // Allow fluid movement anywhere across the monitor while keeping titlebar accessible
+      const minX = -120;
+      const maxX = 1760 - 240;
+      const minY = 0;
+      const maxY = 990 - 56 - 60;
+
+      const newX = Math.round(Math.max(minX, Math.min(maxX, dragStart.current.initialX + dx)));
+      const newY = Math.round(Math.max(minY, Math.min(maxY, dragStart.current.initialY + dy)));
 
       if (isDragging.current === 'about') {
         setAboutPos({ x: newX, y: newY });
@@ -776,7 +821,7 @@ export function Workstation() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  }, [isAboutMaximized, isResumeMaximized, isMailMaximized, toggleMaximizeAboutWindow, toggleMaximizeResumeWindow]);
 
   const handleCopyEmail = async () => {
     try {
@@ -1162,6 +1207,7 @@ export function Workstation() {
         >
           {/* Desktop Screen Boundary (1760px x 990px) */}
           <div
+            ref={desktopScreenRef}
             data-desktop-screen="true"
             onPointerDown={(e) => e.stopPropagation()}
             style={{
@@ -1272,14 +1318,14 @@ export function Workstation() {
                 top: isAboutMaximized ? 0 : `${aboutPos.y}px`,
                 width: isAboutMaximized ? '100%' : '920px',
                 height: isAboutMaximized ? 'calc(100% - 56px)' : '620px',
-                zIndex: activeWindow === 'about' ? 40 : 30
+                zIndex: activeWindow === 'about' ? 50 : 35
               }}
               className="bg-[#070b14]/98 border border-white/20 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 pointer-events-auto"
             >
               {/* Draggable Terminal Title Bar */}
               <div
                 onMouseDown={(e) => handleMouseDown('about', aboutPos, e)}
-                className="bg-[#0f172a] px-4 py-2.5 border-b border-white/10 flex items-center justify-between cursor-move select-none"
+                className="bg-[#0f172a] px-4 py-2.5 border-b border-white/10 flex items-center justify-between cursor-grab active:cursor-grabbing select-none"
               >
                 <div className="flex items-center gap-2.5">
                   <Terminal className="w-4 h-4 text-emerald-400" />
@@ -1576,16 +1622,16 @@ export function Workstation() {
                 position: 'absolute',
                 left: isResumeMaximized ? 0 : `${resumePos.x}px`,
                 top: isResumeMaximized ? 0 : `${resumePos.y}px`,
-                width: isResumeMaximized ? '100%' : '900px',
-                height: isResumeMaximized ? 'calc(100% - 56px)' : '620px',
-                zIndex: activeWindow === 'resume' ? 40 : 30
+                width: isResumeMaximized ? '100%' : '920px',
+                height: isResumeMaximized ? 'calc(100% - 56px)' : '640px',
+                zIndex: activeWindow === 'resume' ? 50 : 35
               }}
               className="bg-[#0f172a] border-2 border-blue-500 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 pointer-events-auto"
             >
-              {/* Title Bar (ONLY Cross/Close Button - No minimize, no maximize) */}
+              {/* Title Bar (ONLY Cross/Close Button as strictly requested - No minimize, no maximize) */}
               <div
                 onMouseDown={(e) => handleMouseDown('resume', resumePos, e)}
-                className="bg-[#1e293b] px-4 py-2.5 border-b border-blue-500/30 flex items-center justify-between cursor-move select-none"
+                className="bg-[#1e293b] px-4 py-2.5 border-b border-blue-500/30 flex items-center justify-between cursor-grab active:cursor-grabbing select-none"
               >
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-yellow-400" />
@@ -1594,12 +1640,16 @@ export function Workstation() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                {/* Window Controls (Strictly ONLY the close cross button) */}
+                <div className="flex items-center">
                   <button
                     type="button"
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={closeResumeWindow}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeResumeWindow();
+                    }}
                     className="p-1.5 rounded text-white/70 hover:text-white hover:bg-red-600 transition-colors cursor-pointer"
                     aria-label="Close Window"
                     title="Close Window"
@@ -1609,16 +1659,48 @@ export function Workstation() {
                 </div>
               </div>
 
-              {/* Actions Toolbar */}
-              <div className="bg-[#0b1120] px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs font-mono">
+              {/* Actions Toolbar with Zoom and Full View Options */}
+              <div className="bg-[#0b1120] px-4 py-2 border-b border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
                 <div className="flex items-center gap-2">
                   <span className="text-yellow-400 flex items-center gap-1 font-semibold">
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Nikhil Singh • public/resume.pdf</span>
                   </span>
+
+                  {/* Zoom Controls */}
+                  <div className="hidden sm:flex items-center gap-1 ml-2 bg-white/5 border border-white/10 rounded px-1.5 py-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setResumeZoom((z) => Math.max(60, z - 15))}
+                      className="p-1 text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
+                      title="Zoom Out (-)"
+                    >
+                      <ZoomOut className="w-3 h-3" />
+                    </button>
+                    <span className="text-[11px] font-mono text-white/90 min-w-[36px] text-center">
+                      {resumeZoom}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setResumeZoom((z) => Math.min(180, z + 15))}
+                      className="p-1 text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
+                      title="Zoom In (+)"
+                    >
+                      <ZoomIn className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setResumeZoom(100)}
+                      className="px-1.5 py-0.5 text-[10px] text-white/60 hover:text-white rounded transition-colors"
+                      title="Reset Zoom"
+                    >
+                      Fit
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {/* Full View Option (opens /resume.pdf in new tab) */}
                   <button
                     type="button"
                     onClick={() => {
@@ -1627,13 +1709,14 @@ export function Workstation() {
                       }
                     }}
                     className="flex items-center gap-1.5 px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-sm cursor-pointer"
+                    title="Open official PDF in full browser tab"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Open Full View</span>
+                    <span>↗ Open Full View</span>
                   </button>
                   <button
                     onClick={handleShareResume}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs transition-colors cursor-pointer"
                     title="Share or Copy Resume Link"
                   >
                     {copiedResumeLink ? (
@@ -1646,7 +1729,7 @@ export function Workstation() {
                   <a
                     href="/resume.pdf"
                     download="Nikhil_Singh_Resume.pdf"
-                    className="flex items-center gap-1.5 px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xs transition-colors shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xs transition-colors shadow-sm cursor-pointer"
                   >
                     <Download className="w-3 h-3" />
                     <span>Download PDF</span>
@@ -1654,16 +1737,74 @@ export function Workstation() {
                 </div>
               </div>
 
-              {/* Document Viewport */}
+              {/* Scrollable Document Viewport (Guaranteed 100% visible, smoothly scrollable, native rendering) */}
               <div
                 onWheel={(e) => e.stopPropagation()}
-                className="flex-1 bg-[#1e293b] overflow-hidden p-2 flex flex-col items-center justify-center relative"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: '#38bdf8 #060a12' }}
+                className="flex-1 bg-[#0b101c] overflow-y-auto overflow-x-auto p-4 sm:p-6 flex flex-col items-center select-text relative"
               >
-                <iframe
-                  src="/resume.pdf#toolbar=1&navpanes=0&view=FitH"
-                  title="Nikhil Singh Official Resume"
-                  className="w-full h-full min-h-[420px] rounded bg-white border-0"
-                />
+                {/* Header Information Banner */}
+                <div className="w-full max-w-[840px] mb-4 p-3 rounded-lg bg-blue-950/70 border border-blue-500/40 flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-blue-100">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-yellow-400 shrink-0" />
+                    <span>Official Resume document loaded • Scrollable sheet view</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') window.open('/resume.pdf', '_blank');
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors cursor-pointer"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>Open Full View in New Tab</span>
+                  </button>
+                </div>
+
+                {/* Clean Document Page Container (High-Resolution 200 DPI Page Canvas) */}
+                <div
+                  style={{
+                    width: `${resumeZoom}%`,
+                    maxWidth: '840px',
+                    minWidth: '500px',
+                    transition: 'width 0.15s ease-out'
+                  }}
+                  className="bg-white rounded-md shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-slate-300 p-2 sm:p-4 my-2 flex flex-col items-center"
+                >
+                  {/* High-Resolution Document Rendered from public/resume.pdf */}
+                  <img
+                    src="/resume-preview.png"
+                    alt="Nikhil Singh Official Resume Document"
+                    className="w-full h-auto rounded block shadow-sm select-none pointer-events-auto"
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Document Footer Banner */}
+                <div className="w-full max-w-[840px] mt-6 p-4 rounded-xl bg-black/60 border border-white/15 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-white/90">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span>End of Resume Document • Source: public/resume.pdf</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') window.open('/resume.pdf', '_blank');
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      ↗ Open Full PDF in New Tab
+                    </button>
+                    <a
+                      href="/resume.pdf"
+                      download="Nikhil_Singh_Resume.pdf"
+                      className="px-3 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xs transition-colors shadow-sm"
+                    >
+                      📥 Download PDF
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1675,16 +1816,16 @@ export function Workstation() {
                 position: 'absolute',
                 left: isMailMaximized ? 0 : `${mailPos.x}px`,
                 top: isMailMaximized ? 0 : `${mailPos.y}px`,
-                width: isMailMaximized ? '100%' : '860px',
-                height: isMailMaximized ? 'calc(100% - 56px)' : '600px',
-                zIndex: activeWindow === 'mail' ? 40 : 30
+                width: isMailMaximized ? '100%' : '880px',
+                height: isMailMaximized ? 'calc(100% - 56px)' : '620px',
+                zIndex: activeWindow === 'mail' ? 50 : 35
               }}
               className="bg-black border-2 border-white rounded-xl shadow-2xl flex-col overflow-hidden pointer-events-auto"
             >
-              {/* Title Bar (Black & White with Yellow/Blue controls) */}
+              {/* Title Bar (Authentic Windows 3-control titlebar: Minimize, Maximize/Restore, Close) */}
               <div
                 onMouseDown={(e) => handleMouseDown('mail', mailPos, e)}
-                className="bg-[#050505] px-4 py-2.5 border-b border-white flex items-center justify-between cursor-move select-none"
+                className="bg-[#050505] px-4 py-2.5 border-b border-white flex items-center justify-between cursor-grab active:cursor-grabbing select-none"
               >
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-blue-500" />
@@ -1693,14 +1834,19 @@ export function Workstation() {
                   </span>
                 </div>
 
+                {/* 3 Working Controls: Minimize, Maximize/Restore, Close */}
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={() => setIsMailMinimized(true)}
-                    className="px-2.5 py-1 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMailMinimized(true);
+                    }}
+                    className="p-1.5 rounded text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold transition-colors cursor-pointer"
                     aria-label="Minimize Window"
+                    title="Minimize"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -1708,19 +1854,27 @@ export function Workstation() {
                     type="button"
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={() => setIsMailMaximized((prev) => !prev)}
-                    className="px-2.5 py-1 text-blue-400 hover:bg-blue-600 hover:text-white font-bold transition-colors"
-                    aria-label="Maximize or Restore Window"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMailMaximized((prev) => !prev);
+                    }}
+                    className="p-1.5 rounded text-blue-400 hover:bg-blue-600 hover:text-white font-bold transition-colors cursor-pointer"
+                    aria-label={isMailMaximized ? 'Restore Window' : 'Maximize Window'}
+                    title={isMailMaximized ? 'Restore' : 'Maximize'}
                   >
-                    <Square className="w-3 h-3" />
+                    <Square className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
                     onMouseDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
-                    onClick={() => setIsMailOpen(false)}
-                    className="px-2.5 py-1 text-white hover:bg-white hover:text-black font-bold transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMailOpen(false);
+                    }}
+                    className="p-1.5 rounded text-white hover:bg-white hover:text-black font-bold transition-colors cursor-pointer"
                     aria-label="Close Window"
+                    title="Close"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
