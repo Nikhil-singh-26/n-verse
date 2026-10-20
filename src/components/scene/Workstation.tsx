@@ -82,51 +82,33 @@ export function Workstation() {
   const [contactMessage, setContactMessage] = useState('');
 
   // Terminal Streaming & CLI State
-  const [terminalStreamIndex, setTerminalStreamIndex] = useState(0);
-  const [terminalHistory, setTerminalHistory] = useState<string[]>([]);
+  const [aboutTab, setAboutTab] = useState<'terminal' | 'page'>('terminal');
+  const [terminalHistory, setTerminalHistory] = useState<string[]>([
+    'nikhil@n-verse:~$ ./about_me.sh',
+    '========================================================================',
+    ' [SYSINFO]   Arch Linux (x86_64) | Host: N-VERSE Workstation',
+    ' [USER]      nikhil (Nikhil Singh)',
+    ' [STATUS]    Active • Full-Stack Software Engineer & 3D Web Creative',
+    ' [LOCATION]  Bilaspur, Chhattisgarh, India (Open to Remote / Relocate)',
+    '========================================================================',
+    '',
+    'Code. Learn. Build. Repeat.',
+    '',
+    '[SUMMARY]',
+    'Full-stack developer passionate about building practical web and mobile applications,',
+    'creating responsive user experiences, and developing scalable solutions using React,',
+    'Next.js, Node.js, Express, MongoDB, and Flutter.',
+    '',
+    '[ACADEMIC CREDENTIALS]',
+    '• Degree:      B.Tech in Computer Science & Engineering (2024 — 2028)',
+    '• Institution: Government Engineering College Bilaspur (CG)',
+    '• Performance: CGPA 7.6 / 10',
+    '',
+    'Type "help", "skills", "education", "resume", "contact", or "clear" below.'
+  ]);
   const [terminalInput, setTerminalInput] = useState('');
-  const [isTerminalStreamingComplete, setIsTerminalStreamingComplete] = useState(false);
   const terminalScrollRef = useRef<HTMLDivElement | null>(null);
-
-  // Full About Me Terminal Content Lines
-  const terminalFullBio = [
-    'nikhil@n-verse:~$ cat about.txt',
-    '',
-    '========================================================================',
-    '                    NIKHIL SINGH // ABOUT ME',
-    '========================================================================',
-    '',
-    '[STATUS]       Active • Software Engineer & Full-Stack Developer',
-    '[LOCATION]     Bilaspur, Chhattisgarh, India (Open to Remote / Relocate)',
-    '[DEGREE]       B.Tech in Computer Science & Engineering (2022 — 2026)',
-    '[INSTITUTION]  Government Engineering College Bilaspur (CG)',
-    '[CGPA]         7.85 / 10',
-    '',
-    '[CORE BIOGRAPHY]',
-    'Passionate Computer Science student and software engineer focused on building',
-    'robust, scalable digital experiences and interactive 3D web systems. With deep',
-    'experience in modern full-stack development, cloud architecture, and real-time',
-    '3D graphics, I transform complex ideas into intuitive, production-grade applications.',
-    '',
-    '[TECHNICAL SKILLS]',
-    '• Languages:      Java, TypeScript, JavaScript, SQL, HTML5, CSS3, Python, C++',
-    '• Frontend:       React.js, Next.js, Three.js, React Three Fiber, Tailwind CSS',
-    '• Backend:        Node.js, Express.js, RESTful APIs, Microservices Architecture',
-    '• Databases:      MongoDB, PostgreSQL, MySQL',
-    '• Tools & DevOps: Git, GitHub, Docker, Postman, Linux, Vercel',
-    '',
-    '[DEVELOPMENT VALUES]',
-    '1. Clean Architecture: Modular, maintainable, and type-safe code.',
-    '2. High Performance: Fluid 60fps rendering and sub-second response times.',
-    '3. Seamless UX: Thoughtfully crafted with precision micro-interactions.',
-    '',
-    '[CONTACT & CHANNELS]',
-    '• Email:     singhnikhil2608@gmail.com',
-    '• GitHub:    github.com/Nikhil-singh-26',
-    '• LinkedIn:  linkedin.com/in/nikhil-singh-dev',
-    '',
-    'Type "help", "skills", "education", "contact", "resume", or "clear" below.'
-  ];
+  const terminalInputRef = useRef<HTMLInputElement | null>(null);
 
   // 3D Screen Canvas Texture (Guaranteed 100% visibly ON with wallpaper & 3 folders)
   const [screenCanvasTexture, setScreenCanvasTexture] = useState<THREE.CanvasTexture | null>(null);
@@ -209,387 +191,402 @@ export function Workstation() {
     ) => {
       const w = 180;
       const h = 190;
-      // Card backing
-      drawRRect(x, y, w, h, 20);
-      ctx.fillStyle = 'rgba(9, 13, 22, 0.88)';
+      const cx = x + w / 2;
+      const cy = y + 54;
+
+      // Desktop App Shortcut (Clean rounded icon tile with shadow)
+      drawRRect(cx - 36, cy - 36, 72, 72, 16);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
       ctx.fill();
       ctx.strokeStyle = mainColor;
-      ctx.lineWidth = 2.2;
+      ctx.lineWidth = 1.8;
       ctx.stroke();
-
-      const cx = x + w / 2;
-      const cy = y + 68;
 
       if (type === 'terminal') {
         // Console badge with >_ prompt
-        drawRRect(cx - 36, cy - 32, 72, 54, 10);
-        ctx.fillStyle = '#061a14';
+        ctx.font = 'bold 26px monospace';
+        ctx.fillStyle = mainColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('>_', cx, cy);
+      } else if (type === 'mail') {
+        // Mail envelope
+        drawRRect(cx - 24, cy - 18, 48, 36, 6);
+        ctx.fillStyle = 'rgba(37, 99, 235, 0.3)';
         ctx.fill();
         ctx.strokeStyle = mainColor;
         ctx.lineWidth = 1.8;
         ctx.stroke();
 
-        ctx.font = 'bold 26px monospace';
-        ctx.fillStyle = mainColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('>_', cx, cy - 5);
-      } else if (type === 'mail') {
-        // Mail envelope
-        drawRRect(cx - 36, cy - 28, 72, 48, 8);
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.18)';
-        ctx.fill();
-        ctx.strokeStyle = mainColor;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Flap
         ctx.beginPath();
-        ctx.moveTo(cx - 36, cy - 28);
+        ctx.moveTo(cx - 24, cy - 18);
         ctx.lineTo(cx, cy);
-        ctx.lineTo(cx + 36, cy - 28);
+        ctx.lineTo(cx + 24, cy - 18);
         ctx.stroke();
       } else {
         // Document page with folded top-right corner
-        ctx.fillStyle = 'rgba(16, 185, 129, 0.18)';
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.25)';
         ctx.beginPath();
-        ctx.moveTo(cx - 28, cy - 34);
-        ctx.lineTo(cx + 12, cy - 34);
-        ctx.lineTo(cx + 28, cy - 18);
-        ctx.lineTo(cx + 28, cy + 30);
-        ctx.lineTo(cx - 28, cy + 30);
+        ctx.moveTo(cx - 20, cy - 24);
+        ctx.lineTo(cx + 8, cy - 24);
+        ctx.lineTo(cx + 20, cy - 12);
+        ctx.lineTo(cx + 20, cy + 24);
+        ctx.lineTo(cx - 20, cy + 24);
         ctx.closePath();
         ctx.fill();
         ctx.strokeStyle = mainColor;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.8;
         ctx.stroke();
 
-        // Corner fold
         ctx.beginPath();
-        ctx.moveTo(cx + 12, cy - 34);
-        ctx.lineTo(cx + 12, cy - 18);
-        ctx.lineTo(cx + 28, cy - 18);
-        ctx.stroke();
-
-        // Text lines on document
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(cx - 18, cy - 4);
-        ctx.lineTo(cx + 18, cy - 4);
-        ctx.moveTo(cx - 18, cy + 8);
-        ctx.lineTo(cx + 18, cy + 8);
-        ctx.moveTo(cx - 18, cy + 20);
-        ctx.lineTo(cx + 8, cy + 20);
+        ctx.moveTo(cx + 8, cy - 24);
+        ctx.lineTo(cx + 8, cy - 12);
+        ctx.lineTo(cx + 20, cy - 12);
         ctx.stroke();
       }
 
-      // Title
-      ctx.font = 'bold 24px sans-serif';
+      // Shortcut Label
+      ctx.font = 'bold 20px sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(title, cx, y + 138);
+      ctx.fillText(title, cx, y + 120);
 
       // Subtitle
       ctx.font = 'bold 13px monospace';
       ctx.fillStyle = subColor;
-      ctx.fillText(subtitle, cx, y + 162);
+      ctx.fillText(subtitle, cx, y + 144);
     };
 
     // Folder 1: About (Terminal Icon, y = 110)
-    drawDesktopAppCard(85, 110, 'About', 'Profile & Bio', 'terminal', '#10b981', '#a7f3d0');
+    drawDesktopAppCard(85, 110, 'About', 'Terminal / Bash', 'terminal', '#10b981', '#a7f3d0');
 
-    // Folder 2: Contact (Mail Envelope, y = 340)
-    drawDesktopAppCard(85, 340, 'Contact', 'Mail & Channels', 'mail', '#38bdf8', '#bae6fd');
+    // Folder 2: Contact (Mail Envelope, y = 340) - Strict White, Black, Blue, Yellow
+    drawDesktopAppCard(85, 340, 'Contact', 'Mail & Channels', 'mail', '#2563eb', '#facc15');
 
     // Folder 3: Resume (Document Page, y = 570)
-    drawDesktopAppCard(85, 570, 'Resume', 'Resume.pdf', 'file', '#10b981', '#a7f3d0');
+    drawDesktopAppCard(85, 570, 'Resume', 'CV', 'file', '#facc15', '#ffffff');
 
     // 5. Active Windows Drawn directly onto Screen
     if (isAboutWindowOpen && !isAboutMinimized) {
       const wx = 360;
-      const wy = 100;
-      const ww = 1180;
-      const wh = 760;
+      const wy = 90;
+      const ww = 1240;
+      const wh = 780;
 
-      drawRRect(wx, wy, ww, wh, 18);
-      ctx.fillStyle = 'rgba(14, 20, 34, 0.96)';
+      // Authentic Solid Jet-Black Linux Terminal Window
+      drawRRect(wx, wy, ww, wh, 12);
+      ctx.fillStyle = '#020408';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
-      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.0;
       ctx.stroke();
 
-      // Title bar
-      drawRRect(wx, wy, ww, 52, 18);
-      ctx.fillStyle = '#1a2336';
+      // Title bar: Linux Dark Bar
+      drawRRect(wx, wy, ww, 48, 12);
+      ctx.fillStyle = '#0a1017';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.0;
       ctx.stroke();
 
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.arc(wx + 26, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.font = 'bold 16px sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('About Me — Nikhil Singh', wx + 42, wy + 26);
-
-      // Window controls
+      // Terminal Window dots (Red, Yellow, Green)
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
-      ctx.arc(wx + ww - 30, wy + 26, 7, 0, Math.PI * 2);
+      ctx.arc(wx + 22, wy + 24, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#f59e0b';
       ctx.beginPath();
-      ctx.arc(wx + ww - 54, wy + 26, 7, 0, Math.PI * 2);
+      ctx.arc(wx + 42, wy + 24, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#10b981';
       ctx.beginPath();
-      ctx.arc(wx + ww - 78, wy + 26, 7, 0, Math.PI * 2);
+      ctx.arc(wx + 62, wy + 24, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      // Content inside About Window
-      ctx.font = '900 38px sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText('Nikhil Singh', wx + 48, wy + 115);
+      // Title Text
+      ctx.font = 'bold 15px monospace';
+      ctx.fillStyle = '#10b981';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('bash — nikhil@archlinux: ~ (pts/0)', wx + 85, wy + 24);
 
-      ctx.font = 'bold 18px monospace';
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillText('FULL-STACK DEVELOPER & 3D WEB CREATIVE', wx + 48, wy + 158);
+      // Terminal Sub-bar / Host info
+      ctx.fillStyle = '#060a10';
+      ctx.fillRect(wx + 1, wy + 48, ww - 2, 28);
+      ctx.font = '12px monospace';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('Linux arch-nverse 6.12.8-arch1-1 x86_64 | zsh 5.9 | user: nikhil', wx + 20, wy + 62);
 
-      ctx.font = '16px sans-serif';
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillText('Computer Science Engineer specializing in scalable full-stack web applications,', wx + 48, wy + 208);
-      ctx.fillText('immersive 3D interactive experiences with Three.js/R3F, and modern cloud architectures.', wx + 48, wy + 236);
+      // Terminal Content (Authentic interactive terminal rendering)
+      let ty = wy + 95;
+      const visibleLines = terminalHistory.slice(-20);
+      const lineSpacing = 24;
+      const clipHeight = wh - 120;
+      const totalContentHeight = (visibleLines.length + 1) * lineSpacing;
+      if (totalContentHeight > clipHeight) {
+        ty = wy + 95 - (totalContentHeight - clipHeight);
+      }
 
-      // Skill badges
-      const skills = ['Next.js', 'React.js', 'TypeScript', 'Java', 'Three.js', 'Flutter', 'Node.js', 'PostgreSQL'];
-      skills.forEach((sk, i) => {
-        const bx = wx + 48 + (i % 4) * 165;
-        const by = wy + 300 + Math.floor(i / 4) * 55;
-        drawRRect(bx, by, 150, 42, 8);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-        ctx.stroke();
-        ctx.font = 'bold 14px monospace';
-        ctx.fillStyle = '#38bdf8';
-        ctx.textAlign = 'center';
-        ctx.fillText(sk, bx + 75, by + 21);
+      ctx.save();
+      // Clip within terminal body
+      ctx.beginPath();
+      ctx.rect(wx + 12, wy + 76, ww - 24, wh - 85);
+      ctx.clip();
+
+      visibleLines.forEach((line) => {
+        if (line.startsWith('nikhil@')) {
+          ctx.font = 'bold 16px monospace';
+          ctx.fillStyle = '#10b981';
+        } else if (line.startsWith('===') || line.startsWith('NAME=')) {
+          ctx.font = '15px monospace';
+          ctx.fillStyle = '#22c55e';
+        } else if (line.startsWith('[') || line.startsWith('Type "')) {
+          ctx.font = 'bold 15px monospace';
+          ctx.fillStyle = '#facc15';
+        } else if (line.startsWith(' |') || line.startsWith('  _')) {
+          ctx.font = 'bold 14px monospace';
+          ctx.fillStyle = '#38bdf8';
+        } else {
+          ctx.font = '15px monospace';
+          ctx.fillStyle = '#f1f5f9';
+        }
+        ctx.fillText(line, wx + 24, ty);
+        ty += lineSpacing;
       });
 
-      // Quick links hint
-      ctx.font = '14px sans-serif';
-      ctx.fillStyle = '#94a3b8';
-      ctx.textAlign = 'left';
-      ctx.fillText('Contact: singhnikhil2608@gmail.com  •  Location: India  •  GitHub: github.com/Nikhil-singh-26', wx + 48, wy + 465);
+      // Active prompt with blinking block cursor
+      ctx.font = 'bold 16px monospace';
+      ctx.fillStyle = '#10b981';
+      ctx.fillText('nikhil@n-verse:~$ █', wx + 24, ty);
+      ctx.restore();
     } else if (isResumeWindowOpen && !isResumeMinimized) {
       const wx = 360;
-      const wy = 100;
-      const ww = 1180;
-      const wh = 760;
+      const wy = 90;
+      const ww = 1240;
+      const wh = 780;
 
-      drawRRect(wx, wy, ww, wh, 18);
-      ctx.fillStyle = 'rgba(14, 20, 34, 0.96)';
+      // Clean Document Viewer Window Frame
+      drawRRect(wx, wy, ww, wh, 12);
+      ctx.fillStyle = '#0f172a';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1.8;
       ctx.stroke();
 
-      // Title bar
-      drawRRect(wx, wy, ww, 52, 18);
-      ctx.fillStyle = '#132322';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.stroke();
-
-      ctx.fillStyle = '#10b981';
-      ctx.beginPath();
-      ctx.arc(wx + 26, wy + 26, 7, 0, Math.PI * 2);
+      // Title bar: PDF Document Viewer
+      drawRRect(wx, wy, ww, 48, 12);
+      ctx.fillStyle = '#1e293b';
       ctx.fill();
 
-      ctx.font = 'bold 16px sans-serif';
+      // Window dots - ONLY Close dot (Red Cross Dot)
+      ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(wx + 22, wy + 24, 6, 0, Math.PI * 2); ctx.fill();
+
+      // Title
+      ctx.font = 'bold 15px monospace';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('Resume.pdf — Official Resume (Nikhil Singh)', wx + 42, wy + 26);
+      ctx.fillText('PDF Viewer — resume.pdf (Nikhil Singh)', wx + 48, wy + 24);
 
-      // Window controls
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(wx + ww - 30, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.arc(wx + ww - 54, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#10b981';
-      ctx.beginPath();
-      ctx.arc(wx + ww - 78, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
+      // Document Actions Sub-bar
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(wx + 1, wy + 48, ww - 2, 46);
 
-      // Header: Candidate Name & Education
-      ctx.font = '900 36px sans-serif';
+      // Button: Open Full PDF
+      drawRRect(wx + 24, wy + 55, 200, 32, 6);
+      ctx.fillStyle = '#2563eb';
+      ctx.fill();
+      ctx.font = 'bold 13px sans-serif';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText('Nikhil Singh', wx + 48, wy + 110);
+      ctx.textAlign = 'center';
+      ctx.fillText('↗ Open Full View', wx + 124, wy + 71);
 
-      ctx.font = 'bold 16px monospace';
+      // Button: Download
+      drawRRect(wx + 280, wy + 55, 180, 32, 6);
       ctx.fillStyle = '#10b981';
-      ctx.fillText('B.TECH COMPUTER SCIENCE & ENGINEERING (2022 — 2026)', wx + 48, wy + 152);
+      ctx.fill();
+      ctx.fillStyle = '#000000';
+      ctx.fillText('📥 Download PDF', wx + 370, wy + 71);
 
-      ctx.font = '15px sans-serif';
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillText('Government Engineering College Bilaspur (CG) • CGPA: 7.85 / 10', wx + 48, wy + 185);
+      // Document Path Status
+      ctx.font = '13px monospace';
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'right';
+      ctx.fillText('Source: public/resume.pdf  [100% Zoom • 1 of 1]', wx + ww - 24, wy + 71);
 
-      // Section: Core Competencies
-      ctx.font = 'bold 18px monospace';
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillText('// CORE COMPETENCIES & EXPERTISE', wx + 48, wy + 240);
+      // PDF Sheet Preview (Clean white page aesthetic)
+      const pw = 800;
+      const ph = 620;
+      const px = wx + (ww - pw) / 2;
+      const py = wy + 110;
 
-      const resumeSkills = [
-        'Data Structures & Algorithms',
-        'Full-Stack Web (MERN / Next.js)',
-        '3D Web Graphics (Three.js / WebGL)',
-        'Cloud & DevOps (Docker, CI/CD)',
-        'Database (MongoDB, PostgreSQL)',
-        'Mobile App (Flutter / Dart)'
-      ];
-      resumeSkills.forEach((item, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const ix = wx + 48 + col * 550;
-        const iy = wy + 280 + row * 45;
-        drawRRect(ix, iy, 510, 36, 8);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-        ctx.stroke();
-        ctx.font = '14px sans-serif';
-        ctx.fillStyle = '#e2e8f0';
-        ctx.textAlign = 'left';
-        ctx.fillText('• ' + item, ix + 16, iy + 18);
-      });
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(px, py, pw, ph);
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px, py, pw, ph);
 
-      // Section: Leadership & Achievements
-      ctx.font = 'bold 18px monospace';
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillText('// LEADERSHIP & RECOGNITION', wx + 48, wy + 440);
+      // Sheet Content (Matches real resume)
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 26px sans-serif';
+      ctx.fillStyle = '#0f172a';
+      ctx.fillText('NIKHIL SINGH', px + pw / 2, py + 48);
 
-      ctx.font = '15px sans-serif';
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillText('• Google Developer Groups (GDG) On Campus — Technical Lead', wx + 48, wy + 480);
-      ctx.fillText('• Symbiosis Skill Hackathon — First Place Winner (Feb 2026)', wx + 48, wy + 515);
-      ctx.fillText('• 350+ LeetCode problems solved with verified ranking and badges', wx + 48, wy + 550);
+      ctx.font = '13px monospace';
+      ctx.fillStyle = '#2563eb';
+      ctx.fillText('FULL STACK SOFTWARE ENGINEER | THREE.JS & CLOUD ARCHITECTURES', px + pw / 2, py + 74);
+      ctx.font = '12px sans-serif';
+      ctx.fillStyle = '#475569';
+      ctx.fillText('nikhilsingh260406@gmail.com  •  github.com/Nikhil-singh-26  •  linkedin.com/in/nikhil-singh-dev', px + pw / 2, py + 95);
 
-      // Download / Print hint
-      drawRRect(wx + 48, wy + 600, 340, 48, 10);
-      ctx.fillStyle = '#10b981';
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px + 40, py + 112);
+      ctx.lineTo(px + pw - 40, py + 112);
+      ctx.stroke();
+
+      // Document notice
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillStyle = '#1e293b';
+      ctx.fillText('📄 Official Resume Loaded from public/resume.pdf', px + pw / 2, py + 220);
+      ctx.font = '14px sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('Click below or the Resume icon to open the complete document in a new tab.', px + pw / 2, py + 250);
+
+      // Big action button inside sheet
+      drawRRect(px + pw / 2 - 160, py + 290, 320, 48, 8);
+      ctx.fillStyle = '#2563eb';
       ctx.fill();
       ctx.font = 'bold 15px sans-serif';
-      ctx.fillStyle = '#061a14';
-      ctx.textAlign = 'center';
-      ctx.fillText('📥 Download Full Resume (PDF)', wx + 218, wy + 624);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('↗ Click to Open Full PDF', px + pw / 2, py + 314);
     } else if (isMailOpen && !isMailMinimized) {
       const wx = 360;
-      const wy = 100;
-      const ww = 1180;
-      const wh = 760;
+      const wy = 90;
+      const ww = 1240;
+      const wh = 780;
 
-      drawRRect(wx, wy, ww, wh, 18);
-      ctx.fillStyle = 'rgba(14, 20, 34, 0.96)';
+      // Pure Black Window Frame with Crisp White Border (Strict White, Black, Blue, Yellow)
+      drawRRect(wx, wy, ww, wh, 12);
+      ctx.fillStyle = '#000000';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      // Title bar
-      drawRRect(wx, wy, ww, 52, 18);
-      ctx.fillStyle = '#152538';
+      // Title bar: Pure Black with White line
+      drawRRect(wx, wy, ww, 48, 12);
+      ctx.fillStyle = '#050505';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0;
       ctx.stroke();
 
-      ctx.fillStyle = '#38bdf8';
-      ctx.beginPath();
-      ctx.arc(wx + 26, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
+      // Window controls: Yellow, Blue, White
+      ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(wx + 22, wy + 24, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(wx + 42, wy + 24, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(wx + 62, wy + 24, 6, 0, Math.PI * 2); ctx.fill();
 
-      ctx.font = 'bold 16px sans-serif';
+      // Title: White & Yellow
+      ctx.font = 'bold 15px monospace';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('Contact & Channels — Message Dispatcher', wx + 42, wy + 26);
+      ctx.fillText('CONTACT & CHANNELS — NIKHIL SINGH', wx + 85, wy + 24);
 
-      // Window controls
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(wx + ww - 30, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.arc(wx + ww - 54, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#10b981';
-      ctx.beginPath();
-      ctx.arc(wx + ww - 78, wy + 26, 7, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Header: Let's Connect
+      // Body: Header
       ctx.font = '900 36px sans-serif';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText('Get in Touch', wx + 48, wy + 110);
+      ctx.fillText('GET IN TOUCH', wx + 48, wy + 105);
 
       ctx.font = 'bold 16px monospace';
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillText('DIRECT COMMUNICATIONS & SOCIAL NETWORKS', wx + 48, wy + 152);
+      ctx.fillStyle = '#facc15';
+      ctx.fillText('DIRECT COMMUNICATIONS & VERIFIED CHANNELS', wx + 48, wy + 145);
 
-      // Email Card
-      drawRRect(wx + 48, wy + 190, 1080, 80, 12);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      // Section 1: Official Email (Black card, Blue 2px border)
+      drawRRect(wx + 48, wy + 175, ww - 96, 95, 8);
+      ctx.fillStyle = '#050505';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2.0;
       ctx.stroke();
 
-      ctx.font = 'bold 14px monospace';
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillText('OFFICIAL INBOX', wx + 75, wy + 218);
-      ctx.font = 'bold 22px monospace';
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillText('singhnikhil2608@gmail.com', wx + 75, wy + 248);
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = '#facc15';
+      ctx.fillText('OFFICIAL INBOX', wx + 75, wy + 205);
 
-      // Social Links
-      const channels = [
-        { label: 'GitHub', value: 'github.com/Nikhil-singh-26', color: '#f59e0b' },
-        { label: 'LinkedIn', value: 'linkedin.com/in/nikhil-singh-dev', color: '#0ea5e9' },
-        { label: 'Location', value: 'Chhattisgarh, India (Open to Remote / Relocation)', color: '#10b981' }
-      ];
-      channels.forEach((ch, idx) => {
-        const cy = wy + 300 + idx * 75;
-        drawRRect(wx + 48, cy, 1080, 62, 10);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-        ctx.stroke();
+      ctx.font = 'bold 24px monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('nikhilsingh260406@gmail.com', wx + 75, wy + 240);
 
-        ctx.font = 'bold 16px sans-serif';
-        ctx.fillStyle = ch.color;
-        ctx.textAlign = 'left';
-        ctx.fillText(ch.label, wx + 75, cy + 31);
+      // Section 2: Send Message (Mailto)
+      drawRRect(wx + 48, wy + 290, ww - 96, 175, 8);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
-        ctx.font = '15px monospace';
-        ctx.fillStyle = '#cbd5e1';
-        ctx.fillText(ch.value, wx + 240, cy + 31);
-      });
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = '#facc15';
+      ctx.fillText('COMPOSE MESSAGE', wx + 75, wy + 320);
 
-      // Status indicator
       ctx.font = '14px sans-serif';
-      ctx.fillStyle = '#10b981';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Subject: Software Engineer Opportunity / Project Collaboration', wx + 75, wy + 355);
+      ctx.fillText('Recipient: nikhilsingh260406@gmail.com', wx + 75, wy + 385);
+
+      // Button: Send via Email Client (Electric Blue with White text)
+      drawRRect(wx + 75, wy + 410, 360, 42, 6);
+      ctx.fillStyle = '#2563eb';
+      ctx.fill();
+      ctx.font = 'bold 14px monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText('✉ SEND EMAIL VIA CLIENT', wx + 255, wy + 431);
+
+      // Section 3: Verified Channels
       ctx.textAlign = 'left';
-      ctx.fillText('🟢 Currently open for Software Engineer Internships & New Grad Opportunities', wx + 48, wy + 550);
+      // GitHub (Yellow accent)
+      drawRRect(wx + 48, wy + 485, (ww - 116) / 2, 75, 8);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.font = 'bold 14px monospace';
+      ctx.fillStyle = '#facc15';
+      ctx.fillText('GITHUB', wx + 75, wy + 512);
+      ctx.font = '15px monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('github.com/Nikhil-singh-26', wx + 75, wy + 540);
+
+      // LinkedIn (Blue accent)
+      const lix = wx + 48 + (ww - 116) / 2 + 20;
+      drawRRect(lix, wy + 485, (ww - 116) / 2, 75, 8);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.font = 'bold 14px monospace';
+      ctx.fillStyle = '#2563eb';
+      ctx.fillText('LINKEDIN', lix + 27, wy + 512);
+      ctx.font = '15px monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('linkedin.com/in/nikhil-singh-dev', lix + 27, wy + 540);
+
+      // Status Badge (Yellow box with Black text)
+      drawRRect(wx + 48, wy + 580, ww - 96, 46, 6);
+      ctx.fillStyle = '#facc15';
+      ctx.fill();
+      ctx.font = 'bold 14px monospace';
+      ctx.fillStyle = '#000000';
+      ctx.textAlign = 'center';
+      ctx.fillText('● STATUS: OPEN FOR SOFTWARE ENGINEER INTERNSHIPS & FULL-TIME OPPORTUNITIES', wx + ww / 2, wy + 603);
     }
 
     // 6. Windows Taskbar (y = 1076 to 1152)
@@ -603,49 +600,53 @@ export function Workstation() {
     ctx.lineTo(width, tby);
     ctx.stroke();
 
-    // Active Applications in Taskbar (Shows only open windows)
-    let currentTabX = 24;
-    if (isAboutWindowOpen) {
-      drawRRect(currentTabX, tby + 16, 200, 44, 8);
-      ctx.fillStyle = !isAboutMinimized ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
+    // Windows 11 Start 4-Square Logo on the Left
+    const wlogoX = 36;
+    const wlogoY = tby + 26;
+    ctx.fillStyle = '#00adef';
+    ctx.fillRect(wlogoX, wlogoY, 10, 10);
+    ctx.fillRect(wlogoX + 13, wlogoY, 10, 10);
+    ctx.fillRect(wlogoX, wlogoY + 13, 10, 10);
+    ctx.fillRect(wlogoX + 13, wlogoY + 13, 10, 10);
+
+    // Active Applications in Taskbar (Centered in the Middle - Windows 11 Style)
+    const appTabs = [
+      { id: 'about', label: '>_ Terminal', isOpen: isAboutWindowOpen, isMin: isAboutMinimized, color: '#10b981' },
+      { id: 'mail', label: '✉ Mail', isOpen: isMailOpen, isMin: isMailMinimized, color: '#38bdf8' },
+      { id: 'resume', label: '📄 Resume', isOpen: isResumeWindowOpen, isMin: isResumeMinimized, color: '#facc15' }
+    ];
+    const openTabs = appTabs.filter((t) => t.isOpen);
+    const tabWidth = 170;
+    const tabGap = 12;
+    const totalW = openTabs.length * tabWidth + Math.max(0, openTabs.length - 1) * tabGap;
+    let startX = (width - totalW) / 2;
+
+    openTabs.forEach((tab) => {
+      const isActive = activeWindow === tab.id && !tab.isMin;
+      drawRRect(startX, tby + 16, tabWidth, 44, 8);
+      ctx.fillStyle = isActive ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.06)';
       ctx.fill();
-      ctx.strokeStyle = '#10b981';
+      ctx.strokeStyle = isActive ? tab.color : 'rgba(255, 255, 255, 0.15)';
       ctx.lineWidth = 1.2;
       ctx.stroke();
+
       ctx.font = 'bold 13px monospace';
-      ctx.fillStyle = '#10b981';
+      ctx.fillStyle = isActive ? tab.color : '#e2e8f0';
       ctx.textAlign = 'center';
-      ctx.fillText('>_ Terminal — About', currentTabX + 100, tby + 38);
-      currentTabX += 215;
-    }
+      ctx.fillText(tab.label, startX + tabWidth / 2, tby + 38);
 
-    if (isMailOpen) {
-      drawRRect(currentTabX, tby + 16, 180, 44, 8);
-      ctx.fillStyle = !isMailMinimized ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
-      ctx.fill();
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillStyle = '#38bdf8';
-      ctx.textAlign = 'center';
-      ctx.fillText('✉ Mail — Contact', currentTabX + 90, tby + 38);
-      currentTabX += 195;
-    }
-
-    if (isResumeWindowOpen) {
-      drawRRect(currentTabX, tby + 16, 180, 44, 8);
-      ctx.fillStyle = !isResumeMinimized ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.05)';
-      ctx.fill();
-      ctx.strokeStyle = '#a7f3d0';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillStyle = '#a7f3d0';
-      ctx.textAlign = 'center';
-      ctx.fillText('📄 Resume', currentTabX + 90, tby + 38);
-      currentTabX += 195;
-    }
+      // Windows 11 pill indicator underneath
+      if (isActive) {
+        ctx.fillStyle = tab.color;
+        ctx.fillRect(startX + tabWidth / 2 - 16, tby + 56, 32, 3);
+      } else {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(startX + tabWidth / 2, tby + 57, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      startX += tabWidth + tabGap;
+    });
 
     // Right Tray
     ctx.font = 'bold 14px monospace';
@@ -664,6 +665,8 @@ export function Workstation() {
     isResumeMinimized,
     isMailOpen,
     isMailMinimized,
+    activeWindow,
+    terminalHistory,
     currentTime,
     currentDate
   ]);
@@ -806,41 +809,37 @@ export function Workstation() {
     setActiveWindow('mail');
   };
 
-  // Stream terminal lines when About window opens
-  useEffect(() => {
-    if (!isAboutWindowOpen) {
-      setTerminalStreamIndex(0);
-      setIsTerminalStreamingComplete(false);
-      return;
+  const handleSendEmailViaClient = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
+    const subject = encodeURIComponent(contactSubject.trim() || 'Software Engineer Opportunity / Project Collaboration');
+    const body = encodeURIComponent(
+      contactMessage.trim() || 'Hello Nikhil,\n\nI came across your portfolio and would like to connect.'
+    );
+    const mailtoUrl = `mailto:${contactData.email}?subject=${subject}&body=${body}`;
+    if (typeof window !== 'undefined') {
+      window.location.href = mailtoUrl;
+    }
+  };
 
-    if (isTerminalStreamingComplete) return;
-
-    const interval = setInterval(() => {
-      setTerminalStreamIndex((prev) => {
-        if (prev + 1 >= terminalFullBio.length) {
-          clearInterval(interval);
-          setIsTerminalStreamingComplete(true);
-          return terminalFullBio.length;
-        }
-        return prev + 1;
-      });
-    }, 35);
-
-    return () => clearInterval(interval);
-  }, [isAboutWindowOpen, isTerminalStreamingComplete, terminalFullBio.length]);
+  // Auto-focus terminal command input whenever About window is opened or brought to front
+  useEffect(() => {
+    if (isAboutWindowOpen && !isAboutMinimized && activeWindow === 'about') {
+      const timer = setTimeout(() => {
+        terminalInputRef.current?.focus();
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [isAboutWindowOpen, isAboutMinimized, activeWindow, aboutTab]);
 
   // Auto-scroll terminal viewport as new lines arrive
   useEffect(() => {
     if (terminalScrollRef.current) {
       terminalScrollRef.current.scrollTop = terminalScrollRef.current.scrollHeight;
     }
-  }, [terminalStreamIndex, terminalHistory]);
-
-  const handleSkipTerminalStream = () => {
-    setTerminalStreamIndex(terminalFullBio.length);
-    setIsTerminalStreamingComplete(true);
-  };
+  }, [terminalHistory]);
 
   const handleTerminalCommand = (cmd: string) => {
     const trimmed = cmd.trim();
@@ -851,8 +850,6 @@ export function Workstation() {
 
     if (lower === 'clear' || lower === 'cls') {
       setTerminalHistory([]);
-      setTerminalStreamIndex(terminalFullBio.length);
-      setIsTerminalStreamingComplete(true);
       setTerminalInput('');
       return;
     } else if (lower === 'help') {
@@ -861,39 +858,56 @@ export function Workstation() {
         '  about      - Display developer biography & career overview',
         '  skills     - View core technology stack and tools',
         '  education  - View B.Tech degree, university, and GPA stats',
-        '  resume     - Launch the official Resume document viewer',
+        '  resume     - Open official resume in PDF viewer window',
         '  contact    - Launch direct email & communication channels',
+        '  page       - Switch to graphical Developer Profile page view',
         '  clear      - Clear terminal screen buffer'
       );
     } else if (lower === 'about' || lower === 'cat about.txt' || lower === 'bio') {
       newEntry.push(
         'Nikhil Singh — Software Engineer & Creative Developer',
-        'B.Tech CSE @ Government Engineering College Bilaspur (2022-2026) | CGPA: 7.85/10',
-        'Specializing in full-stack web applications and real-time 3D spatial graphics.',
-        'Email: singhnikhil2608@gmail.com | GitHub: github.com/Nikhil-singh-26'
+        'B.Tech CSE @ Government Engineering College Bilaspur (2024-2028) | CGPA: 7.6/10',
+        'Full-stack developer passionate about building practical web and mobile applications,',
+        'creating responsive user experiences, and developing scalable solutions using React,',
+        'Next.js, Node.js, Express, MongoDB, and Flutter.',
+        'Email: nikhilsingh260406@gmail.com | GitHub: github.com/Nikhil-singh-26 | LinkedIn: linkedin.com/in/nikhil-singh-dev'
       );
-    } else if (lower === 'skills') {
+    } else if (lower === 'skills' || lower === 'stack') {
       newEntry.push(
         'Core Technologies:',
-        '  • Languages: Java, TypeScript, JavaScript, SQL, Python, C++',
-        '  • Frontend: React.js, Next.js, Three.js, React Three Fiber, Tailwind CSS',
-        '  • Backend: Node.js, Express.js, MongoDB, PostgreSQL, REST APIs',
-        '  • DevOps & Tools: Git, GitHub, Docker, Postman, Linux, Vercel'
+        '  • Languages: Java, JavaScript, TypeScript, C, Dart',
+        '  • Frontend: HTML5, CSS3, React, Next.js, Tailwind CSS, Drei, Three.js, Gsap',
+        '  • Backend: Node.js, Express.js',
+        '  • Databases: MongoDB, Mongoose, PostgreSQL, MySQL',
+        '  • Mobile: Flutter',
+        '  • DevOps & Tools: Git, GitHub, Postman, Linux, Vercel'
       );
     } else if (lower === 'education') {
       newEntry.push(
         'Academic Credentials:',
         '  • Degree: Bachelor of Technology (B.Tech)',
-        '  • Major: Computer Science & Engineering (2022 — 2026)',
-        '  • College: Government Engineering College Bilaspur (CG)',
-        '  • Cumulative GPA: 7.85 / 10'
+        '  • Major: Computer Science & Engineering (2024 — 2028)',
+        '  • Institution: Government Engineering College Bilaspur (CG)',
+        '  • CGPA: 7.6 / 10'
       );
-    } else if (lower === 'resume') {
-      newEntry.push('Opening official Resume document viewer...');
+    } else if (lower === 'resume' || lower === 'cv') {
+      newEntry.push('Opening official resume document on display...');
       handleOpenResume();
-    } else if (lower === 'contact') {
+    } else if (lower === 'contact' || lower === 'mail' || lower === 'email') {
       newEntry.push('Opening direct communication channels...');
       handleOpenContact();
+    } else if (lower === 'page' || lower === 'gui' || lower === 'profile') {
+      newEntry.push('Switching to graphical Developer Profile page view...');
+      setAboutTab('page');
+    } else if (lower === 'cli' || lower === 'term' || lower === 'terminal') {
+      newEntry.push('Already in interactive Terminal CLI view.');
+      setAboutTab('terminal');
+    } else if (lower === 'whoami') {
+      newEntry.push('nikhil (Full-Stack Software Engineer & 3D Web Creative)');
+    } else if (lower === 'ls' || lower === 'dir') {
+      newEntry.push('about.txt   skills.md   education.pdf   resume.pdf   contact.sh');
+    } else if (lower === 'date') {
+      newEntry.push(new Date().toString());
     } else {
       newEntry.push(`bash: command not found: ${trimmed}. Type "help" for available commands.`);
     }
@@ -934,53 +948,110 @@ export function Workstation() {
     const u = e.uv.x; // 0 (left) to 1 (right)
     const v = e.uv.y; // 0 (bottom) to 1 (top)
 
-    // Taskbar (v < 0.07) - toggle active open window tabs
+    // Taskbar (v < 0.07) - toggle active open window tabs in the MIDDLE
     if (v < 0.07) {
-      if (u <= 0.18 && isAboutWindowOpen) {
+      if (u >= 0.35 && u < 0.45 && isAboutWindowOpen) {
         if (isAboutMinimized) {
           openAboutWindow();
           setActiveWindow('about');
-        } else {
+        } else if (activeWindow === 'about') {
           minimizeAboutWindow();
+        } else {
+          setActiveWindow('about');
         }
-      } else if (u > 0.18 && u <= 0.34 && isMailOpen) {
-        setIsMailMinimized((prev) => !prev);
-      } else if (u > 0.34 && u <= 0.50 && isResumeWindowOpen) {
+      } else if (u >= 0.45 && u < 0.55 && isMailOpen) {
+        if (isMailMinimized) {
+          setIsMailMinimized(false);
+          setActiveWindow('mail');
+        } else if (activeWindow === 'mail') {
+          setIsMailMinimized(true);
+        } else {
+          setActiveWindow('mail');
+        }
+      } else if (u >= 0.55 && u <= 0.65 && isResumeWindowOpen) {
         if (isResumeMinimized) {
           openResumeWindow();
           setActiveWindow('resume');
-        } else {
+        } else if (activeWindow === 'resume') {
           minimizeResumeWindow();
+        } else {
+          setActiveWindow('resume');
         }
       }
       return;
     }
 
-    // Left desktop folders (u: 0.03 to 0.15)
-    if (u >= 0.03 && u <= 0.15) {
-      // Folder 1: About (v: 0.68 to 0.88)
-      if (v >= 0.68 && v <= 0.88) {
+    // Left desktop folders (u: 0.035 to 0.165)
+    if (u >= 0.035 && u <= 0.165) {
+      // Folder 1: About (v: 0.68 to 0.91)
+      if (v >= 0.68 && v <= 0.91) {
         openAboutWindow();
         setActiveWindow('about');
+        setTimeout(() => terminalInputRef.current?.focus(), 60);
         return;
       }
-      // Folder 2: Contact (v: 0.44 to 0.64)
-      if (v >= 0.44 && v <= 0.64) {
+      // Folder 2: Contact (v: 0.45 to 0.68)
+      if (v >= 0.45 && v <= 0.68) {
         handleOpenContact();
         return;
       }
-      // Folder 3: Resume (v: 0.20 to 0.40)
-      if (v >= 0.20 && v <= 0.40) {
+      // Folder 3: Resume (v: 0.22 to 0.45)
+      if (v >= 0.22 && v <= 0.45) {
         handleOpenResume();
         return;
       }
     }
 
-    // Window close button (u: 0.72 to 0.76, v: 0.82 to 0.88)
-    if (u >= 0.72 && u <= 0.76 && v >= 0.82 && v <= 0.88) {
-      if (isAboutWindowOpen) closeAboutWindow();
-      if (isResumeWindowOpen) closeResumeWindow();
-      if (isMailOpen) setIsMailOpen(false);
+    // Active Window Controls (Close, Minimize, Maximize) on 3D Mesh
+    const isAnyWinOpen =
+      (isAboutWindowOpen && !isAboutMinimized) ||
+      (isResumeWindowOpen && !isResumeMinimized) ||
+      (isMailOpen && !isMailMinimized);
+
+    if (isAnyWinOpen) {
+      // Close button (Left red dot u: [0.20, 0.235] or Right X u: [0.68, 0.73])
+      if (
+        (u >= 0.20 && u <= 0.235 && v >= 0.85 && v <= 0.92) ||
+        (u >= 0.68 && u <= 0.73 && v >= 0.88 && v <= 0.95)
+      ) {
+        if (activeWindow === 'about' && isAboutWindowOpen) closeAboutWindow();
+        else if (activeWindow === 'resume' && isResumeWindowOpen) closeResumeWindow();
+        else if (activeWindow === 'mail' && isMailOpen) setIsMailOpen(false);
+        else {
+          if (isAboutWindowOpen) closeAboutWindow();
+          if (isResumeWindowOpen) closeResumeWindow();
+          if (isMailOpen) setIsMailOpen(false);
+        }
+        return;
+      }
+
+      // Minimize button (Only for About and Mail - Resume has NO minimize/maximize)
+      if (
+        (u >= 0.235 && u <= 0.255 && v >= 0.85 && v <= 0.92) ||
+        (u >= 0.63 && u <= 0.675 && v >= 0.88 && v <= 0.95)
+      ) {
+        if (activeWindow === 'about' && isAboutWindowOpen) minimizeAboutWindow();
+        else if (activeWindow === 'mail' && isMailOpen) setIsMailMinimized(true);
+        return;
+      }
+
+      // Maximize button (Only for About and Mail - Resume has NO minimize/maximize)
+      if (
+        (u >= 0.255 && u <= 0.28 && v >= 0.85 && v <= 0.92) ||
+        (u >= 0.675 && u <= 0.70 && v >= 0.88 && v <= 0.95)
+      ) {
+        if (activeWindow === 'about' && isAboutWindowOpen) toggleMaximizeAboutWindow();
+        else if (activeWindow === 'mail' && isMailOpen) setIsMailMaximized((prev) => !prev);
+        return;
+      }
+    }
+
+    // If Contact window is open and user clicks inside copy/mailto
+    if (isMailOpen && !isMailMinimized) {
+      if (u >= 0.18 && u <= 0.82 && v >= 0.62 && v <= 0.78) {
+        handleCopyEmail();
+        return;
+      }
     }
   };
 
@@ -1091,6 +1162,8 @@ export function Workstation() {
         >
           {/* Desktop Screen Boundary (1760px x 990px) */}
           <div
+            data-desktop-screen="true"
+            onPointerDown={(e) => e.stopPropagation()}
             style={{
               width: '1760px',
               height: '990px',
@@ -1105,36 +1178,40 @@ export function Workstation() {
             <div className="absolute inset-0 bg-radial from-transparent via-black/15 to-black/45 pointer-events-none" />
 
             {/* Desktop Icons Area: Exactly Three Visible Folders (About, Contact, Resume) on the Left */}
-            <div className="absolute left-14 top-14 flex flex-col gap-6 pointer-events-auto z-30">
-              {/* Folder 1: About (Terminal Icon) */}
+            <div className="absolute left-12 top-12 flex flex-col gap-6 pointer-events-auto z-30 select-none">
+              {/* Folder 1: About Me (Terminal & Profile Icon) */}
               <div
+                onMouseDown={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   openAboutWindow();
                   setActiveWindow('about');
+                  setTimeout(() => terminalInputRef.current?.focus(), 60);
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   openAboutWindow();
                   setActiveWindow('about');
+                  setTimeout(() => terminalInputRef.current?.focus(), 60);
                 }}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-emerald-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                className="flex flex-col items-center justify-center w-28 p-2 rounded-xl hover:bg-white/10 hover:border-white/20 border border-transparent cursor-pointer group text-center transition-all active:scale-95"
                 role="button"
                 tabIndex={0}
-                aria-label="Open Terminal About Me"
+                aria-label="Open About Me"
               >
-                <div className="p-3.5 rounded-2xl bg-emerald-500/20 group-hover:bg-emerald-500/35 text-emerald-400 transition-transform group-hover:scale-110 shadow-lg border border-emerald-500/30">
-                  <Terminal className="w-14 h-14 text-emerald-400" />
+                <div className="w-16 h-16 rounded-xl bg-black/60 border border-emerald-400/50 flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:border-emerald-400 transition-transform">
+                  <Terminal className="w-8 h-8 text-emerald-400" />
                 </div>
-                <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2.5 tracking-wide">
-                  About
+                <span className="text-sm font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2 tracking-wide">
+                  About Me
                 </span>
-                <span className="text-xs font-mono text-emerald-300 font-medium">Profile & Bio</span>
+                <span className="text-[11px] font-mono text-emerald-300/80 drop-shadow">terminal</span>
               </div>
 
               {/* Folder 2: Contact (Mail Envelope) */}
               <div
+                onMouseDown={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
@@ -1144,22 +1221,23 @@ export function Workstation() {
                   e.stopPropagation();
                   handleOpenContact();
                 }}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-sky-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                className="flex flex-col items-center justify-center w-28 p-2 rounded-xl hover:bg-white/10 hover:border-white/20 border border-transparent cursor-pointer group text-center transition-all active:scale-95"
                 role="button"
                 tabIndex={0}
                 aria-label="Open Contact & Mail"
               >
-                <div className="p-3.5 rounded-2xl bg-sky-500/20 group-hover:bg-sky-500/35 text-sky-400 transition-transform group-hover:scale-110 shadow-lg border border-sky-500/30">
-                  <Mail className="w-14 h-14 text-sky-400" />
+                <div className="w-16 h-16 rounded-xl bg-black/60 border border-blue-500/50 flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:border-blue-400 transition-transform">
+                  <Mail className="w-8 h-8 text-blue-400" />
                 </div>
-                <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2.5 tracking-wide">
+                <span className="text-sm font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2 tracking-wide">
                   Contact
                 </span>
-                <span className="text-xs font-mono text-sky-300 font-medium">Mail & Channels</span>
+                <span className="text-[11px] font-mono text-yellow-400/80 drop-shadow">channels</span>
               </div>
 
               {/* Folder 3: Resume (Document Page File) */}
               <div
+                onMouseDown={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
@@ -1169,22 +1247,22 @@ export function Workstation() {
                   e.stopPropagation();
                   handleOpenResume();
                 }}
-                className="flex flex-col items-center justify-center w-36 p-3.5 rounded-2xl bg-[#090d16]/85 hover:bg-white/25 border border-white/20 hover:border-amber-400/80 cursor-pointer group text-center transition-all select-none shadow-[0_8px_28px_rgba(0,0,0,0.65)] backdrop-blur-md active:scale-95"
+                className="flex flex-col items-center justify-center w-28 p-2 rounded-xl hover:bg-white/10 hover:border-white/20 border border-transparent cursor-pointer group text-center transition-all active:scale-95"
                 role="button"
                 tabIndex={0}
                 aria-label="Open Resume Document"
               >
-                <div className="p-3.5 rounded-2xl bg-amber-500/20 group-hover:bg-amber-500/35 text-amber-400 transition-transform group-hover:scale-110 shadow-lg border border-amber-500/30">
-                  <FileText className="w-14 h-14 text-amber-400" />
+                <div className="w-16 h-16 rounded-xl bg-black/60 border border-yellow-500/50 flex items-center justify-center shadow-lg group-hover:scale-105 group-hover:border-yellow-400 transition-transform">
+                  <FileText className="w-8 h-8 text-yellow-400" />
                 </div>
-                <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2.5 tracking-wide">
+                <span className="text-sm font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mt-2 tracking-wide">
                   Resume
                 </span>
-                <span className="text-xs font-mono text-amber-300 font-medium">Resume.pdf</span>
+                <span className="text-[11px] font-mono text-yellow-300/80 drop-shadow">resume.pdf</span>
               </div>
             </div>
 
-            {/* ================= 1. ABOUT ME WINDOW (AUTHENTIC INTERACTIVE TERMINAL) ================= */}
+            {/* ================= 1. ABOUT ME WINDOW (AUTHENTIC INTERACTIVE TERMINAL & PROFILE PAGE) ================= */}
             <div
               onMouseDown={() => setActiveWindow('about')}
               style={{
@@ -1206,137 +1284,288 @@ export function Workstation() {
                 <div className="flex items-center gap-2.5">
                   <Terminal className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs font-mono font-semibold text-emerald-300 tracking-wide">
-                    Terminal — About Nikhil Singh (bash)
+                    About Nikhil Singh — {aboutTab === 'terminal' ? 'bash (~/about-me)' : 'Developer Profile'}
                   </span>
                 </div>
 
                 {/* Window Controls (Minimize, Maximize, Close) */}
-                <div className="flex items-center">
+                <div className="flex items-center gap-1">
                   <button
-                    onClick={minimizeAboutWindow}
-                    className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      minimizeAboutWindow();
+                    }}
+                    className="p-1.5 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                     aria-label="Minimize Window"
                   >
-                    <Minus className="w-3.5 h-3.5" />
+                    <Minus className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={toggleMaximizeAboutWindow}
-                    className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMaximizeAboutWindow();
+                    }}
+                    className="p-1.5 rounded text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                     aria-label="Maximize or Restore Window"
                   >
-                    <Square className="w-3 h-3" />
+                    <Square className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={closeAboutWindow}
-                    className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-red-600 transition-colors"
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeAboutWindow();
+                    }}
+                    className="p-1.5 rounded text-white/70 hover:text-white hover:bg-red-600 transition-colors"
                     aria-label="Close Window"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              {/* Quick CLI Actions Sub-Toolbar */}
-              <div className="bg-[#0b101c] px-4 py-1.5 border-b border-white/10 flex items-center justify-between text-xs font-mono">
-                <span className="text-white/50 text-[11px]">nikhil@desktop:~/about-me</span>
+              {/* Sub-Toolbar (Switch between Terminal and Profile Page, and quick CLI commands) */}
+              <div className="bg-[#0b101c] px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs font-mono">
                 <div className="flex items-center gap-1.5">
-                  {!isTerminalStreamingComplete && (
-                    <button
-                      onClick={handleSkipTerminalStream}
-                      className="px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] transition-colors"
-                    >
-                      Skip Animation ⏩
-                    </button>
-                  )}
                   <button
-                    onClick={() => handleTerminalCommand('skills')}
-                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 text-[11px] transition-colors"
+                    type="button"
+                    onClick={() => {
+                      setAboutTab('terminal');
+                      setTimeout(() => terminalInputRef.current?.focus(), 60);
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold transition-all ${
+                      aboutTab === 'terminal'
+                        ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10 border border-transparent'
+                    }`}
                   >
-                    skills
+                    <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Terminal (CLI)</span>
                   </button>
+
                   <button
-                    onClick={() => handleTerminalCommand('education')}
-                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 text-[11px] transition-colors"
+                    type="button"
+                    onClick={() => setAboutTab('page')}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold transition-all ${
+                      aboutTab === 'page'
+                        ? 'bg-blue-500/25 text-blue-300 border border-blue-500/40 shadow-sm'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10 border border-transparent'
+                    }`}
                   >
-                    education
-                  </button>
-                  <button
-                    onClick={() => handleTerminalCommand('clear')}
-                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-white/70 text-[11px] transition-colors"
-                  >
-                    clear
+                    <User className="w-3.5 h-3.5 text-blue-400" />
+                    <span>About Me (Page)</span>
                   </button>
                 </div>
+
+                {aboutTab === 'terminal' ? (
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    {['help', 'about', 'skills', 'education', 'resume', 'contact', 'clear'].map((cmd) => (
+                      <button
+                        key={cmd}
+                        type="button"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={() => handleTerminalCommand(cmd)}
+                        className="px-2 py-0.5 rounded bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 text-white/80 border border-white/10 text-[11px] font-mono transition-colors"
+                      >
+                        {cmd}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-white/50 text-[11px] font-mono">Profile Details • GEC Bilaspur</span>
+                )}
               </div>
 
-              {/* Authentic Terminal Body (Word-by-word Stream & Interactive CLI) */}
-              <div
-                ref={terminalScrollRef}
-                onWheel={(e) => e.stopPropagation()}
-                className="flex-1 p-5 overflow-y-auto space-y-2 bg-[#060a12] text-xs sm:text-[13px] font-mono leading-relaxed select-text"
-              >
-                {/* Streamed Bio Lines */}
-                {terminalFullBio.slice(0, terminalStreamIndex).map((line, idx) => (
-                  <div
-                    key={`stream-${idx}`}
-                    className={`whitespace-pre-wrap ${
-                      line.startsWith('nikhil@')
-                        ? 'text-emerald-400 font-bold'
-                        : line.startsWith('===')
-                        ? 'text-[#38bdf8] font-bold'
-                        : line.startsWith('[')
-                        ? 'text-amber-300 font-semibold'
-                        : 'text-white/85'
-                    }`}
-                  >
-                    {line}
-                  </div>
-                ))}
+              {/* Window Body: Either Terminal or Profile Page */}
+              {aboutTab === 'terminal' ? (
+                /* Authentic Interactive Terminal Body */
+                <div
+                  ref={terminalScrollRef}
+                  onClick={() => terminalInputRef.current?.focus()}
+                  onWheel={(e) => e.stopPropagation()}
+                  style={{ scrollbarWidth: 'thin', scrollbarColor: '#10b981 #090d16' }}
+                  className="flex-1 min-h-0 p-6 overflow-y-auto space-y-3 bg-[#050811] text-base sm:text-lg md:text-[18px] font-mono leading-relaxed select-text cursor-text"
+                >
+                  {/* Historical User Commands & Responses */}
+                  {terminalHistory.map((item, idx) => (
+                    <div
+                      key={`hist-${idx}`}
+                      className={`whitespace-pre-wrap ${
+                        item.startsWith('nikhil@')
+                          ? 'text-emerald-400 font-bold text-lg sm:text-xl pt-1'
+                          : item.startsWith('===')
+                          ? 'text-[#38bdf8] font-bold tracking-wider'
+                          : item.startsWith('[')
+                          ? 'text-yellow-400 font-bold text-base sm:text-lg pt-1'
+                          : item.startsWith('•')
+                          ? 'text-white font-medium pl-3'
+                          : item.startsWith('bash:')
+                          ? 'text-red-400 font-semibold'
+                          : 'text-white/90'
+                      }`}
+                    >
+                      {item}
+                    </div>
+                  ))}
 
-                {/* Blinking Cursor during Streaming */}
-                {!isTerminalStreamingComplete && (
-                  <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse align-middle" />
-                )}
-
-                {/* Historical User Commands & Responses */}
-                {terminalHistory.map((item, idx) => (
-                  <div
-                    key={`hist-${idx}`}
-                    className={`whitespace-pre-wrap ${
-                      item.startsWith('nikhil@')
-                        ? 'text-emerald-400 font-bold'
-                        : item.startsWith('bash:')
-                        ? 'text-red-400'
-                        : 'text-white/85'
-                    }`}
-                  >
-                    {item}
-                  </div>
-                ))}
-
-                {/* Active Interactive Command Line Form */}
-                {isTerminalStreamingComplete && (
+                  {/* Active Interactive Command Line Form (Always Active & Focused) */}
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       handleTerminalCommand(terminalInput);
                     }}
-                    className="flex items-center gap-2 pt-2 border-t border-white/5"
+                    className="flex items-center gap-2 pt-3 border-t border-emerald-500/30 cursor-text"
                   >
-                    <span className="text-emerald-400 font-bold select-none text-xs sm:text-[13px]">
+                    <span className="text-emerald-400 font-bold select-none text-base sm:text-lg flex-shrink-0">
                       nikhil@n-verse:~$
                     </span>
                     <input
+                      ref={terminalInputRef}
                       type="text"
                       value={terminalInput}
                       onChange={(e) => setTerminalInput(e.target.value)}
-                      placeholder='type command (e.g. "skills", "education", "resume", "clear")...'
-                      className="flex-1 bg-transparent border-none outline-none text-white font-mono text-xs sm:text-[13px] focus:ring-0 p-0 placeholder-white/30"
+                      onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleTerminalCommand(terminalInput);
+                        }
+                      }}
+                      placeholder='type command ("about", "skills", "education", "resume", "clear")...'
+                      className="flex-1 bg-transparent border-none outline-none text-white font-mono text-base sm:text-lg focus:ring-0 p-0 placeholder-white/35"
                       autoFocus
                     />
+                    <button
+                      type="submit"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      className="px-3 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 rounded text-xs font-mono font-bold transition-all cursor-pointer"
+                    >
+                      Run ↵
+                    </button>
                   </form>
-                )}
-              </div>
+                </div>
+              ) : (
+                /* Authentic Modern Developer Profile Page */
+                <div
+                  onWheel={(e) => e.stopPropagation()}
+                  className="flex-1 min-h-0 p-6 overflow-y-auto space-y-5 bg-[#090e17] text-white select-text"
+                >
+                  {/* Header Banner */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-mono font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded border border-yellow-400/30">
+                          B.Tech CSE (2024 — 2028)
+                        </span>
+                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/30">
+                          CGPA: 7.6 / 10
+                        </span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-white tracking-wide">
+                        Nikhil Singh
+                      </h2>
+                      <p className="text-xs sm:text-sm font-mono text-[#38bdf8] font-semibold mt-0.5">
+                        Computer Science Engineering Student & Aspiring Software Engineer
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleOpenResume}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xs font-mono transition-colors shadow-sm cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Resume PDF</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleOpenContact}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs font-mono transition-colors shadow-sm cursor-pointer"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Contact Me</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Academic Credentials Card */}
+                  <div className="bg-black/50 border border-white/15 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-mono text-yellow-400 font-bold uppercase tracking-wider">
+                      <GraduationCap className="w-4 h-4" />
+                      <span>Academic Credentials</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono text-white/90">
+                      <div>
+                        <span className="text-white/50 block text-[11px]">Degree:</span>
+                        <span className="font-semibold text-white">B.Tech in Computer Science & Engineering</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50 block text-[11px]">Duration:</span>
+                        <span className="font-semibold text-white">2024 — 2028</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50 block text-[11px]">Institution:</span>
+                        <span className="font-semibold text-white">Government Engineering College Bilaspur (CG)</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50 block text-[11px]">Cumulative GPA:</span>
+                        <span className="font-bold text-emerald-400 text-sm">7.6 / 10</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary & Core Biography */}
+                  <div className="space-y-2">
+                    <div className="text-xs font-mono text-white/60 uppercase tracking-wider font-bold">
+                      // Core Summary & Philosophy
+                    </div>
+                    <p className="text-sm font-sans text-slate-300 leading-relaxed">
+                      Full-stack developer passionate about building practical web and mobile applications,
+                      creating responsive user experiences, and developing scalable solutions using React,
+                      Next.js, Node.js, Express, MongoDB, and Flutter.
+                    </p>
+                    <p className="text-sm font-sans text-slate-300 leading-relaxed">
+                      Focused on strong engineering fundamentals, clean modular code, and building genuinely useful products that solve real problems.
+                    </p>
+                  </div>
+
+                  {/* Technical Stack Grid */}
+                  <div className="space-y-2.5 pt-1">
+                    <div className="text-xs font-mono text-[#38bdf8] uppercase tracking-wider font-bold">
+                      // Technical Skillset & Tools
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <span className="text-emerald-400 font-bold block mb-1.5">Languages & Core:</span>
+                        <span className="text-white/80">Java, JavaScript, TypeScript, C, Dart</span>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <span className="text-[#38bdf8] font-bold block mb-1.5">Frontend & 3D:</span>
+                        <span className="text-white/80">React, Next.js, HTML5, CSS3, Tailwind CSS, Drei, Three.js, Gsap</span>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <span className="text-yellow-400 font-bold block mb-1.5">Backend & Databases:</span>
+                        <span className="text-white/80">Node.js, Express.js, MongoDB, Mongoose, PostgreSQL, MySQL</span>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                        <span className="text-purple-400 font-bold block mb-1.5">Mobile & DevOps:</span>
+                        <span className="text-white/80">Flutter, Git, GitHub, Postman, Linux, Vercel</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* ================= 2. RESUME DOCUMENT VIEWER WINDOW ================= */}
@@ -1347,107 +1576,98 @@ export function Workstation() {
                 position: 'absolute',
                 left: isResumeMaximized ? 0 : `${resumePos.x}px`,
                 top: isResumeMaximized ? 0 : `${resumePos.y}px`,
-                width: isResumeMaximized ? '100%' : '880px',
-                height: isResumeMaximized ? 'calc(100% - 56px)' : '580px',
+                width: isResumeMaximized ? '100%' : '900px',
+                height: isResumeMaximized ? 'calc(100% - 56px)' : '620px',
                 zIndex: activeWindow === 'resume' ? 40 : 30
               }}
-              className="bg-[#121824]/98 border border-white/20 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 pointer-events-auto"
+              className="bg-[#0f172a] border-2 border-blue-500 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 pointer-events-auto"
             >
-                {/* Title Bar */}
-                <div
-                  onMouseDown={(e) => handleMouseDown('resume', resumePos, e)}
-                  className="bg-[#1a2232] px-3.5 py-2 border-b border-white/10 flex items-center justify-between cursor-move select-none"
-                >
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-semibold text-white tracking-wide">
-                      Resume.pdf — Official Resume
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={minimizeResumeWindow}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                      aria-label="Minimize Window"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={toggleMaximizeResumeWindow}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                      aria-label="Maximize or Restore Window"
-                    >
-                      <Square className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={closeResumeWindow}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-red-600 transition-colors"
-                      aria-label="Close Window"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+              {/* Title Bar (ONLY Cross/Close Button - No minimize, no maximize) */}
+              <div
+                onMouseDown={(e) => handleMouseDown('resume', resumePos, e)}
+                className="bg-[#1e293b] px-4 py-2.5 border-b border-blue-500/30 flex items-center justify-between cursor-move select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-yellow-400" />
+                  <span className="text-xs font-mono font-semibold text-white tracking-wide">
+                    PDF Viewer — resume.pdf (Nikhil Singh)
+                  </span>
                 </div>
 
-                {/* Actions Toolbar */}
-                <div className="bg-[#090e17] px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="text-emerald-400 flex items-center gap-1 font-semibold">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Nikhil Singh • Computer Science</span>
-                    </span>
-                    <span className="text-white/40 hidden sm:inline">&bull;</span>
-                    <span className="text-white/60 text-[11px] hidden sm:inline">GEC Bilaspur (2022-2026)</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <a
-                      href="/resume.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-[#38bdf8] text-xs transition-colors"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>Open in Tab</span>
-                    </a>
-                    <button
-                      onClick={handleShareResume}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs transition-colors"
-                      title="Share or Copy Resume Link"
-                    >
-                      {copiedResumeLink ? (
-                        <Check className="w-3 h-3 text-emerald-400" />
-                      ) : (
-                        <Share2 className="w-3 h-3 text-amber-400" />
-                      )}
-                      <span>{copiedResumeLink ? 'Link Copied!' : 'Share / Copy'}</span>
-                    </button>
-                    <a
-                      href="/resume.pdf"
-                      download="Nikhil_Singh_Resume.pdf"
-                      className="flex items-center gap-1 px-3 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition-colors shadow-sm"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>Download</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Document Viewport */}
-                <div
-                  onWheel={(e) => e.stopPropagation()}
-                  className="flex-1 bg-[#1a202c] overflow-y-auto p-1.5 flex flex-col items-center"
-                >
-                  <iframe
-                    src="/resume.pdf#toolbar=0"
-                    title="Nikhil Singh Resume"
-                    className="w-full h-full min-h-[380px] border-0 rounded bg-white"
-                  />
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={closeResumeWindow}
+                    className="p-1.5 rounded text-white/70 hover:text-white hover:bg-red-600 transition-colors cursor-pointer"
+                    aria-label="Close Window"
+                    title="Close Window"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-            {/* ================= 3. CONTACT & MAIL CLIENT WINDOW ================= */}
+              {/* Actions Toolbar */}
+              <div className="bg-[#0b1120] px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="text-yellow-400 flex items-center gap-1 font-semibold">
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Nikhil Singh • public/resume.pdf</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.open('/resume.pdf', '_blank');
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-sm cursor-pointer"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open Full View</span>
+                  </button>
+                  <button
+                    onClick={handleShareResume}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs transition-colors"
+                    title="Share or Copy Resume Link"
+                  >
+                    {copiedResumeLink ? (
+                      <Check className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <Share2 className="w-3 h-3 text-yellow-400" />
+                    )}
+                    <span>{copiedResumeLink ? 'Copied!' : 'Copy Link'}</span>
+                  </button>
+                  <a
+                    href="/resume.pdf"
+                    download="Nikhil_Singh_Resume.pdf"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xs transition-colors shadow-sm"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download PDF</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Document Viewport */}
+              <div
+                onWheel={(e) => e.stopPropagation()}
+                className="flex-1 bg-[#1e293b] overflow-hidden p-2 flex flex-col items-center justify-center relative"
+              >
+                <iframe
+                  src="/resume.pdf#toolbar=1&navpanes=0&view=FitH"
+                  title="Nikhil Singh Official Resume"
+                  className="w-full h-full min-h-[420px] rounded bg-white border-0"
+                />
+              </div>
+            </div>
+
+            {/* ================= 3. CONTACT & MAIL CLIENT WINDOW (STRICT WHITE, BLACK, BLUE, YELLOW) ================= */}
             <div
               onMouseDown={() => setActiveWindow('mail')}
               style={{
@@ -1455,149 +1675,175 @@ export function Workstation() {
                 position: 'absolute',
                 left: isMailMaximized ? 0 : `${mailPos.x}px`,
                 top: isMailMaximized ? 0 : `${mailPos.y}px`,
-                width: isMailMaximized ? '100%' : '840px',
-                height: isMailMaximized ? 'calc(100% - 56px)' : '580px',
+                width: isMailMaximized ? '100%' : '860px',
+                height: isMailMaximized ? 'calc(100% - 56px)' : '600px',
                 zIndex: activeWindow === 'mail' ? 40 : 30
               }}
-              className="bg-[#121824]/98 border border-white/20 rounded-xl shadow-2xl flex-col overflow-hidden backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 pointer-events-auto"
+              className="bg-black border-2 border-white rounded-xl shadow-2xl flex-col overflow-hidden pointer-events-auto"
             >
-                {/* Title Bar */}
-                <div
-                  onMouseDown={(e) => handleMouseDown('mail', mailPos, e)}
-                  className="bg-[#1a2232] px-3.5 py-2 border-b border-white/10 flex items-center justify-between cursor-move select-none"
-                >
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-[#38bdf8]" />
-                    <span className="text-xs font-semibold text-white tracking-wide">
-                      Mail & Communications — Nikhil Singh
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setIsMailMinimized(true)}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                      aria-label="Minimize Window"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setIsMailMaximized((prev) => !prev)}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                      aria-label="Maximize or Restore Window"
-                    >
-                      <Square className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => setIsMailOpen(false)}
-                      className="px-2.5 py-1 text-white/70 hover:text-white hover:bg-red-600 transition-colors"
-                      aria-label="Close Window"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+              {/* Title Bar (Black & White with Yellow/Blue controls) */}
+              <div
+                onMouseDown={(e) => handleMouseDown('mail', mailPos, e)}
+                className="bg-[#050505] px-4 py-2.5 border-b border-white flex items-center justify-between cursor-move select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-blue-500" />
+                  <span className="text-xs font-mono font-bold text-white tracking-wider uppercase">
+                    CONTACT & CHANNELS — NIKHIL SINGH
+                  </span>
                 </div>
 
-                {/* Mail & Channels Content */}
-                <div
-                  onWheel={(e) => e.stopPropagation()}
-                  className="flex-1 p-4 flex flex-col justify-between overflow-y-auto space-y-3.5 text-xs font-sans bg-[#0c121d]"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-white text-sm font-['Outfit']">
-                        Direct Communications Channel
-                      </h4>
-                      <span className="text-[10px] font-mono text-[#38bdf8] bg-[#38bdf8]/10 px-2 py-0.5 rounded">
-                        Available for Opportunities
-                      </span>
-                    </div>
-
-                    {/* Email Copy Card */}
-                    <div className="bg-[#141b2a] rounded-lg p-3 border border-white/10 space-y-1.5">
-                      <div className="text-[10px] font-mono text-[#38bdf8] uppercase tracking-wider">
-                        Direct Email Address
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-xs text-white select-all">
-                          {contactData.email}
-                        </span>
-                        <button
-                          onClick={handleCopyEmail}
-                          className="flex items-center gap-1.5 px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-xs font-mono transition-colors"
-                        >
-                          {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{copiedEmail ? 'Copied' : 'Copy Email'}</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Interactive Message Compose Form */}
-                    <div className="bg-[#141b2a] rounded-lg p-3 border border-white/10 space-y-2">
-                      <div className="text-[10px] font-mono text-[#38bdf8] uppercase tracking-wider">
-                        Send Message
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Subject (e.g. Software Engineer Opportunity / Project Collab)"
-                        value={contactSubject}
-                        onChange={(e) => setContactSubject(e.target.value)}
-                        className="w-full bg-[#0a0e17] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#38bdf8]"
-                      />
-                      <textarea
-                        rows={3}
-                        placeholder="Your message..."
-                        value={contactMessage}
-                        onChange={(e) => setContactMessage(e.target.value)}
-                        className="w-full bg-[#0a0e17] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#38bdf8] resize-none"
-                      />
-                      <a
-                        href={`mailto:${contactData.email}?subject=${encodeURIComponent(
-                          contactSubject || 'N-VERSE Portfolio Inquiry'
-                        )}&body=${encodeURIComponent(contactMessage)}`}
-                        className="w-full py-2 rounded bg-[#38bdf8] hover:bg-white text-black font-semibold font-mono text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Send via Email Client</span>
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Verified Links */}
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-[11px] font-mono text-white/50">Verified Profiles:</span>
-                    <div className="flex items-center gap-2">
-                      {contactData.github && (
-                        <a
-                          href={contactData.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 hover:bg-white/15 border border-white/10 text-xs font-mono transition-colors"
-                        >
-                          <GithubIcon className="w-3.5 h-3.5 text-[#38bdf8]" />
-                          <span>GitHub</span>
-                        </a>
-                      )}
-                      {contactData.linkedin && (
-                        <a
-                          href={contactData.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 hover:bg-white/15 border border-white/10 text-xs font-mono transition-colors"
-                        >
-                          <LinkedinIcon className="w-3.5 h-3.5 text-[#38bdf8]" />
-                          <span>LinkedIn</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={() => setIsMailMinimized(true)}
+                    className="px-2.5 py-1 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold transition-colors"
+                    aria-label="Minimize Window"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={() => setIsMailMaximized((prev) => !prev)}
+                    className="px-2.5 py-1 text-blue-400 hover:bg-blue-600 hover:text-white font-bold transition-colors"
+                    aria-label="Maximize or Restore Window"
+                  >
+                    <Square className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={() => setIsMailOpen(false)}
+                    className="px-2.5 py-1 text-white hover:bg-white hover:text-black font-bold transition-colors"
+                    aria-label="Close Window"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
-            {/* ================= WINDOWS TASKBAR (BOTTOM OF MAIN WALL SCREEN) ================= */}
-            <div className="h-14 bg-[#0e131d]/95 border-t border-white/15 px-6 flex items-center justify-between z-40 select-none pointer-events-auto">
-              {/* Running Applications Tabs */}
+              {/* Mail & Channels Content (Strict White, Black, Blue, Yellow - ZERO AI LOOK) */}
+              <div
+                onWheel={(e) => e.stopPropagation()}
+                className="flex-1 p-5 flex flex-col justify-between overflow-y-auto space-y-4 text-xs font-mono bg-black"
+              >
+                <div className="space-y-3.5">
+                  <div className="flex items-center justify-between border-b border-white/20 pb-2">
+                    <div>
+                      <h4 className="font-black text-white text-base tracking-wider uppercase">
+                        GET IN TOUCH
+                      </h4>
+                      <p className="text-[11px] font-mono text-yellow-400 font-semibold">
+                        DIRECT COMMUNICATIONS & VERIFIED CHANNELS
+                      </p>
+                    </div>
+                    <span className="text-[11px] font-mono font-bold text-black bg-yellow-400 px-2.5 py-1 rounded">
+                      ● STATUS: OPEN FOR WORK
+                    </span>
+                  </div>
+
+                  {/* Official Email Card (Black background, Blue 2px border, Yellow label, White text) */}
+                  <div className="bg-black rounded-lg p-3.5 border-2 border-blue-600 space-y-1.5 shadow-sm">
+                    <div className="text-[11px] font-mono text-yellow-400 font-bold uppercase tracking-wider">
+                      OFFICIAL INBOX
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-sm sm:text-base font-bold text-white select-all">
+                        {contactData.email}
+                      </span>
+                      <button
+                        onClick={handleCopyEmail}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-yellow-400 hover:bg-yellow-300 text-black font-bold font-mono text-xs transition-colors shadow-sm"
+                      >
+                        {copiedEmail ? <Check className="w-3.5 h-3.5 text-black" /> : <Copy className="w-3.5 h-3.5 text-black" />}
+                        <span>{copiedEmail ? 'COPIED!' : 'COPY EMAIL'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Direct Message Compose Form (Black, White borders, Blue send button) */}
+                  <div className="bg-black rounded-lg p-3.5 border-2 border-white space-y-2.5">
+                    <div className="text-[11px] font-mono text-yellow-400 font-bold uppercase tracking-wider">
+                      // DIRECT DISPATCHER
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Subject (e.g. Software Engineer Role / Project Collab)"
+                      value={contactSubject}
+                      onChange={(e) => setContactSubject(e.target.value)}
+                      className="w-full bg-black border border-white rounded px-3 py-2 text-xs text-white placeholder-yellow-400/60 font-mono focus:outline-none focus:border-blue-500"
+                    />
+                    <textarea
+                      rows={3}
+                      placeholder="Your message here..."
+                      value={contactMessage}
+                      onChange={(e) => setContactMessage(e.target.value)}
+                      className="w-full bg-black border border-white rounded px-3 py-2 text-xs text-white placeholder-yellow-400/60 font-mono focus:outline-none focus:border-blue-500 resize-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendEmailViaClient}
+                      className="w-full py-2.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold font-mono text-xs flex items-center justify-center gap-2 border border-blue-400 transition-all shadow-md uppercase tracking-wider cursor-pointer"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>SEND EMAIL VIA CLIENT</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Verified Links (White, Black, Blue, Yellow) */}
+                <div className="pt-3 border-t border-white/20 flex items-center justify-between">
+                  <span className="text-[11px] font-mono text-white font-bold uppercase">Verified Profiles:</span>
+                  <div className="flex items-center gap-3">
+                    {contactData.github && (
+                      <a
+                        href={contactData.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-black hover:bg-yellow-400 hover:text-black border-2 border-yellow-400 text-yellow-400 text-xs font-mono font-bold transition-colors"
+                      >
+                        <GithubIcon className="w-3.5 h-3.5" />
+                        <span>GitHub</span>
+                      </a>
+                    )}
+                    {contactData.linkedin && (
+                      <a
+                        href={contactData.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-black hover:bg-blue-600 hover:text-white border-2 border-blue-600 text-blue-400 text-xs font-mono font-bold transition-colors"
+                      >
+                        <LinkedinIcon className="w-3.5 h-3.5" />
+                        <span>LinkedIn</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ================= WINDOWS 11 TASKBAR (BOTTOM OF MAIN WALL SCREEN) ================= */}
+            <div className="h-14 bg-[#0e131d]/95 border-t border-white/15 px-6 flex items-center justify-between z-40 select-none pointer-events-auto relative">
+              {/* Windows 11 Start Button on the Left */}
               <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group">
+                  <div className="grid grid-cols-2 gap-0.5 w-4 h-4">
+                    <div className="bg-[#00adef] rounded-[1px] group-hover:brightness-110" />
+                    <div className="bg-[#00adef] rounded-[1px] group-hover:brightness-110" />
+                    <div className="bg-[#00adef] rounded-[1px] group-hover:brightness-110" />
+                    <div className="bg-[#00adef] rounded-[1px] group-hover:brightness-110" />
+                  </div>
+                  <span className="font-mono text-xs text-white/80 font-bold hidden sm:inline">Start</span>
+                </div>
+              </div>
+
+              {/* Running Applications Tabs Centered in the Middle (Windows 11 Style) */}
+              <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
                 {/* About Tab */}
                 {isAboutWindowOpen && (
                   <button
@@ -1611,7 +1857,7 @@ export function Workstation() {
                         setActiveWindow('about');
                       }
                     }}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border relative ${
                       activeWindow === 'about' && !isAboutMinimized
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-semibold shadow-sm'
                         : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
@@ -1619,6 +1865,9 @@ export function Workstation() {
                   >
                     <Terminal className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="font-mono text-xs">Terminal — About</span>
+                    {activeWindow === 'about' && !isAboutMinimized && (
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-emerald-400 rounded-full" />
+                    )}
                   </button>
                 )}
 
@@ -1635,14 +1884,17 @@ export function Workstation() {
                         setActiveWindow('mail');
                       }
                     }}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border relative ${
                       activeWindow === 'mail' && !isMailMinimized
-                        ? 'bg-sky-500/20 text-sky-300 border-sky-500/40 font-semibold shadow-sm'
+                        ? 'bg-blue-600/30 text-yellow-400 border-blue-500/60 font-bold shadow-sm'
                         : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
                     }`}
                   >
-                    <Mail className="w-3.5 h-3.5 text-sky-400" />
+                    <Mail className="w-3.5 h-3.5 text-blue-400" />
                     <span className="font-mono text-xs">Mail — Contact</span>
+                    {activeWindow === 'mail' && !isMailMinimized && (
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-400 rounded-full" />
+                    )}
                   </button>
                 )}
 
@@ -1659,14 +1911,17 @@ export function Workstation() {
                         setActiveWindow('resume');
                       }
                     }}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-colors border relative ${
                       activeWindow === 'resume' && !isResumeMinimized
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-semibold shadow-sm'
+                        ? 'bg-yellow-500/25 text-yellow-300 border-yellow-500/50 font-bold shadow-sm'
                         : 'bg-white/5 text-white/70 hover:bg-white/10 border-transparent'
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5 text-amber-400" />
+                    <FileText className="w-3.5 h-3.5 text-yellow-400" />
                     <span className="font-mono text-xs">Resume</span>
+                    {activeWindow === 'resume' && !isResumeMinimized && (
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-yellow-400 rounded-full" />
+                    )}
                   </button>
                 )}
               </div>

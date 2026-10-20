@@ -369,7 +369,7 @@ export function WelcomeIntro() {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00f0ff]/30 bg-[#00f0ff]/10 backdrop-blur-md text-[#38bdf8] font-mono text-xs uppercase tracking-widest"
         >
           <Sparkles className="w-3.5 h-3.5 text-[#00f0ff]" />
-          <span>An Interactive Engineering Universe</span>
+          <span>Nikhil Universe</span>
         </div>
 
         {/* N / V E R S E Wordmark with Custom Letter Choreography */}

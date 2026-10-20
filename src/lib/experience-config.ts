@@ -12,7 +12,7 @@ export const SECTIONS: SectionConfig[] = [
   },
   {
     id: 'room',
-    label: 'Studio',
+    label: 'My Verse',
     stationName: 'Studio Entry',
     order: 1,
     cameraPosition: [0.2, 2.2, 5.8],
@@ -22,7 +22,7 @@ export const SECTIONS: SectionConfig[] = [
   {
     id: 'workstation',
     label: 'Desktop',
-    stationName: 'Desktop Workstation',
+    stationName: 'Display',
     order: 2,
     cameraPosition: [-1.2, 2.22, -1.80],
     cameraTarget: [-1.2, 2.22, -4.45],
@@ -31,7 +31,7 @@ export const SECTIONS: SectionConfig[] = [
   {
     id: 'skills',
     label: 'Skills',
-    stationName: 'Technology Globe',
+    stationName: 'Technology & Skills Planet',
     order: 3,
     cameraPosition: [-0.6, 1.45, 0.0],
     cameraTarget: [3.0, 1.45, 0.0],
@@ -40,7 +40,7 @@ export const SECTIONS: SectionConfig[] = [
   {
     id: 'projects',
     label: 'Projects',
-    stationName: 'Vintage Projector & Folios',
+    stationName: 'Projects Arena',
     order: 4,
     cameraPosition: [-1.05, 1.62, 1.95],
     cameraTarget: [-4.96, 2.05, 0.70],
@@ -57,8 +57,8 @@ export const SECTIONS: SectionConfig[] = [
   },
   {
     id: 'finale',
-    label: 'Finale',
-    stationName: 'Studio Finale',
+    label: 'Outro',
+    stationName: 'Outro',
     order: 6,
     cameraPosition: [0.0, 2.5, 5.6],
     cameraTarget: [0.0, 1.6, -1.0],

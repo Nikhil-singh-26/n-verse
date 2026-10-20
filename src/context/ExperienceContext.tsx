@@ -159,7 +159,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       cmd: 'about',
       output: [
         'Nikhil Singh — Computer Science Engineering student & aspiring software engineer.',
-        'Institution: Government Engineering College Bilaspur (2022 — 2026).',
+        'Institution: Government Engineering College Bilaspur (2024 — 2028).',
         'Philosophy: Strong engineering fundamentals, clean modular code, and creating genuinely useful products.'
       ]
     }

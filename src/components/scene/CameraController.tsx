@@ -110,9 +110,9 @@ export function CameraController() {
         if (win.__isInteractingWithObject || win.__isDraggingWindow) return;
       }
 
-      // If clicking interactive UI controls (buttons, links, inputs, window titlebars, folder icons), leave interaction to UI
+      // If clicking interactive UI controls (buttons, links, inputs, window titlebars, folder icons, or desktop screen), leave interaction to UI
       const targetEl = e.target as HTMLElement | null;
-      if (targetEl && targetEl.closest('button, a, input, textarea, select, [role="button"], .cursor-move, [tabindex="0"]')) {
+      if (targetEl && targetEl.closest('button, a, input, textarea, select, [role="button"], .cursor-move, [tabindex="0"], [data-desktop-screen="true"]')) {
         return;
       }
       if (e.button !== 0 && e.pointerType === 'mouse') return;
@@ -182,22 +182,36 @@ export function CameraController() {
 
     const targetSection = SECTIONS.find((s) => s.id === activeSection) || SECTIONS[1];
 
-    destPos.current.set(
-      targetSection.cameraPosition[0],
-      targetSection.cameraPosition[1] + mobileYOffset,
-      targetSection.cameraPosition[2] + mobileZOffset
-    );
-    destLookAt.current.set(
-      targetSection.cameraTarget[0],
-      targetSection.cameraTarget[1],
-      targetSection.cameraTarget[2]
-    );
-    targetFov.current = targetSection.fov;
+    if (activeSection === 'workstation') {
+      const viewportAspect = size.width / Math.max(1, size.height);
+      const fovRad = THREE.MathUtils.degToRad(targetSection.fov);
+      // Screen is 4.40m wide x 2.475m high (16:9 ratio) at [-1.2, 2.22, -4.45]
+      // To cover the screen edge-to-edge with no surrounding borders or room visible:
+      const dHeight = (2.475 / 2) / Math.tan(fovRad / 2);
+      const dWidth = (4.40 / (2 * viewportAspect)) / Math.tan(fovRad / 2);
+      const coverDistance = Math.min(dHeight, dWidth) * 0.985;
+
+      destPos.current.set(-1.2, 2.22, -4.45 + coverDistance);
+      destLookAt.current.set(-1.2, 2.22, -4.45);
+      targetFov.current = targetSection.fov;
+    } else {
+      destPos.current.set(
+        targetSection.cameraPosition[0],
+        targetSection.cameraPosition[1] + mobileYOffset,
+        targetSection.cameraPosition[2] + mobileZOffset
+      );
+      destLookAt.current.set(
+        targetSection.cameraTarget[0],
+        targetSection.cameraTarget[1],
+        targetSection.cameraTarget[2]
+      );
+      targetFov.current = targetSection.fov;
+    }
 
     // Smoothly settle manual zoom offset when moving to a new station
     targetJourneyZoomOffset.current = THREE.MathUtils.lerp(targetJourneyZoomOffset.current, 0, 0.4);
     lastProgressRef.current = scrollProgress;
-  }, [scrollProgress, isMobile, activeSection]);
+  }, [scrollProgress, isMobile, activeSection, size.width, size.height]);
 
   useFrame((_, delta) => {
     // Smooth lerp factor based on motion preference

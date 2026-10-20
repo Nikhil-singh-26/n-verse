@@ -34,7 +34,7 @@ export function WelcomeOverlay() {
           /* Scene A: Gate Title & Minimal Prompt */
           <div className="space-y-4 animate-in fade-in zoom-in-95 duration-700">
             <div className="inline-block px-3.5 py-1 rounded-full border border-[#00f0ff]/30 bg-[#00f0ff]/10 text-[#00f0ff] font-mono text-xs uppercase tracking-widest">
-              An Interactive Engineering Universe
+              Nikhil Universe
             </div>
             <h1 className="text-5xl sm:text-7xl md:text-8xl font-extrabold tracking-tight text-white font-['Outfit']">
               <span className="text-gradient-cyan">N/VERSE</span>

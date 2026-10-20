@@ -1,4 +1,4 @@
-# N/VERSE — An Interactive Engineering Universe
+# N/VERSE — Nikhil Universe
 
 > **CODE. LEARN. BUILD. REPEAT.**
 
@@ -161,6 +161,7 @@ src/
 ## ⚙️ Configuration & Customization
 
 All personal and technical content is isolated in `src/data/`:
+
 - **Profile & Terminal**: Edit [profile.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/profile.ts) to adjust bio, education, or terminal command responses.
 - **Skills**: Edit [skills.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/skills.ts) to update languages, frameworks, or databases.
 - **Projects**: Edit [projects.ts](file:///d:/Programing/Portfolio/N-VERSE/src/data/projects.ts) to add or configure projects, GitHub URLs, or live demo links.

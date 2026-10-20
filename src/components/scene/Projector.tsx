@@ -82,6 +82,13 @@ export function Projector() {
   const flightProgress = useRef<number>(0);
   const prevIndexRef = useRef<number>(activeProjectIndex);
 
+  // Dedicated 3D target for spotlight illumination on the left wall board
+  const spotTarget = useMemo(() => {
+    const obj = new THREE.Object3D();
+    obj.position.set(-4.945, 2.15, 0.8);
+    return obj;
+  }, []);
+
   // Flight trajectory definition (from table stack to left wall)
   const trajectory = useMemo(() => {
     return {
@@ -248,6 +255,9 @@ export function Projector() {
 
   return (
     <group>
+      {/* Dedicated 3D target for spotlight illumination on the left wall board */}
+      <primitive object={spotTarget} />
+
       {/* ================= 1. PHYSICAL PROJECTOR DISPLAY TABLE & VINTAGE FILM PROJECTOR ================= */}
       {/* Positioned on the left side of the room beside the left wall (X = -2.3, Z = 0.95) */}
       <group position={[-2.3, 0, 0.95]}>
@@ -306,7 +316,7 @@ export function Projector() {
 
         {/* ================= DETAILED VINTAGE 35mm FILM PROJECTOR ================= */}
         {/* Placed firmly on the wooden table, facing directly toward the left wall (-X) */}
-        <group position={[0, 0.75, -0.38]} rotation={[0, -Math.PI / 2, 0]}>
+        <group position={[0, 0.75, -0.38]} rotation={[0, Math.PI + 0.087, 0]}>
           {/* Heavy Cast-Iron Stepped Base with Vibration Absorbers */}
           <mesh position={[0, 0.02, 0]} castShadow>
             <boxGeometry args={[0.42, 0.038, 0.28]} />
@@ -444,8 +454,8 @@ export function Projector() {
           </group>
 
           {/* ================= OPTICAL LENS BARREL ================= */}
-          {/* Telescoping Brass Lens Assembly pointing forward towards the left wall */}
-          <group position={[0.18, 0.18, 0]}>
+          {/* Telescoping Brass Lens Assembly tilted upward toward the left wall board */}
+          <group position={[0.18, 0.18, 0]} rotation={[0, 0, 0.38]}>
             {/* Outer Lens Housing */}
             <mesh rotation={[0, 0, -Math.PI / 2]}>
               <cylinderGeometry args={[0.055, 0.065, 0.09, 24]} />
@@ -494,23 +504,23 @@ export function Projector() {
             <meshStandardMaterial color="#2d2822" roughness={0.9} />
           </mesh>
 
-          {/* Projector Spotlight Aimed at Left Wall Presentation Surface */}
+          {/* Projector Spotlight Aimed Directly at Left Wall Presentation Surface */}
           <spotLight
             ref={spotlightRef}
-            position={[0.1, 0.18, 0]}
-            target-position={[4.5, 0.18, 0]}
+            position={[0.18, 0.18, 0]}
+            target={spotTarget}
             color="#fff6e0"
             intensity={0.1}
-            angle={0.52}
+            angle={0.55}
             penumbra={0.45}
             distance={8.5}
             castShadow
           />
 
-          {/* Atmospheric Conical Light Beam Frustum */}
-          <group position={[1.4, 0.18, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          {/* Atmospheric Conical Light Beam Frustum pointing directly at the left wall board */}
+          <group position={[1.5, 0.71, 0]} rotation={[0, 0, -Math.PI / 2 + 0.38]}>
             <mesh>
-              <cylinderGeometry args={[1.5, 0.05, 2.6, 24, 1, true]} />
+              <cylinderGeometry args={[1.45, 0.06, 2.85, 24, 1, true]} />
               <meshBasicMaterial
                 ref={beamMaterialRef}
                 color="#fff5db"

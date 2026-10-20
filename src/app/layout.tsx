@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'N/VERSE — An Interactive Engineering Universe | Nikhil Singh',
+  title: 'N/VERSE — Nikhil Universe | Nikhil Singh',
   description:
     'Interactive 3D developer portfolio and engineering universe of Nikhil Singh — Computer Science Engineering student, full-stack developer, and software systems builder.',
   keywords: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Nikhil Singh' }],
   creator: 'Nikhil Singh',
   openGraph: {
-    title: 'N/VERSE — An Interactive Engineering Universe',
+    title: 'N/VERSE — Nikhil Universe',
     description:
       'Cinematic 3D interactive engineering laboratory portfolio of Nikhil Singh. CODE. LEARN. BUILD. REPEAT.',
     url: 'https://n-verse.vercel.app',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'N/VERSE — An Interactive Engineering Universe',
+    title: 'N/VERSE — Nikhil Universe',
     description: 'Cinematic 3D interactive portfolio of Nikhil Singh.'
   }
 };

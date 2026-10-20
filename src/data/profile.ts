@@ -3,17 +3,17 @@ import { ProfileData } from '@/types';
 export const profileData: ProfileData = {
   name: 'Nikhil Singh',
   brand: 'N/VERSE',
-  mainTitle: 'N/VERSE — An Interactive Engineering Universe',
+  mainTitle: 'N/VERSE — Nikhil Universe',
   tagline: 'CODE. LEARN. BUILD. REPEAT.',
   role: 'Computer Science Engineering Student & Aspiring Software Engineer',
   degree: 'B.Tech in Computer Science Engineering',
   university: 'Government Engineering College Bilaspur',
-  graduationYear: '2026',
+  graduationYear: '2028',
   location: 'Bilaspur, Chhattisgarh, India',
   status: 'Open to Software Engineering Internships & Opportunities',
   bio: [
     'A developer learning, experimenting, and building practical projects across web and mobile technologies, with a focus on improving engineering fundamentals and creating useful products.',
-    'Currently pursuing B.Tech in Computer Science Engineering at Government Engineering College Bilaspur.',
+    'Currently pursuing B.Tech in Computer Science Engineering at Government Engineering College Bilaspur (2024 — 2028).',
     'Passionate about software engineering, full-stack systems, interactive web experiences, Flutter mobile applications, and algorithmic problem solving.'
   ],
   terminalPrompts: [
@@ -30,8 +30,9 @@ export const profileData: ProfileData = {
       command: 'education',
       description: 'Academic background & institution',
       output: [
-        'Degree: B.Tech in Computer Science Engineering',
-        'Institution: Government Engineering College Bilaspur',
+        'Degree: B.Tech in Computer Science & Engineering (2024 — 2028)',
+        'Institution: Government Engineering College Bilaspur (CG)',
+        'Performance: CGPA 7.6 / 10',
         'Core Disciplines: Data Structures & Algorithms, Object-Oriented Programming, Database Management Systems, Operating Systems, Computer Networks.'
       ]
     },
@@ -40,7 +41,7 @@ export const profileData: ProfileData = {
       description: 'Technologies I work with',
       output: [
         'Languages: Java, JavaScript, TypeScript, C, Dart',
-        'Frontend: HTML5, CSS3, React, Next.js, Tailwind CSS',
+        'Frontend: HTML5, CSS3, React, Next.js, Tailwind CSS, Drei, Three.js, Gsap',
         'Backend: Node.js, Express.js',
         'Databases: MongoDB, Mongoose, PostgreSQL, MySQL',
         'Mobile: Flutter',
