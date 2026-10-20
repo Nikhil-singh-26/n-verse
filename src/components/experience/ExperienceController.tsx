@@ -12,6 +12,8 @@ import { ProgressIndicator } from './ProgressIndicator';
 import { SkipControl } from './SkipControl';
 import { LeetCodeInspectionModal } from '../overlays/LeetCodeInspectionModal';
 
+import { WorkstationDesktop } from '../scene/WorkstationDesktop';
+
 export function ExperienceController() {
   const { hasWebGl, isIntroFinished } = useExperience();
 
@@ -33,12 +35,13 @@ export function ExperienceController() {
       {/* Scroll Timeline Driver */}
       <ScrollTimeline />
 
-      {/* Refined Navigation & HUD Controls (Revealed after intro) */}
+      {/* Refined Navigation, Workstation Desktop & HUD Controls (Revealed after intro) */}
       {isIntroFinished && (
         <>
           <SectionNavigation />
           <ProgressIndicator />
           <SkipControl />
+          <WorkstationDesktop />
         </>
       )}
 

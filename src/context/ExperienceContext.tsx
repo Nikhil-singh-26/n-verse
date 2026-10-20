@@ -202,11 +202,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     }
 
     // Workstation window interaction states per destination
-    if (id === 'workstation' || id === 'room') {
-      setIsAboutWindowOpen(false);
-      setIsResumeWindowOpen(false);
-      setIsMailOpen(false);
-    } else if (id === 'about') {
+    if (id === 'about') {
       setIsAboutWindowOpen(true);
       setIsAboutMinimized(false);
       setIsResumeWindowOpen(false);
