@@ -52,13 +52,56 @@ export function WorkstationDesktop() {
   const [isMailMaximized, setIsMailMaximized] = useState(false);
 
   // Responsive Draggable window coordinates within the desktop container
-  const [aboutPos, setAboutPos] = useState({ x: 180, y: 35 });
-  const [resumePos, setResumePos] = useState({ x: 230, y: 45 });
-  const [mailPos, setMailPos] = useState({ x: 200, y: 55 });
+  const [aboutPos, setAboutPos] = useState({ x: 260, y: 35 });
+  const [resumePos, setResumePos] = useState({ x: 290, y: 45 });
+  const [mailPos, setMailPos] = useState({ x: 275, y: 55 });
 
   const isDragging = useRef<'about' | 'resume' | 'mail' | null>(null);
   const dragStart = useRef({ clientX: 0, clientY: 0, initialX: 0, initialY: 0 });
   const desktopScreenRef = useRef<HTMLDivElement | null>(null);
+
+  // Exact 3D Wall Monitor Screen Projection Bounds (16:9 Cover geometry matching CameraController)
+  const [screenBounds, setScreenBounds] = useState(() => {
+    if (typeof window === 'undefined') {
+      return { width: 1920, height: 1080, left: 0, top: 0 };
+    }
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const aspect = w / Math.max(1, h);
+    let mw: number;
+    let mh: number;
+    if (aspect >= 16 / 9) {
+      mw = w / 0.985;
+      mh = mw * (9 / 16);
+    } else {
+      mh = h / 0.985;
+      mw = mh * (16 / 9);
+    }
+    return { width: mw, height: mh, left: (w - mw) / 2, top: (h - mh) / 2 };
+  });
+
+  useEffect(() => {
+    const updateBounds = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const aspect = w / Math.max(1, h);
+      let mw: number;
+      let mh: number;
+      if (aspect >= 16 / 9) {
+        mw = w / 0.985;
+        mh = mw * (9 / 16);
+      } else {
+        mh = h / 0.985;
+        mw = mh * (16 / 9);
+      }
+      const left = (w - mw) / 2;
+      const top = (h - mh) / 2;
+      setScreenBounds({ width: mw, height: mh, left, top });
+    };
+    updateBounds();
+    window.addEventListener('resize', updateBounds);
+    return () => window.removeEventListener('resize', updateBounds);
+  }, []);
 
   // Resume Document Viewer State
   const [resumeZoom, setResumeZoom] = useState(100);
@@ -303,52 +346,72 @@ export function WorkstationDesktop() {
 
   return (
     <div
-      ref={desktopScreenRef}
-      className="fixed inset-0 pointer-events-none z-20 flex items-center justify-center p-2 sm:p-4 md:p-6"
-      style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 52px)',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 56px)'
-      }}
+      className="fixed inset-0 pointer-events-none z-20 overflow-hidden select-none"
     >
-      {/* 16:9 Screen Display Boundary Matched to the 3D Wall Monitor (100% Transparent - No duplicate wallpaper/border) */}
+      {/* 16:9 Screen Display Boundary Matched 1:1 to the 3D Wall Monitor */}
       <div
+        ref={desktopScreenRef}
         data-desktop-screen="true"
         style={{
-          width: '100%',
-          maxWidth: 'min(calc(100vw - 40px), calc((100vh - 120px) * (16 / 9)))',
-          aspectRatio: '16 / 9'
+          position: 'absolute',
+          left: `${screenBounds.left}px`,
+          top: `${screenBounds.top}px`,
+          width: `${screenBounds.width}px`,
+          height: `${screenBounds.height}px`
         }}
-        className="relative pointer-events-none overflow-hidden select-none"
+        className="pointer-events-none overflow-hidden select-none"
       >
-        {/* ================= TRANSPARENT INTERACTIVE HOTSPOTS OVER 3 WALL FOLDERS ================= */}
-        <div className="absolute left-3 sm:left-5 md:left-7 top-4 sm:top-6 md:top-8 flex flex-col gap-4 sm:gap-6 md:gap-8 pointer-events-auto z-10 select-none">
-          {/* Hotspot 1: About Me */}
-          <div
-            onClick={handleOpenAboutMe}
-            className="w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-2xl cursor-pointer hover:bg-emerald-500/15 hover:ring-1 hover:ring-emerald-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center"
-            role="button"
-            tabIndex={0}
-            title="About Me (Terminal) — Click to open"
-          />
+        {/* ================= TRANSPARENT INTERACTIVE HOTSPOTS DIRECTLY OVER 3 WALL FOLDERS ================= */}
+        {/* Hotspot 1: About Me (Canvas Card: cx=180, cy=154, span y=100..270 on 2048x1152) */}
+        <div
+          onClick={handleOpenAboutMe}
+          style={{
+            position: 'absolute',
+            left: '8.789%',
+            top: '16.32%',
+            transform: 'translate(-50%, -50%)',
+            width: 'clamp(90px, 8.8%, 140px)',
+            height: 'clamp(116px, 14.5%, 170px)'
+          }}
+          className="rounded-2xl cursor-pointer hover:bg-emerald-500/15 hover:ring-1 hover:ring-emerald-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
+          role="button"
+          tabIndex={0}
+          title="About Me (Terminal) — Click to open"
+        />
 
-          {/* Hotspot 2: Contact */}
-          <div
-            onClick={handleOpenContact}
-            className="w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-2xl cursor-pointer hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center"
-            role="button"
-            tabIndex={0}
-            title="Contact & Mail — Click to open"
-          />
+        {/* Hotspot 2: Contact (Canvas Card: cx=180, cy=384, span y=330..500 on 2048x1152) */}
+        <div
+          onClick={handleOpenContact}
+          style={{
+            position: 'absolute',
+            left: '8.789%',
+            top: '36.28%',
+            transform: 'translate(-50%, -50%)',
+            width: 'clamp(90px, 8.8%, 140px)',
+            height: 'clamp(116px, 14.5%, 170px)'
+          }}
+          className="rounded-2xl cursor-pointer hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
+          role="button"
+          tabIndex={0}
+          title="Contact & Mail — Click to open"
+        />
 
-          {/* Hotspot 3: Resume */}
-          <div
-            onClick={handleOpenResume}
-            className="w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-2xl cursor-pointer hover:bg-yellow-500/15 hover:ring-1 hover:ring-yellow-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center"
-            role="button"
-            tabIndex={0}
-            title="Resume (PDF Viewer) — Click to open"
-          />
-        </div>
+        {/* Hotspot 3: Resume (Canvas Card: cx=180, cy=614, span y=560..730 on 2048x1152) */}
+        <div
+          onClick={handleOpenResume}
+          style={{
+            position: 'absolute',
+            left: '8.789%',
+            top: '56.25%',
+            transform: 'translate(-50%, -50%)',
+            width: 'clamp(90px, 8.8%, 140px)',
+            height: 'clamp(116px, 14.5%, 170px)'
+          }}
+          className="rounded-2xl cursor-pointer hover:bg-yellow-500/15 hover:ring-1 hover:ring-yellow-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
+          role="button"
+          tabIndex={0}
+          title="Resume (PDF Viewer) — Click to open"
+        />
 
         {/* ================= WINDOW 1: ABOUT ME (AUTHENTIC LINUX/WINDOWS TERMINAL) ================= */}
         {isAboutWindowOpen && !isAboutMinimized && (

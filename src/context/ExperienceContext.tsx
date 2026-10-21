@@ -142,7 +142,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
   const [isProjectAnimating, setIsProjectAnimating] = useState<boolean>(false);
 
   // Desktop Window State
-  const [isAboutWindowOpen, setIsAboutWindowOpen] = useState<boolean>(true);
+  const [isAboutWindowOpen, setIsAboutWindowOpen] = useState<boolean>(false);
   const [isResumeWindowOpen, setIsResumeWindowOpen] = useState<boolean>(false);
   const [isAboutMinimized, setIsAboutMinimized] = useState<boolean>(false);
   const [isResumeMinimized, setIsResumeMinimized] = useState<boolean>(false);
@@ -219,7 +219,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       setIsContactCardRevealed(true);
       setIsAboutWindowOpen(false);
       setIsResumeWindowOpen(false);
-    } else if (['skills', 'projects', 'achievements', 'finale'].includes(id)) {
+    } else if (['intro', 'room', 'skills', 'projects', 'achievements', 'finale'].includes(id)) {
       setIsAboutWindowOpen(false);
       setIsResumeWindowOpen(false);
       setIsMailOpen(false);
