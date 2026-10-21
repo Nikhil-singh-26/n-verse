@@ -1,51 +1,29 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useExperience } from '@/context/ExperienceContext';
 
+/**
+ * Honest, minimal asset readiness check.
+ * Renders only if WebGL / 3D context is actively mounting;
+ * never displays fake percentages or arbitrary delays.
+ */
 export function LoadingScreen() {
-  const { isReady, setIsReady, isReducedMotion } = useExperience();
-  const [loadingProgress, setLoadingProgress] = useState(25);
-  const [fadingOut, setFadingOut] = useState(false);
-
-  useEffect(() => {
-    if (isReducedMotion) {
-      setIsReady(true);
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setLoadingProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setFadingOut(true);
-          setTimeout(() => setIsReady(true), 400);
-          return 100;
-        }
-        return prev + Math.floor(Math.random() * 30) + 20;
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [setIsReady, isReducedMotion]);
+  const { isReady } = useExperience();
 
   if (isReady) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-[#000000] flex flex-col items-center justify-center p-6 transition-opacity duration-500 ${
-        fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
-      }`}
+      className="fixed inset-0 z-50 bg-[#080b11] flex flex-col items-center justify-center p-6 select-none"
+      aria-label="Loading environment"
     >
-      <div className="w-full max-w-xs space-y-4 text-center">
-        <h1 className="text-3xl font-extrabold text-white tracking-widest font-['Outfit']">
-          N/VERSE
-        </h1>
-        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-white transition-all duration-200 ease-out"
-            style={{ width: `${Math.min(100, loadingProgress)}%` }}
-          />
+      <div className="flex flex-col items-center gap-3">
+        <span className="font-['Outfit'] text-sm tracking-[0.3em] font-semibold text-white/90 uppercase">
+          N<span className="text-[#00f0ff]">/</span>VERSE
+        </span>
+        <div className="w-16 h-[1.5px] bg-white/10 rounded-full overflow-hidden">
+          <div className="w-full h-full bg-[#00f0ff] animate-pulse" />
         </div>
       </div>
     </div>

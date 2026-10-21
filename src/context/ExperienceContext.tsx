@@ -178,10 +178,12 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
       setHasWebGl(!!gl);
+      setIsReady(true);
     } catch {
       setHasWebGl(false);
+      setIsReady(true);
     }
-  }, []);
+  }, [setIsReady]);
 
   const setActiveSection = useCallback((id: SectionId) => {
     setActiveSectionState(id);

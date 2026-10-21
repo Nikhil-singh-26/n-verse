@@ -8,15 +8,8 @@ import { useExperience } from '@/context/ExperienceContext';
 
 export function Workstation() {
   const {
-    isAboutWindowOpen,
-    isResumeWindowOpen,
-    isAboutMinimized,
-    isResumeMinimized,
-    isMailOpen,
     openAboutWindow,
-    minimizeAboutWindow,
     openResumeWindow,
-    minimizeResumeWindow,
     setIsMailOpen,
     jumpToSection
   } = useExperience();
@@ -234,7 +227,7 @@ export function Workstation() {
     // Folder 3: Resume (Document Page, y = 560)
     drawDesktopAppCard(90, 560, 'Resume', 'document', 'file', '#facc15', '#fef08a');
 
-    // 4. Windows 11 Taskbar along the bottom
+    // 4. Windows 11 Taskbar along the bottom (base bar, Start logo, clock)
     const tby = height - 68;
     ctx.fillStyle = 'rgba(11, 16, 26, 0.96)';
     ctx.fillRect(0, tby, width, 68);
@@ -260,65 +253,20 @@ export function Workstation() {
     ctx.textBaseline = 'middle';
     ctx.fillText('Start', sx + 32, sy + 12);
 
-    // Active Running Window Tabs in Center
-    const tabCx = width / 2;
-
-    // Terminal Tab
-    if (isAboutWindowOpen && !isAboutMinimized) {
-      drawRRect(tabCx - 200, tby + 12, 170, 44, 8);
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
-      ctx.fill();
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.font = 'bold 14px monospace';
-      ctx.fillStyle = '#10b981';
-      ctx.textAlign = 'center';
-      ctx.fillText('>_ Terminal', tabCx - 115, tby + 34);
-    }
-
-    // Mail Tab
-    if (isMailOpen) {
-      drawRRect(tabCx - 20, tby + 12, 160, 44, 8);
-      ctx.fillStyle = 'rgba(59, 130, 246, 0.26)';
-      ctx.fill();
-      ctx.strokeStyle = '#3b82f6';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.font = 'bold 14px monospace';
-      ctx.fillStyle = '#facc15';
-      ctx.textAlign = 'center';
-      ctx.fillText('✉ Contact', tabCx + 60, tby + 34);
-    }
-
-    // Resume Tab
-    if (isResumeWindowOpen && !isResumeMinimized) {
-      drawRRect(tabCx + 150, tby + 12, 160, 44, 8);
-      ctx.fillStyle = 'rgba(250, 204, 21, 0.26)';
-      ctx.fill();
-      ctx.strokeStyle = '#facc15';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      ctx.font = 'bold 14px monospace';
-      ctx.fillStyle = '#facc15';
-      ctx.textAlign = 'center';
-      ctx.fillText('📄 Resume', tabCx + 230, tby + 34);
-    }
-
-    // Clock & Date on right
+    // Clock & Date on right (padded from right bezel to avoid viewport clipping)
     ctx.font = 'bold 15px monospace';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'right';
-    ctx.fillText(currentTime || '10:45 PM', width - 36, tby + 26);
+    ctx.fillText(currentTime || '10:45 PM', width - 80, tby + 26);
     ctx.font = '12px monospace';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.60)';
-    ctx.fillText(currentDate || '10/20/2026', width - 36, tby + 46);
+    ctx.fillText(currentDate || '10/20/2026', width - 80, tby + 46);
 
     const tex = (canvas as unknown as { __texRef?: THREE.CanvasTexture }).__texRef;
     if (tex) {
       tex.needsUpdate = true;
     }
-  }, [currentDate, currentTime, isAboutMinimized, isAboutWindowOpen, isMailOpen, isResumeMinimized, isResumeWindowOpen]);
+  }, [currentDate, currentTime]);
 
   // Initialize Canvas Texture once on mount
   useEffect(() => {
@@ -369,30 +317,6 @@ export function Workstation() {
     if (!e.uv) return;
     const u = e.uv.x; // 0 (left) to 1 (right)
     const v = e.uv.y; // 0 (bottom) to 1 (top)
-
-    // Taskbar at bottom (v < 0.08) - toggle running windows
-    if (v < 0.08) {
-      if (u >= 0.35 && u < 0.45 && isAboutWindowOpen) {
-        if (isAboutMinimized) {
-          openAboutWindow();
-        } else {
-          minimizeAboutWindow();
-        }
-        return;
-      }
-      if (u >= 0.45 && u < 0.55 && isMailOpen) {
-        setIsMailOpen(false);
-        return;
-      }
-      if (u >= 0.55 && u <= 0.65 && isResumeWindowOpen) {
-        if (isResumeMinimized) {
-          openResumeWindow();
-        } else {
-          minimizeResumeWindow();
-        }
-        return;
-      }
-    }
 
     // Left desktop folders (u: 0.02 to 0.22)
     if (u >= 0.02 && u <= 0.22) {

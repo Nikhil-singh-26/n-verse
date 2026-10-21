@@ -910,20 +910,25 @@ export function WorkstationDesktop() {
           </div>
         )}
 
-        {/* ================= TRANSPARENT INTERACTIVE TASKBAR (BOTTOM) ================= */}
+        {/* ================= SOLID NON-OVERLAPPING INTERACTIVE TASKBAR (BOTTOM) ================= */}
         {(isAboutWindowOpen || isMailOpen || isResumeWindowOpen) && (
           <div className="h-11 sm:h-12 w-full absolute bottom-0 inset-x-0 px-3 sm:px-4 flex items-center justify-between z-40 select-none pointer-events-none">
-            {/* Start Logo Hotspot on left */}
+            {/* Start Logo Hotspot on left (aligned over canvas Start logo) */}
             <div
               onClick={handleOpenAboutMe}
               className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-white/10 transition-colors cursor-pointer pointer-events-auto"
-              title="Start"
+              title="Start — Click to launch Terminal"
+              role="button"
+              tabIndex={0}
             >
               <div className="w-16 h-7" />
             </div>
 
-            {/* Running Applications Tabs Centered in the Middle (Windows 11 Style) */}
-            <div className="flex items-center gap-1.5 pointer-events-auto">
+            {/* Running Application Tabs Centered in the Middle (One entry per open window) */}
+            <nav
+              aria-label="Running Applications Taskbar"
+              className="flex items-center gap-2 pointer-events-auto"
+            >
               {/* Terminal Tab */}
               {isAboutWindowOpen && (
                 <button
@@ -938,21 +943,37 @@ export function WorkstationDesktop() {
                       setActiveWindow('about');
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors border relative cursor-pointer ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all border relative cursor-pointer select-none ${
                     activeWindow === 'about' && !isAboutMinimized
-                      ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400 font-bold shadow-md backdrop-blur-sm'
-                      : 'bg-black/70 text-white/70 hover:bg-white/10 border-white/20'
+                      ? 'bg-[#101b2b] text-white border-emerald-400/80 shadow-[0_2px_10px_rgba(16,185,129,0.2)] font-semibold'
+                      : isAboutMinimized
+                      ? 'bg-[#080d16] text-slate-400 hover:text-slate-200 border-white/10 hover:border-white/20 opacity-75 hover:opacity-100'
+                      : 'bg-[#0c1422] text-slate-300 hover:text-white border-white/15 hover:border-white/30'
                   }`}
+                  aria-label={`Terminal window (${
+                    activeWindow === 'about' && !isAboutMinimized
+                      ? 'Active'
+                      : isAboutMinimized
+                      ? 'Minimized'
+                      : 'Inactive'
+                  })`}
+                  title={`Terminal — About (${
+                    activeWindow === 'about' && !isAboutMinimized ? 'Active' : isAboutMinimized ? 'Minimized' : 'Running'
+                  })`}
                 >
-                  <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="font-mono text-[11px] hidden sm:inline">Terminal — About</span>
-                  {activeWindow === 'about' && !isAboutMinimized && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-emerald-400 rounded-full" />
-                  )}
+                  <Terminal className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="font-mono text-[11px] tracking-tight hidden sm:inline whitespace-nowrap">
+                    Terminal — About
+                  </span>
+                  {activeWindow === 'about' && !isAboutMinimized ? (
+                    <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-emerald-400 rounded-full" />
+                  ) : !isAboutMinimized ? (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-slate-500" />
+                  ) : null}
                 </button>
               )}
 
-              {/* Contact Tab */}
+              {/* Contact / Mail Tab */}
               {isMailOpen && (
                 <button
                   type="button"
@@ -966,17 +987,33 @@ export function WorkstationDesktop() {
                       setActiveWindow('mail');
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors border relative cursor-pointer ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all border relative cursor-pointer select-none ${
                     activeWindow === 'mail' && !isMailMinimized
-                      ? 'bg-blue-600/40 text-yellow-300 border-blue-400 font-bold shadow-md backdrop-blur-sm'
-                      : 'bg-black/70 text-white/70 hover:bg-white/10 border-white/20'
+                      ? 'bg-[#0e1d32] text-white border-sky-400/80 shadow-[0_2px_10px_rgba(56,189,248,0.2)] font-semibold'
+                      : isMailMinimized
+                      ? 'bg-[#080d16] text-slate-400 hover:text-slate-200 border-white/10 hover:border-white/20 opacity-75 hover:opacity-100'
+                      : 'bg-[#0c1422] text-slate-300 hover:text-white border-white/15 hover:border-white/30'
                   }`}
+                  aria-label={`Mail window (${
+                    activeWindow === 'mail' && !isMailMinimized
+                      ? 'Active'
+                      : isMailMinimized
+                      ? 'Minimized'
+                      : 'Inactive'
+                  })`}
+                  title={`Mail — Contact (${
+                    activeWindow === 'mail' && !isMailMinimized ? 'Active' : isMailMinimized ? 'Minimized' : 'Running'
+                  })`}
                 >
-                  <Mail className="w-3.5 h-3.5 text-blue-400" />
-                  <span className="font-mono text-[11px] hidden sm:inline">Mail — Contact</span>
-                  {activeWindow === 'mail' && !isMailMinimized && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-blue-400 rounded-full" />
-                  )}
+                  <Mail className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <span className="font-mono text-[11px] tracking-tight hidden sm:inline whitespace-nowrap">
+                    Mail — Contact
+                  </span>
+                  {activeWindow === 'mail' && !isMailMinimized ? (
+                    <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-sky-400 rounded-full" />
+                  ) : !isMailMinimized ? (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-slate-500" />
+                  ) : null}
                 </button>
               )}
 
@@ -994,22 +1031,39 @@ export function WorkstationDesktop() {
                       setActiveWindow('resume');
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors border relative cursor-pointer ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all border relative cursor-pointer select-none ${
                     activeWindow === 'resume' && !isResumeMinimized
-                      ? 'bg-yellow-500/30 text-yellow-300 border-yellow-400 font-bold shadow-md backdrop-blur-sm'
-                      : 'bg-black/70 text-white/70 hover:bg-white/10 border-white/20'
+                      ? 'bg-[#221c0e] text-white border-amber-400/80 shadow-[0_2px_10px_rgba(251,191,36,0.2)] font-semibold'
+                      : isResumeMinimized
+                      ? 'bg-[#080d16] text-slate-400 hover:text-slate-200 border-white/10 hover:border-white/20 opacity-75 hover:opacity-100'
+                      : 'bg-[#0c1422] text-slate-300 hover:text-white border-white/15 hover:border-white/30'
                   }`}
+                  aria-label={`Resume viewer (${
+                    activeWindow === 'resume' && !isResumeMinimized
+                      ? 'Active'
+                      : isResumeMinimized
+                      ? 'Minimized'
+                      : 'Inactive'
+                  })`}
+                  title={`Resume.pdf (${
+                    activeWindow === 'resume' && !isResumeMinimized ? 'Active' : isResumeMinimized ? 'Minimized' : 'Running'
+                  })`}
                 >
-                  <FileText className="w-3.5 h-3.5 text-yellow-400" />
-                  <span className="font-mono text-[11px] hidden sm:inline">Resume.pdf</span>
-                  {activeWindow === 'resume' && !isResumeMinimized && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-yellow-400 rounded-full" />
-                  )}
+                  <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="font-mono text-[11px] tracking-tight hidden sm:inline whitespace-nowrap">
+                    Resume.pdf
+                  </span>
+                  {activeWindow === 'resume' && !isResumeMinimized ? (
+                    <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-amber-400 rounded-full" />
+                  ) : !isResumeMinimized ? (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-slate-500" />
+                  ) : null}
                 </button>
               )}
-            </div>
+            </nav>
 
-            <div className="w-20" />
+            {/* Spacer on right ensuring taskbar tabs stay centered */}
+            <div className="w-16 sm:w-24 shrink-0" />
           </div>
         )}
       </div>
