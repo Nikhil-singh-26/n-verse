@@ -13,6 +13,7 @@ import { SkipControl } from './SkipControl';
 import { LeetCodeInspectionModal } from '../overlays/LeetCodeInspectionModal';
 
 import { WorkstationDesktop } from '../scene/WorkstationDesktop';
+import { ProjectHUD } from '../scene/ProjectHUD';
 
 export function ExperienceController() {
   const { hasWebGl, isIntroFinished } = useExperience();
@@ -42,6 +43,7 @@ export function ExperienceController() {
           <ProgressIndicator />
           <SkipControl />
           <WorkstationDesktop />
+          <ProjectHUD />
         </>
       )}
 

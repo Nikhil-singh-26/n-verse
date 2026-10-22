@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useExperience } from '@/context/ExperienceContext';
-import { Html } from '@react-three/drei';
 import { projectsData } from '@/data/projects';
+import { drawProjectManuscript } from '@/lib/project-manuscript-canvas';
 import {
   ExternalLink,
   ChevronLeft,
@@ -81,6 +81,70 @@ export function Projector() {
   // Flight progress ref (0 = on wooden table stack, 1 = settled flush on left wall)
   const flightProgress = useRef<number>(0);
   const prevIndexRef = useRef<number>(activeProjectIndex);
+
+  // Dynamic High-DPI Manuscript Canvas Texture for Physical 3D Flying Page
+  const [projectCanvasTexture, setProjectCanvasTexture] = useState<THREE.CanvasTexture | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Initialize 2048x1310 manuscript canvas texture
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 1310;
+    canvasRef.current = canvas;
+
+    drawProjectManuscript(canvas, currentProject, activeProjectIndex, projectsData.length);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 16;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.generateMipmaps = true;
+    setProjectCanvasTexture(tex);
+  }, []);
+
+  // Redraw canvas texture when active project changes
+  useEffect(() => {
+    if (canvasRef.current && projectCanvasTexture) {
+      drawProjectManuscript(canvasRef.current, currentProject, activeProjectIndex, projectsData.length);
+      projectCanvasTexture.needsUpdate = true;
+    }
+  }, [activeProjectIndex, currentProject, projectCanvasTexture]);
+
+  // Click & pointer raycasting handlers for action buttons on the 3D manuscript
+  const handlePageClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    const uv = e.uv;
+    if (!uv) return;
+
+    // UV bounds for the footer action buttons (y is V: ~0.035 to ~0.098, x is U)
+    if (uv.y >= 0.035 && uv.y <= 0.098) {
+      // Button 1: GitHub / Source Repo (x: ~0.035 to ~0.255)
+      if (uv.x >= 0.035 && uv.x <= 0.255) {
+        const url = currentProject.repositoryUrl || currentProject.links?.github;
+        if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      }
+      // Button 2: Live Demo / Running Apparatus or Specialized Repo
+      else if (uv.x >= 0.262 && uv.x <= 0.485) {
+        const url = currentProject.liveDemoUrl || currentProject.links?.live || currentProject.repositoryUrl || currentProject.links?.github;
+        if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+  };
+
+  const handlePagePointerMove = (e: ThreeEvent<PointerEvent>) => {
+    const uv = e.uv;
+    if (uv && uv.y >= 0.035 && uv.y <= 0.098 && uv.x >= 0.035 && uv.x <= 0.485) {
+      document.body.style.cursor = 'pointer';
+    } else {
+      document.body.style.cursor = 'auto';
+    }
+  };
+
+  const handlePagePointerOut = () => {
+    document.body.style.cursor = 'auto';
+  };
 
   // Dedicated 3D target for spotlight illumination on the left wall board
   const spotTarget = useMemo(() => {
@@ -551,10 +615,14 @@ export function Projector() {
             <planeGeometry args={[0.44, 0.32]} />
             <meshStandardMaterial color="#f6e8cc" roughness={0.88} />
           </mesh>
-          {/* Static Table Label */}
+          {/* Top Sheet on Table Stack displaying archival folio header */}
           <mesh position={[0, 0.011, 0]} rotation={[-Math.PI / 2, 0, 0.01]}>
             <planeGeometry args={[0.43, 0.31]} />
-            <meshStandardMaterial color="#f8eed7" roughness={0.85} />
+            {projectCanvasTexture ? (
+              <meshStandardMaterial map={projectCanvasTexture} roughness={0.82} />
+            ) : (
+              <meshStandardMaterial color="#f8eed7" roughness={0.85} />
+            )}
           </mesh>
         </group>
       </group>
@@ -562,34 +630,32 @@ export function Projector() {
       {/* ================= 2. 3D FLYING PARCHMENT PAGE ================= */}
       {/* Animated along the Bezier curve: lifts from table, arcs through golden beam, and settles on left wall */}
       <group ref={flyingPageRef} position={[-2.3, 0.775, 1.25]}>
-        {/* Physical 3D Parchment Sheet with double-sided aged paper appearance */}
-        <mesh castShadow receiveShadow>
+        {/* Physical 3D Archival Manuscript Sheet with high-DPI canvas texture */}
+        <mesh
+          castShadow
+          receiveShadow
+          onClick={handlePageClick}
+          onPointerMove={handlePagePointerMove}
+          onPointerOut={handlePagePointerOut}
+        >
           <planeGeometry args={[2.5, 1.6, 8, 6]} />
-          <meshStandardMaterial
-            color="#f7eedb"
-            roughness={0.86}
-            metalness={0.02}
-            side={THREE.DoubleSide}
-          />
+          {projectCanvasTexture ? (
+            <meshStandardMaterial
+              map={projectCanvasTexture}
+              color="#ffffff"
+              roughness={0.42}
+              metalness={0.0}
+              side={THREE.DoubleSide}
+            />
+          ) : (
+            <meshStandardMaterial
+              color="#f7eedb"
+              roughness={0.65}
+              metalness={0.0}
+              side={THREE.DoubleSide}
+            />
+          )}
         </mesh>
-
-        {/* Deckled Aged Border Inset */}
-        <lineSegments position={[0, 0, 0.002]}>
-          <edgesGeometry args={[new THREE.PlaneGeometry(2.46, 1.56)]} />
-          <lineBasicMaterial color="#a88c68" />
-        </lineSegments>
-
-        {/* Embossed Wax Seal Badge on Front Face of 3D Page */}
-        <group position={[1.05, 0.62, 0.005]}>
-          <mesh>
-            <circleGeometry args={[0.08, 24]} />
-            <meshStandardMaterial color="#943823" roughness={0.4} metalness={0.15} />
-          </mesh>
-          <mesh position={[0, 0, 0.002]}>
-            <circleGeometry args={[0.065, 24]} />
-            <meshStandardMaterial color="#782d1c" roughness={0.3} metalness={0.2} />
-          </mesh>
-        </group>
       </group>
 
       {/* Soft Contact Drop Shadow on the Left Wall as Page Settles */}
@@ -606,256 +672,7 @@ export function Projector() {
         />
       </mesh>
 
-      {/* ================= 3. ANCIENT PROJECT PAGES (GENUINE AGED ARCHIVAL MANUSCRIPTS) ================= */}
-      {/* Mounted flush on the Left Wall (X = -4.945, Y = 2.15, Z = 0.8) inside the architectural frame */}
-      <group position={[-4.945, 2.15, 0.8]} rotation={[0, Math.PI / 2, 0]}>
-        <Html
-          transform
-          distanceFactor={1.42}
-          position={[0, 0, 0.015]}
-          className="pointer-events-auto select-none"
-        >
-          {/* Main Ancient Archival Manuscript Sheet (960px x 580px) */}
-          <div
-            key={currentProject.id}
-            style={{
-              opacity: isProjects && projectPageState !== 'waiting' ? 1 : 0,
-              pointerEvents: isProjects && projectPageState === 'presented' ? 'auto' : 'none',
-              transform: isProjects && projectPageState === 'presented' ? 'scale(1)' : 'scale(0.97)',
-              transition: 'opacity 0.35s ease, transform 0.35s ease',
-              boxShadow: '0 25px 65px rgba(18, 12, 6, 0.8), 0 4px 14px rgba(0,0,0,0.4), inset 0 0 90px rgba(110, 75, 35, 0.22)'
-            }}
-            className="w-[960px] h-[580px] bg-gradient-to-br from-[#f8f1de] via-[#eee0c1] to-[#ddcaa3] border border-[#7d6040]/70 rounded-xs p-8 flex flex-col justify-between text-[#241a10] font-serif relative overflow-hidden select-none animate-in fade-in duration-300"
-          >
-            {/* Realistic Paper Fibers, Uneven Discoloration & Tea-Stain Patina */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.4)_0%,transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(100,65,25,0.22)_0%,transparent_60%)] pointer-events-none" />
-            <div className="absolute inset-2 border border-[#9a7852]/50 pointer-events-none" />
-            <div className="absolute inset-3 border border-[#bfa078]/35 pointer-events-none border-dashed" />
 
-            {/* Antique Forged-Iron Map Tacks Pinning the Corners to the Wall */}
-            <div className="absolute top-3 left-3 w-4 h-4 rounded-full bg-gradient-to-br from-[#4a3b2c] via-[#241c14] to-[#120d09] shadow-[0_2px_5px_rgba(0,0,0,0.6)] border border-[#73583c] flex items-center justify-center pointer-events-none">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#120d09]" />
-            </div>
-            <div className="absolute top-3 right-3 w-4 h-4 rounded-full bg-gradient-to-br from-[#4a3b2c] via-[#241c14] to-[#120d09] shadow-[0_2px_5px_rgba(0,0,0,0.6)] border border-[#73583c] flex items-center justify-center pointer-events-none">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#120d09]" />
-            </div>
-            <div className="absolute bottom-3 left-3 w-4 h-4 rounded-full bg-gradient-to-br from-[#4a3b2c] via-[#241c14] to-[#120d09] shadow-[0_2px_5px_rgba(0,0,0,0.6)] border border-[#73583c] flex items-center justify-center pointer-events-none">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#120d09]" />
-            </div>
-            {/* Curled dog-eared corner on bottom-right */}
-            <div className="absolute bottom-0 right-0 w-8 h-8 pointer-events-none overflow-hidden">
-              <div className="w-12 h-12 bg-gradient-to-tl from-[#cbb18a] to-[#ebd9b8] rotate-45 transform origin-bottom-right shadow-[-3px_-3px_7px_rgba(0,0,0,0.25)] border-t border-l border-[#8b6b47]/60" />
-            </div>
-
-            {/* ================= MANUSCRIPT ARCHIVAL HEADER ================= */}
-            <div className="border-b-2 border-[#826444]/60 pb-3 relative z-10 flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-[#694c30] uppercase mb-1">
-                  <span>ARCHIVUM N-VERSE</span>
-                  <span>&bull;</span>
-                  <span>FOLIO NO. 0{activeProjectIndex + 1}</span>
-                  <span>&bull;</span>
-                  <span className="italic font-serif capitalize text-[#8b3d22]">
-                    {currentProject.category}
-                  </span>
-                </div>
-                <h2 className="text-3xl font-black tracking-tight text-[#17100a] leading-none drop-shadow-xs font-serif">
-                  {currentProject.title}
-                </h2>
-                <p className="italic text-sm text-[#5a3b22] mt-1 font-serif">
-                  &ldquo;{currentProject.tagline}&rdquo;
-                </p>
-              </div>
-
-              {/* Hand-Stamped Archival Seal Motif */}
-              <div className="text-right flex flex-col items-end">
-                <div className="px-3 py-1 border-2 border-[#8b321e]/70 rounded-xs text-[#8b321e] font-mono text-[10px] font-bold tracking-wider rotate-[-2deg] bg-[#8b321e]/5">
-                  VERIFIED INVENTOR SPECIFICATION
-                </div>
-                <span className="text-[10px] font-mono text-[#6c5137] mt-1 italic">
-                  Status: {currentProject.status}
-                </span>
-              </div>
-            </div>
-
-            {/* ================= MANUSCRIPT BODY (TWO-COLUMN ARCHIVAL SPECIFICATION) ================= */}
-            <div className="grid grid-cols-12 gap-7 my-3 relative z-10 flex-1 overflow-hidden">
-              {/* Left Column: Abstract, Purpose, and Handwritten Specifications */}
-              <div className="col-span-7 flex flex-col justify-between space-y-3">
-                {/* Motivation / Purpose Paragraph */}
-                <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-[#63452b] font-bold flex items-center gap-1.5">
-                    <span>&sect; I.</span>
-                    <span>System Abstract & Motivation:</span>
-                  </span>
-                  <p className="text-xs text-[#241a10] leading-relaxed font-serif pl-3 border-l-2 border-[#8f6d49]/60 italic">
-                    {currentProject.purpose}
-                  </p>
-                </div>
-
-                {/* Engineering Functionalities (Archival Section § II) */}
-                <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-[#63452b] font-bold flex items-center gap-1.5">
-                    <span>&sect; II.</span>
-                    <span>Inventor&apos;s Operational Heuristics:</span>
-                  </span>
-                  <ul className="space-y-1.5 pl-3 text-xs text-[#1e150d] font-serif">
-                    {currentProject.keyFunctionality.slice(0, 3).map((feat, i) => (
-                      <li key={i} className="flex items-start gap-2 leading-snug">
-                        <span className="text-[#8b321e] font-bold text-sm mt-[-1px]">&#9877;</span>
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Stamped Technology Matrix */}
-                <div className="pt-2 border-t border-[#9c7b56]/40 flex items-center gap-2 flex-wrap text-xs font-mono text-[#332214]">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#6b4c30]">
-                    Configured Apparatus:
-                  </span>
-                  {currentProject.technologies.slice(0, 6).map((tech, ti) => (
-                    <span
-                      key={ti}
-                      className="px-2 py-0.5 border border-[#8f6e4a]/60 bg-[#ead9b8]/50 text-[10.5px] font-medium"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Column: Handcrafted Ink Schematic Sketch & Verified Technical Notes */}
-              <div className="col-span-5 flex flex-col justify-between border-l border-[#8f6e4a]/40 pl-6 space-y-2">
-                <div>
-                  <div className="flex items-center justify-between border-b border-[#9c7b56]/40 pb-1 mb-2">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#573d26] font-bold">
-                      &sect; III. Technical Diagram
-                    </span>
-                    <span className="text-[9px] font-mono text-[#78593a] italic">
-                      Ink Spec // Fig. {activeProjectIndex + 1}
-                    </span>
-                  </div>
-
-                  {/* Authentic Hand-Drawn Ink Schematic Sketch per Project */}
-                  <div className="p-2 border border-[#9a764f]/40 bg-[#f4e9d2]/60 rounded-xs shadow-inner">
-                    {currentProject.id === 'the-brew-club' && (
-                      <svg viewBox="0 0 240 140" className="w-full h-32 stroke-[#4a331e] fill-none">
-                        <path d="M120 18 L120 125 M85 125 L155 125 M100 130 L140 130" strokeWidth="1.8" strokeLinecap="round" />
-                        <circle cx="120" cy="18" r="4.5" className="fill-[#ebd6b2] stroke-[#4a331e]" strokeWidth="1.5" />
-                        <path d="M40 38 L200 24" strokeWidth="2" strokeLinecap="round" />
-                        <path d="M40 38 L22 72 M40 38 L58 72 M18 72 Q40 82 62 72 Z" strokeWidth="1.2" />
-                        <ellipse cx="40" cy="68" rx="8" ry="3" className="fill-[#ebd6b2]" strokeWidth="1" />
-                        <ellipse cx="40" cy="64" rx="8" ry="3" className="fill-[#ebd6b2]" strokeWidth="1" />
-                        <path d="M200 24 L182 58 M200 24 L218 58 M178 58 Q200 68 222 58 Z" strokeWidth="1.2" />
-                        <path d="M178 116 C178 112 186 112 186 116 L188 126 L176 126 Z" strokeWidth="1.2" />
-                        <path d="M182 112 Q194 94 206 82 Q202 91 186 110" strokeWidth="1.2" className="fill-[#ebd6b2]" />
-                        <text x="25" y="105" className="font-serif text-[9px] fill-[#6b492b] italic">Fig. I — Direct Ledger</text>
-                        <text x="135" y="105" className="font-serif text-[9px] fill-[#6b492b] italic">0% Comm. Ratio</text>
-                      </svg>
-                    )}
-
-                    {currentProject.id === 'ecotrack-ai' && (
-                      <svg viewBox="0 0 240 140" className="w-full h-32 stroke-[#4a331e] fill-none">
-                        <circle cx="120" cy="65" r="44" strokeWidth="1.8" />
-                        <circle cx="120" cy="65" r="38" strokeWidth="0.8" strokeDasharray="3 3" />
-                        <path d="M120 65 L142 42" strokeWidth="1.8" strokeLinecap="round" stroke="#8b2514" />
-                        <circle cx="120" cy="65" r="3.5" className="fill-[#4a331e]" />
-                        <path d="M20 120 L60 120 Q75 120 85 110 L95 125 L105 95 L115 122 Q130 120 150 120 L170 108 L185 126 L220 120" strokeWidth="1.4" />
-                        <line x1="20" y1="125" x2="220" y2="125" strokeWidth="0.8" strokeDasharray="4 4" />
-                        <text x="25" y="24" className="font-serif text-[9px] fill-[#6b492b] italic">Fig. II — Telemetry Waveform</text>
-                        <text x="130" y="132" className="font-serif text-[8.5px] fill-[#8b2514] italic">&Delta; Load Anomaly Heuristic</text>
-                      </svg>
-                    )}
-
-                    {currentProject.id === 'know-via' && (
-                      <svg viewBox="0 0 240 140" className="w-full h-32 stroke-[#4a331e] fill-none">
-                        <circle cx="120" cy="70" r="12" className="fill-[#ebd6b2]" strokeWidth="1.5" />
-                        <circle cx="120" cy="70" r="5" className="fill-[#4a331e]" />
-                        <circle cx="60" cy="45" r="9" className="fill-[#ebd6b2]" strokeWidth="1.2" />
-                        <circle cx="68" cy="105" r="8" className="fill-[#ebd6b2]" strokeWidth="1.2" />
-                        <circle cx="180" cy="48" r="10" className="fill-[#ebd6b2]" strokeWidth="1.2" />
-                        <circle cx="172" cy="106" r="8" className="fill-[#ebd6b2]" strokeWidth="1.2" />
-                        <path d="M68 49 L109 66 M113 63 L65 45" strokeWidth="1" strokeDasharray="4 2" />
-                        <path d="M76 101 L109 76 M111 80 L79 105" strokeWidth="1" />
-                        <path d="M131 65 L171 52 M170 56 L130 69" strokeWidth="1" strokeDasharray="4 2" />
-                        <path d="M130 76 L165 101 M163 97 L128 72" strokeWidth="1" />
-                        <circle cx="120" cy="70" r="54" strokeWidth="0.8" strokeDasharray="3 3" />
-                        <text x="25" y="22" className="font-serif text-[9px] fill-[#6b492b] italic">Fig. III — Associative Synapse Graph</text>
-                        <text x="135" y="132" className="font-serif text-[8.5px] fill-[#6b492b] italic">Bidirectional [[Links]]</text>
-                      </svg>
-                    )}
-
-                    {currentProject.id === 'roadvision' && (
-                      <svg viewBox="0 0 240 140" className="w-full h-32 stroke-[#4a331e] fill-none">
-                        <path d="M30 128 L115 56 M210 128 L125 56" strokeWidth="1.6" />
-                        <path d="M120 56 L120 128" strokeWidth="1" strokeDasharray="5 3" />
-                        <line x1="20" y1="56" x2="220" y2="56" strokeWidth="0.8" strokeDasharray="4 2" />
-                        <rect x="70" y="78" width="30" height="24" strokeWidth="1.4" stroke="#8b2514" strokeDasharray="2 2" className="fill-[#8b2514]/10" />
-                        <rect x="142" y="68" width="22" height="18" strokeWidth="1.2" stroke="#8b2514" strokeDasharray="2 2" className="fill-[#8b2514]/10" />
-                        <circle cx="120" cy="56" r="26" strokeWidth="1" strokeDasharray="4 3" />
-                        <circle cx="120" cy="56" r="3.5" className="fill-[#4a331e]" />
-                        <text x="25" y="22" className="font-serif text-[9px] fill-[#6b492b] italic">Fig. IV — Spatial Hazard Reticle</text>
-                        <text x="135" y="132" className="font-serif text-[8.5px] fill-[#8b2514] italic">YOLO Frame Coordinate</text>
-                      </svg>
-                    )}
-                  </div>
-                </div>
-
-                {/* Engineering Highlights */}
-                <div className="space-y-1">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#63452b] font-bold">
-                    &sect; IV. Key Architectural Notes:
-                  </span>
-                  <ul className="space-y-1 text-[11px] text-[#2c1d11] font-serif leading-snug">
-                    {currentProject.details.highlights.slice(0, 2).map((item, hi) => (
-                      <li key={hi} className="flex items-start gap-1.5">
-                        <span className="text-[#8b321e] font-bold">&bull;</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* ================= MANUSCRIPT FOOTER (FUNCTIONAL ARCHIVAL LINKS ONLY) ================= */}
-            <div className="border-t-2 border-[#826444]/60 pt-3 relative z-10 flex items-center justify-between">
-              {/* Authentic Archival Wax / Ink Seal Links */}
-              <div className="flex items-center gap-3">
-                {(currentProject.repositoryUrl || currentProject.links?.github) && (
-                  <a
-                    href={currentProject.repositoryUrl || currentProject.links?.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-1.5 border-2 border-[#3d2919] bg-[#2d1e12] hover:bg-[#4a3320] text-[#f7eedb] font-mono text-xs transition-colors shadow-xs active:scale-95"
-                  >
-                    <GithubIcon className="w-3.5 h-3.5 text-[#ebd6b2]" />
-                    <span>⚓ Examine Source Repository</span>
-                  </a>
-                )}
-
-                {(currentProject.liveDemoUrl || currentProject.links?.live) && (
-                  <a
-                    href={currentProject.liveDemoUrl || currentProject.links?.live}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-1.5 border-2 border-[#7a2917] bg-[#8b321e] hover:bg-[#a83d25] text-white font-mono text-xs transition-colors shadow-xs active:scale-95"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 text-[#ebd6b2]" />
-                    <span>✦ Observe Running Apparatus</span>
-                  </a>
-                )}
-              </div>
-
-              {/* Subdued Archival Verification Stamp */}
-              <div className="text-[11px] font-serif italic text-[#63462d] tracking-wide">
-                Manuscript Folio 0{activeProjectIndex + 1} of 0{projectsData.length} &bull; Scroll to inspect subsequent record
-              </div>
-            </div>
-          </div>
-        </Html>
-      </group>
     </group>
   );
 }

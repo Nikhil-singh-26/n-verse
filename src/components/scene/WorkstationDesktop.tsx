@@ -111,34 +111,136 @@ export function WorkstationDesktop() {
   const [contactSubject, setContactSubject] = useState('');
   const [contactMessage, setContactMessage] = useState('');
 
-  // Terminal State
+  // Terminal State & Hacker Typewriter Animation
   const [aboutTab, setAboutTab] = useState<'terminal' | 'page'>('terminal');
-  const [terminalHistory, setTerminalHistory] = useState<string[]>([
-    'nikhil@n-verse:~$ ./about_me.sh',
-    '========================================================================',
-    ' [SYSINFO]   Arch Linux (x86_64) | Host: N-VERSE Workstation',
-    ' [USER]      nikhil (Nikhil Singh)',
-    ' [STATUS]    Active • Full-Stack Software Engineer & 3D Web Creative',
-    ' [LOCATION]  Bilaspur, Chhattisgarh, India (Open to Remote / Relocate)',
-    '========================================================================',
-    '',
-    'Code. Learn. Build. Repeat.',
-    '',
-    '[SUMMARY]',
-    'Full-stack developer passionate about building practical web and mobile applications,',
-    'creating responsive user experiences, and developing scalable solutions using React,',
-    'Next.js, Node.js, Express, MongoDB, and Flutter.',
-    '',
-    '[ACADEMIC CREDENTIALS]',
-    '• Degree:      B.Tech in Computer Science & Engineering (2024 — 2028)',
-    '• Institution: Government Engineering College Bilaspur (CG)',
-    '• Performance: CGPA 7.6 / 10',
-    '',
-    'Type "help", "skills", "education", "resume", "contact", or "clear" below.'
-  ]);
+  const [terminalHistory, setTerminalHistory] = useState<string[]>([]);
+  const [currentTypingText, setCurrentTypingText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [terminalInput, setTerminalInput] = useState('');
   const terminalScrollRef = useRef<HTMLDivElement | null>(null);
   const terminalInputRef = useRef<HTMLInputElement | null>(null);
+
+  const fullTerminalHistory = React.useMemo(
+    () => [
+      '┌─────────────────────────────────────────────────────────────────────────┐',
+      '│  N  I  K  H  I  L                                                       │',
+      '│  S  I  N  G  H                                                           │',
+      '│  F U L L - S T A C K   E N G I N E E R                                   │',
+      '└─────────────────────────────────────────────────────────────────────────┘',
+      '',
+      '[SYS_BOOT] Mounting N-VERSE cyber mainframe v4.2...',
+      '[KERNEL] Arch Linux (x86_64) // Node.js v22.14 & WebGL Engine',
+      '[PROFILE] Full-stack engineer crafting practical, high-performance web & mobile systems.',
+      '[CORE_STACK] Next.js • React • TypeScript • Node.js • Express • MongoDB • Flutter',
+      '[ACADEMICS] B.Tech in Computer Science & Engineering (2024–2028) @ GEC Bilaspur (CGPA: 7.6)',
+      '[PROJECTS] 01 The Brew Club • 02 Shrinka URL • 03 RoadVision • 04 KnowVia (APK)',
+      '[STATUS] Open for software engineering internships and high-impact roles.',
+      '─────────────────────────────────────────────────────────────────────────────',
+      "Type 'help' to inspect available commands (skills, projects, education, resume, contact)."
+    ],
+    []
+  );
+
+  const skipTyping = () => {
+    if (!isTyping) return;
+    setIsTyping(false);
+    setCurrentTypingText('');
+    setTerminalHistory(fullTerminalHistory);
+    setTimeout(() => terminalInputRef.current?.focus(), 60);
+  };
+
+  // Trigger letter-by-letter and word-by-word hacker sequence when terminal is opened
+  useEffect(() => {
+    if (!isAboutWindowOpen || aboutTab !== 'terminal') return;
+
+    let isCancelled = false;
+    setIsTyping(true);
+    setTerminalHistory([]);
+    setCurrentTypingText('');
+
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const nameLines = [
+      'N  I  K  H  I  L',
+      'S  I  N  G  H',
+      'F U L L - S T A C K   E N G I N E E R'
+    ];
+
+    const contentLines = [
+      '[SYS_BOOT] Mounting N-VERSE cyber mainframe v4.2...',
+      '[KERNEL] Arch Linux (x86_64) // Node.js v22.14 & WebGL Engine',
+      '[PROFILE] Full-stack engineer crafting practical, high-performance web & mobile systems.',
+      '[CORE_STACK] Next.js • React • TypeScript • Node.js • Express • MongoDB • Flutter',
+      '[ACADEMICS] B.Tech in Computer Science & Engineering (2024–2028) @ GEC Bilaspur (CGPA: 7.6)',
+      '[PROJECTS] 01 The Brew Club • 02 Shrinka URL • 03 RoadVision • 04 KnowVia (APK)',
+      '[STATUS] Open for software engineering internships and high-impact roles.',
+      '─────────────────────────────────────────────────────────────────────────────',
+      "Type 'help' to inspect available commands (skills, projects, education, resume, contact)."
+    ];
+
+    const runHackerTypewriter = async () => {
+      await sleep(100);
+      if (isCancelled) return;
+
+      // Cyber Frame Top
+      setTerminalHistory(['┌─────────────────────────────────────────────────────────────────────────┐']);
+      await sleep(60);
+      if (isCancelled) return;
+
+      // 1. My name letter by letter in three lines
+      for (const line of nameLines) {
+        let textSoFar = '│  ';
+        for (let i = 0; i < line.length; i++) {
+          if (isCancelled) return;
+          textSoFar += line[i];
+          setCurrentTypingText(textSoFar);
+          await sleep(22);
+        }
+        if (isCancelled) return;
+        const padded = textSoFar + ' '.repeat(Math.max(1, 74 - textSoFar.length)) + '│';
+        setTerminalHistory((prev) => [...prev, padded]);
+        setCurrentTypingText('');
+        await sleep(60);
+      }
+
+      if (isCancelled) return;
+      // Cyber Frame Bottom
+      setTerminalHistory((prev) => [
+        ...prev,
+        '└─────────────────────────────────────────────────────────────────────────┘',
+        ''
+      ]);
+      await sleep(90);
+
+      // 2. Content written in hacker way word by word
+      for (const line of contentLines) {
+        if (isCancelled) return;
+        const words = line.split(' ');
+        let textSoFar = '';
+        for (let w = 0; w < words.length; w++) {
+          if (isCancelled) return;
+          textSoFar += (w === 0 ? '' : ' ') + words[w];
+          setCurrentTypingText(textSoFar);
+          await sleep(25);
+        }
+        if (isCancelled) return;
+        setTerminalHistory((prev) => [...prev, textSoFar]);
+        setCurrentTypingText('');
+        await sleep(50);
+      }
+
+      if (isCancelled) return;
+      setIsTyping(false);
+      setCurrentTypingText('');
+      setTimeout(() => terminalInputRef.current?.focus(), 60);
+    };
+
+    runHackerTypewriter();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAboutWindowOpen, aboutTab, fullTerminalHistory]);
 
   // Window drag handlers for synchronous 1:1 mouse movement
   const handleMouseDown = (
@@ -225,7 +327,7 @@ export function WorkstationDesktop() {
     if (terminalScrollRef.current) {
       terminalScrollRef.current.scrollTop = terminalScrollRef.current.scrollHeight;
     }
-  }, [terminalHistory]);
+  }, [terminalHistory, currentTypingText]);
 
   const handleTerminalCommand = (cmd: string) => {
     const trimmed = cmd.trim();
@@ -243,11 +345,20 @@ export function WorkstationDesktop() {
         'Available terminal commands:',
         '  about      - Display developer biography & career overview',
         '  skills     - View core technology stack and tools',
+        '  projects   - View verified portfolio applications',
         '  education  - View B.Tech degree, university, and GPA stats',
         '  resume     - Open official resume in PDF viewer window',
         '  contact    - Launch direct email & communication channels',
         '  page       - Switch to graphical Developer Profile page view',
         '  clear      - Clear terminal screen buffer'
+      );
+    } else if (lower === 'projects' || lower === 'work' || lower === 'portfolio') {
+      newEntry.push(
+        'Verified Portfolio Applications:',
+        '  01. The Brew Club - Creator tipping & crowdfunding platform (Next.js, MongoDB)',
+        '  02. Shrinka URL   - High-speed URL shortener & analytics (https://shrinka-url.vercel.app/)',
+        '  03. RoadVision    - AI computer vision road hazard detection (GitHub repository)',
+        '  04. Know Via      - Contextual knowledge engine & markdown graph (Android APK on GitHub)'
       );
     } else if (lower === 'about' || lower === 'cat about.txt' || lower === 'bio') {
       newEntry.push(
@@ -291,7 +402,7 @@ export function WorkstationDesktop() {
     } else if (lower === 'whoami') {
       newEntry.push('nikhil (Full-Stack Software Engineer & 3D Web Creative)');
     } else if (lower === 'ls' || lower === 'dir') {
-      newEntry.push('about.txt   skills.md   education.pdf   resume.pdf   contact.sh');
+      newEntry.push('about.txt   skills.md   projects.json   education.pdf   resume.pdf   contact.sh');
     } else if (lower === 'date') {
       newEntry.push(new Date().toString());
     } else {
@@ -518,18 +629,43 @@ export function WorkstationDesktop() {
             {aboutTab === 'terminal' ? (
               <div
                 ref={terminalScrollRef}
-                onClick={() => terminalInputRef.current?.focus()}
-                className="flex-1 p-3 overflow-y-auto font-mono text-xs space-y-1.5 bg-[#03060c] text-slate-200 select-text cursor-text"
+                onClick={() => {
+                  if (isTyping) skipTyping();
+                  else terminalInputRef.current?.focus();
+                }}
+                className="flex-1 p-3 overflow-y-auto font-mono text-xs space-y-1 bg-[#03060c] text-slate-200 select-text cursor-text"
               >
+                {/* Skip button during typing */}
+                {isTyping && (
+                  <div className="flex justify-end pb-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        skipTyping();
+                      }}
+                      className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[10px] text-emerald-300 hover:bg-emerald-500/25 transition-all cursor-pointer"
+                    >
+                      Skip animation ⏭
+                    </button>
+                  </div>
+                )}
+
                 {terminalHistory.map((line, idx) => (
                   <div
                     key={idx}
                     className={`leading-relaxed whitespace-pre-wrap ${
                       line.startsWith('nikhil@')
                         ? 'text-emerald-400 font-bold'
-                        : line.startsWith('===') || line.startsWith('Available') || line.startsWith('Core') || line.startsWith('Academic')
+                        : line.startsWith('┌') || line.startsWith('│') || line.startsWith('└')
+                        ? 'text-emerald-400 font-bold tracking-wider'
+                        : line.startsWith('[SYS_BOOT]') || line.startsWith('[KERNEL]')
+                        ? 'text-sky-300 font-semibold'
+                        : line.startsWith('[PROFILE]') || line.startsWith('[CORE_STACK]') || line.startsWith('[ACADEMICS]') || line.startsWith('[PROJECTS]') || line.startsWith('[STATUS]')
+                        ? 'text-amber-300 font-semibold'
+                        : line.startsWith('===') || line.startsWith('Available') || line.startsWith('Core') || line.startsWith('Academic') || line.startsWith('Verified')
                         ? 'text-yellow-400 font-semibold'
-                        : line.startsWith('  •') || line.startsWith('  about') || line.startsWith('  skills')
+                        : line.startsWith('  •') || line.startsWith('  about') || line.startsWith('  skills') || line.startsWith('  0')
                         ? 'text-sky-300'
                         : 'text-slate-300'
                     }`}
@@ -538,25 +674,35 @@ export function WorkstationDesktop() {
                   </div>
                 ))}
 
-                {/* Input Prompt */}
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleTerminalCommand(terminalInput);
-                  }}
-                  className="flex items-center gap-1.5 pt-1 text-emerald-400"
-                >
-                  <span className="font-bold select-none">nikhil@n-verse:~$</span>
-                  <input
-                    ref={terminalInputRef}
-                    type="text"
-                    value={terminalInput}
-                    onChange={(e) => setTerminalInput(e.target.value)}
-                    className="flex-1 bg-transparent text-white outline-none border-none font-mono text-xs caret-emerald-400 p-0"
-                    autoFocus
-                    spellCheck={false}
-                  />
-                </form>
+                {/* Active word/letter streaming line with blinking hacker cursor */}
+                {isTyping && (
+                  <div className="flex items-center text-emerald-400 font-mono font-bold leading-relaxed whitespace-pre-wrap">
+                    <span>{currentTypingText}</span>
+                    <span className="inline-block w-2 h-3.5 bg-emerald-400 ml-0.5 animate-pulse" />
+                  </div>
+                )}
+
+                {/* Input Prompt (Focused when typing completes) */}
+                {!isTyping && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleTerminalCommand(terminalInput);
+                    }}
+                    className="flex items-center gap-1.5 pt-1 text-emerald-400"
+                  >
+                    <span className="font-bold select-none">nikhil@n-verse:~$</span>
+                    <input
+                      ref={terminalInputRef}
+                      type="text"
+                      value={terminalInput}
+                      onChange={(e) => setTerminalInput(e.target.value)}
+                      className="flex-1 bg-transparent text-white outline-none border-none font-mono text-xs caret-emerald-400 p-0"
+                      autoFocus
+                      spellCheck={false}
+                    />
+                  </form>
+                )}
               </div>
             ) : (
               <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#080d1a] text-slate-200 select-text">
