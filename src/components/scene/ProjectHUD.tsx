@@ -67,11 +67,11 @@ export function ProjectHUD() {
           <span className="p-1 rounded-md bg-amber-500/20 text-amber-400">
             <Layers className="w-3.5 h-3.5" />
           </span>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <span className="text-[10px] text-amber-300 uppercase tracking-wider font-semibold">
               Folio 0{activeProjectIndex + 1} / 0{projectsData.length}
             </span>
-            <span className="text-white text-xs font-bold truncate max-w-[110px] sm:max-w-[160px]">
+            <span className="text-white text-xs font-bold truncate max-w-[85px] xs:max-w-[110px] sm:max-w-[160px]">
               {currentProject.title}
             </span>
           </div>
@@ -87,7 +87,7 @@ export function ProjectHUD() {
                 onClick={() => goToProject(idx)}
                 disabled={isProjectAnimating || projectPageState === 'animating'}
                 title={`Folio 0${idx + 1}: ${p.title}`}
-                className={`px-2 py-1 rounded-md text-[11px] font-mono font-bold transition-all disabled:opacity-50 ${
+                className={`px-2 py-1.5 sm:py-1 rounded-md text-[11px] font-mono font-bold transition-all touch-manipulation disabled:opacity-50 ${
                   isCur
                     ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.6)]'
                     : 'bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/15'
@@ -104,7 +104,7 @@ export function ProjectHUD() {
           <button
             onClick={handlePrev}
             disabled={activeProjectIndex === 0 || isProjectAnimating || projectPageState === 'animating'}
-            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 hover:text-white disabled:opacity-30 disabled:border-white/5 disabled:hover:bg-white/5 disabled:cursor-not-allowed transition-all active:scale-95"
+            className="p-2 sm:p-1.5 min-w-[34px] min-h-[34px] sm:min-w-0 sm:min-h-0 flex items-center justify-center rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 hover:text-white disabled:opacity-30 disabled:border-white/5 disabled:hover:bg-white/5 disabled:cursor-not-allowed transition-all active:scale-95 touch-manipulation"
             title="Previous Project (Arrow Left)"
             aria-label="Previous Project Folio"
           >
@@ -113,7 +113,7 @@ export function ProjectHUD() {
           <button
             onClick={handleNext}
             disabled={activeProjectIndex === projectsData.length - 1 || isProjectAnimating || projectPageState === 'animating'}
-            className="p-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 hover:text-white disabled:opacity-30 disabled:border-white/5 disabled:hover:bg-white/5 disabled:cursor-not-allowed transition-all active:scale-95"
+            className="p-2 sm:p-1.5 min-w-[34px] min-h-[34px] sm:min-w-0 sm:min-h-0 flex items-center justify-center rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 hover:text-white disabled:opacity-30 disabled:border-white/5 disabled:hover:bg-white/5 disabled:cursor-not-allowed transition-all active:scale-95 touch-manipulation"
             title="Next Project (Arrow Right)"
             aria-label="Next Project Folio"
           >

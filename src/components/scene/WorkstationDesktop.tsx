@@ -80,10 +80,14 @@ export function WorkstationDesktop() {
     return { width: mw, height: mh, left: (w - mw) / 2, top: (h - mh) / 2 };
   });
 
+  // Responsive mobile phone viewport detection
+  const [isPhone, setIsPhone] = useState(false);
+
   useEffect(() => {
     const updateBounds = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
+      setIsPhone(w < 768);
       const aspect = w / Math.max(1, h);
       let mw: number;
       let mh: number;
@@ -463,85 +467,113 @@ export function WorkstationDesktop() {
       <div
         ref={desktopScreenRef}
         data-desktop-screen="true"
-        style={{
-          position: 'absolute',
-          left: `${screenBounds.left}px`,
-          top: `${screenBounds.top}px`,
-          width: `${screenBounds.width}px`,
-          height: `${screenBounds.height}px`
-        }}
+        style={
+          isPhone
+            ? {
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%'
+              }
+            : {
+                position: 'absolute',
+                left: `${screenBounds.left}px`,
+                top: `${screenBounds.top}px`,
+                width: `${screenBounds.width}px`,
+                height: `${screenBounds.height}px`
+              }
+        }
         className="pointer-events-none overflow-hidden select-none"
       >
         {/* ================= TRANSPARENT INTERACTIVE HOTSPOTS DIRECTLY OVER 3 WALL FOLDERS ================= */}
-        {/* Hotspot 1: About Me (Canvas Card: cx=180, cy=154, span y=100..270 on 2048x1152) */}
-        <div
-          onClick={handleOpenAboutMe}
-          style={{
-            position: 'absolute',
-            left: '8.789%',
-            top: '16.32%',
-            transform: 'translate(-50%, -50%)',
-            width: 'clamp(90px, 8.8%, 140px)',
-            height: 'clamp(116px, 14.5%, 170px)'
-          }}
-          className="rounded-2xl cursor-pointer hover:bg-emerald-500/15 hover:ring-1 hover:ring-emerald-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
-          role="button"
-          tabIndex={0}
-          title="About Me (Terminal) — Click to open"
-        />
+        {!isPhone && (
+          <>
+            {/* Hotspot 1: About Me (Canvas Card: cx=180, cy=154, span y=100..270 on 2048x1152) */}
+            <div
+              onClick={handleOpenAboutMe}
+              style={{
+                position: 'absolute',
+                left: '8.789%',
+                top: '16.32%',
+                transform: 'translate(-50%, -50%)',
+                width: 'clamp(90px, 8.8%, 140px)',
+                height: 'clamp(116px, 14.5%, 170px)'
+              }}
+              className="rounded-2xl cursor-pointer hover:bg-emerald-500/15 hover:ring-1 hover:ring-emerald-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
+              role="button"
+              tabIndex={0}
+              title="About Me (Terminal) — Click to open"
+            />
 
-        {/* Hotspot 2: Contact (Canvas Card: cx=180, cy=384, span y=330..500 on 2048x1152) */}
-        <div
-          onClick={handleOpenContact}
-          style={{
-            position: 'absolute',
-            left: '8.789%',
-            top: '36.28%',
-            transform: 'translate(-50%, -50%)',
-            width: 'clamp(90px, 8.8%, 140px)',
-            height: 'clamp(116px, 14.5%, 170px)'
-          }}
-          className="rounded-2xl cursor-pointer hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
-          role="button"
-          tabIndex={0}
-          title="Contact & Mail — Click to open"
-        />
+            {/* Hotspot 2: Contact (Canvas Card: cx=180, cy=384, span y=330..500 on 2048x1152) */}
+            <div
+              onClick={handleOpenContact}
+              style={{
+                position: 'absolute',
+                left: '8.789%',
+                top: '36.28%',
+                transform: 'translate(-50%, -50%)',
+                width: 'clamp(90px, 8.8%, 140px)',
+                height: 'clamp(116px, 14.5%, 170px)'
+              }}
+              className="rounded-2xl cursor-pointer hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
+              role="button"
+              tabIndex={0}
+              title="Contact & Mail — Click to open"
+            />
 
-        {/* Hotspot 3: Resume (Canvas Card: cx=180, cy=614, span y=560..730 on 2048x1152) */}
-        <div
-          onClick={handleOpenResume}
-          style={{
-            position: 'absolute',
-            left: '8.789%',
-            top: '56.25%',
-            transform: 'translate(-50%, -50%)',
-            width: 'clamp(90px, 8.8%, 140px)',
-            height: 'clamp(116px, 14.5%, 170px)'
-          }}
-          className="rounded-2xl cursor-pointer hover:bg-yellow-500/15 hover:ring-1 hover:ring-yellow-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
-          role="button"
-          tabIndex={0}
-          title="Resume (PDF Viewer) — Click to open"
-        />
+            {/* Hotspot 3: Resume (Canvas Card: cx=180, cy=614, span y=560..730 on 2048x1152) */}
+            <div
+              onClick={handleOpenResume}
+              style={{
+                position: 'absolute',
+                left: '8.789%',
+                top: '56.25%',
+                transform: 'translate(-50%, -50%)',
+                width: 'clamp(90px, 8.8%, 140px)',
+                height: 'clamp(116px, 14.5%, 170px)'
+              }}
+              className="rounded-2xl cursor-pointer hover:bg-yellow-500/15 hover:ring-1 hover:ring-yellow-400/40 border border-transparent transition-all active:scale-95 flex flex-col items-center justify-center pointer-events-auto z-10 select-none"
+              role="button"
+              tabIndex={0}
+              title="Resume (PDF Viewer) — Click to open"
+            />
+          </>
+        )}
 
         {/* ================= WINDOW 1: ABOUT ME (AUTHENTIC LINUX/WINDOWS TERMINAL) ================= */}
         {isAboutWindowOpen && !isAboutMinimized && (
           <div
             onClick={() => setActiveWindow('about')}
-            style={{
-              position: 'absolute',
-              left: isAboutMaximized ? 0 : `${aboutPos.x}px`,
-              top: isAboutMaximized ? 0 : `${aboutPos.y}px`,
-              width: isAboutMaximized ? '100%' : 'min(780px, calc(100% - 20px))',
-              height: isAboutMaximized ? 'calc(100% - 44px)' : 'min(500px, calc(100% - 50px))',
-              zIndex: activeWindow === 'about' ? 50 : 35
-            }}
+            style={
+              isPhone
+                ? {
+                    position: 'fixed',
+                    left: isAboutMaximized ? 0 : '8px',
+                    right: isAboutMaximized ? 0 : '8px',
+                    top: isAboutMaximized ? 0 : '12px',
+                    bottom: '56px',
+                    width: 'auto',
+                    height: 'auto',
+                    zIndex: activeWindow === 'about' ? 50 : 35
+                  }
+                : {
+                    position: 'absolute',
+                    left: isAboutMaximized ? 0 : `${aboutPos.x}px`,
+                    top: isAboutMaximized ? 0 : `${aboutPos.y}px`,
+                    width: isAboutMaximized ? '100%' : 'min(780px, calc(100% - 20px))',
+                    height: isAboutMaximized ? 'calc(100% - 44px)' : 'min(500px, calc(100% - 50px))',
+                    zIndex: activeWindow === 'about' ? 50 : 35
+                  }
+            }
             className="bg-[#050912]/98 border border-emerald-500/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden pointer-events-auto"
           >
             {/* Title Bar (Minimize, Maximize/Restore, Close) */}
             <div
-              onMouseDown={(e) => handleMouseDown('about', aboutPos, e)}
-              className="bg-[#0b121f] px-3 py-2 border-b border-white/15 flex items-center justify-between cursor-grab active:cursor-grabbing select-none shrink-0"
+              onMouseDown={(e) => !isPhone && handleMouseDown('about', aboutPos, e)}
+              className={`bg-[#0b121f] px-3 py-2 border-b border-white/15 flex items-center justify-between ${
+                isPhone ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+              } select-none shrink-0`}
             >
               <div className="flex items-center gap-2">
                 <Terminal className="w-3.5 h-3.5 text-emerald-400" />
@@ -761,20 +793,35 @@ export function WorkstationDesktop() {
         {isMailOpen && !isMailMinimized && (
           <div
             onClick={() => setActiveWindow('mail')}
-            style={{
-              position: 'absolute',
-              left: isMailMaximized ? 0 : `${mailPos.x}px`,
-              top: isMailMaximized ? 0 : `${mailPos.y}px`,
-              width: isMailMaximized ? '100%' : 'min(700px, calc(100% - 20px))',
-              height: isMailMaximized ? 'calc(100% - 44px)' : 'min(500px, calc(100% - 50px))',
-              zIndex: activeWindow === 'mail' ? 50 : 35
-            }}
+            style={
+              isPhone
+                ? {
+                    position: 'fixed',
+                    left: isMailMaximized ? 0 : '8px',
+                    right: isMailMaximized ? 0 : '8px',
+                    top: isMailMaximized ? 0 : '12px',
+                    bottom: '56px',
+                    width: 'auto',
+                    height: 'auto',
+                    zIndex: activeWindow === 'mail' ? 50 : 35
+                  }
+                : {
+                    position: 'absolute',
+                    left: isMailMaximized ? 0 : `${mailPos.x}px`,
+                    top: isMailMaximized ? 0 : `${mailPos.y}px`,
+                    width: isMailMaximized ? '100%' : 'min(700px, calc(100% - 20px))',
+                    height: isMailMaximized ? 'calc(100% - 44px)' : 'min(500px, calc(100% - 50px))',
+                    zIndex: activeWindow === 'mail' ? 50 : 35
+                  }
+            }
             className="bg-black border-2 border-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden pointer-events-auto"
           >
             {/* Title Bar (Minimize, Maximize/Restore, Close) */}
             <div
-              onMouseDown={(e) => handleMouseDown('mail', mailPos, e)}
-              className="bg-[#050505] px-3 py-2 border-b border-white flex items-center justify-between cursor-grab active:cursor-grabbing select-none shrink-0"
+              onMouseDown={(e) => !isPhone && handleMouseDown('mail', mailPos, e)}
+              className={`bg-[#050505] px-3 py-2 border-b border-white flex items-center justify-between ${
+                isPhone ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+              } select-none shrink-0`}
             >
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-blue-500" />
@@ -923,20 +970,35 @@ export function WorkstationDesktop() {
         {isResumeWindowOpen && !isResumeMinimized && (
           <div
             onClick={() => setActiveWindow('resume')}
-            style={{
-              position: 'absolute',
-              left: isResumeMaximized ? 0 : `${resumePos.x}px`,
-              top: isResumeMaximized ? 0 : `${resumePos.y}px`,
-              width: isResumeMaximized ? '100%' : 'min(820px, calc(100% - 20px))',
-              height: isResumeMaximized ? 'calc(100% - 44px)' : 'min(520px, calc(100% - 50px))',
-              zIndex: activeWindow === 'resume' ? 50 : 35
-            }}
+            style={
+              isPhone
+                ? {
+                    position: 'fixed',
+                    left: isResumeMaximized ? 0 : '8px',
+                    right: isResumeMaximized ? 0 : '8px',
+                    top: isResumeMaximized ? 0 : '12px',
+                    bottom: '56px',
+                    width: 'auto',
+                    height: 'auto',
+                    zIndex: activeWindow === 'resume' ? 50 : 35
+                  }
+                : {
+                    position: 'absolute',
+                    left: isResumeMaximized ? 0 : `${resumePos.x}px`,
+                    top: isResumeMaximized ? 0 : `${resumePos.y}px`,
+                    width: isResumeMaximized ? '100%' : 'min(820px, calc(100% - 20px))',
+                    height: isResumeMaximized ? 'calc(100% - 44px)' : 'min(520px, calc(100% - 50px))',
+                    zIndex: activeWindow === 'resume' ? 50 : 35
+                  }
+            }
             className="bg-[#0b121e] border border-yellow-500/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden pointer-events-auto"
           >
             {/* Title Bar (STRICT REQUIREMENT: ONLY CROSS 'X' BUTTON, NO MIN/MAX) */}
             <div
-              onMouseDown={(e) => handleMouseDown('resume', resumePos, e)}
-              className="bg-[#0f172a] px-3 py-2 border-b border-white/15 flex items-center justify-between cursor-grab active:cursor-grabbing select-none shrink-0"
+              onMouseDown={(e) => !isPhone && handleMouseDown('resume', resumePos, e)}
+              className={`bg-[#0f172a] px-3 py-2 border-b border-white/15 flex items-center justify-between ${
+                isPhone ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+              } select-none shrink-0`}
             >
               <div className="flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5 text-yellow-400" />
@@ -998,7 +1060,8 @@ export function WorkstationDesktop() {
                   title="Open PDF document in external browser tab"
                 >
                   <ExternalLink className="w-3 h-3" />
-                  <span>Open Full View in New Tab</span>
+                  <span className="hidden xs:inline">Open Full View in New Tab</span>
+                  <span className="xs:hidden">Full View</span>
                 </button>
 
                 <a
@@ -1022,7 +1085,7 @@ export function WorkstationDesktop() {
                 style={{
                   width: `${resumeZoom}%`,
                   maxWidth: '740px',
-                  minWidth: '420px',
+                  minWidth: isPhone ? 'min(100%, 280px)' : '420px',
                   transition: 'width 0.12s ease-out'
                 }}
                 className="bg-white rounded shadow-2xl border border-slate-300 p-2 sm:p-3 my-1 flex flex-col items-center select-none"
@@ -1056,8 +1119,8 @@ export function WorkstationDesktop() {
           </div>
         )}
 
-        {/* ================= SOLID NON-OVERLAPPING INTERACTIVE TASKBAR (BOTTOM) ================= */}
-        {(isAboutWindowOpen || isMailOpen || isResumeWindowOpen) && (
+        {/* ================= SOLID NON-OVERLAPPING INTERACTIVE TASKBAR (BOTTOM - DESKTOP ONLY) ================= */}
+        {!isPhone && (isAboutWindowOpen || isMailOpen || isResumeWindowOpen) && (
           <div className="h-11 sm:h-12 w-full absolute bottom-0 inset-x-0 px-3 sm:px-4 flex items-center justify-between z-40 select-none pointer-events-none">
             {/* Start Logo Hotspot on left (aligned over canvas Start logo) */}
             <div
@@ -1213,6 +1276,93 @@ export function WorkstationDesktop() {
           </div>
         )}
       </div>
+
+      {/* ================= MOBILE FLOATING WORKSTATION LAUNCHER DOCK ================= */}
+      {isPhone && (
+        <div
+          className={`fixed inset-x-0 z-40 flex justify-center px-3 pointer-events-none transition-all duration-200 ${
+            (isAboutWindowOpen && !isAboutMinimized) ||
+            (isMailOpen && !isMailMinimized) ||
+            (isResumeWindowOpen && !isResumeMinimized)
+              ? 'bottom-2.5'
+              : 'bottom-16'
+          }`}
+        >
+          <nav
+            aria-label="Mobile Workstation Launcher"
+            className="bg-[#0c121d]/95 backdrop-blur-md border border-white/20 rounded-2xl p-1.5 flex items-center gap-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.85)] pointer-events-auto"
+          >
+            {/* Terminal tab */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isAboutWindowOpen && !isAboutMinimized && activeWindow === 'about') {
+                  minimizeAboutWindow();
+                } else {
+                  handleOpenAboutMe();
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono transition-all border touch-manipulation cursor-pointer ${
+                isAboutWindowOpen && !isAboutMinimized && activeWindow === 'about'
+                  ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                  : isAboutWindowOpen
+                  ? 'bg-[#101b2b] text-slate-300 border-white/10'
+                  : 'bg-white/5 text-slate-400 border-transparent hover:text-white'
+              }`}
+              aria-label="Terminal"
+            >
+              <Terminal className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Terminal</span>
+            </button>
+
+            {/* Resume tab */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isResumeWindowOpen && !isResumeMinimized && activeWindow === 'resume') {
+                  minimizeResumeWindow();
+                } else {
+                  handleOpenResume();
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono transition-all border touch-manipulation cursor-pointer ${
+                isResumeWindowOpen && !isResumeMinimized && activeWindow === 'resume'
+                  ? 'bg-amber-500/25 text-amber-300 border-amber-400 font-bold shadow-[0_0_10px_rgba(245,158,11,0.3)]'
+                  : isResumeWindowOpen
+                  ? 'bg-[#221c0e] text-slate-300 border-white/10'
+                  : 'bg-white/5 text-slate-400 border-transparent hover:text-white'
+              }`}
+              aria-label="Resume"
+            >
+              <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Resume</span>
+            </button>
+
+            {/* Contact tab */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isMailOpen && !isMailMinimized && activeWindow === 'mail') {
+                  setIsMailMinimized(true);
+                } else {
+                  handleOpenContact();
+                }
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono transition-all border touch-manipulation cursor-pointer ${
+                isMailOpen && !isMailMinimized && activeWindow === 'mail'
+                  ? 'bg-sky-500/25 text-sky-300 border-sky-400 font-bold shadow-[0_0_10px_rgba(56,189,248,0.3)]'
+                  : isMailOpen
+                  ? 'bg-[#0e1d32] text-slate-300 border-white/10'
+                  : 'bg-white/5 text-slate-400 border-transparent hover:text-white'
+              }`}
+              aria-label="Contact"
+            >
+              <Mail className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <span>Contact</span>
+            </button>
+          </nav>
+        </div>
+      )}
     </div>
   );
 }

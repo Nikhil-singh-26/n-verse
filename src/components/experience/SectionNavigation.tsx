@@ -50,7 +50,7 @@ export function SectionNavigation() {
           {/* Mobile Station Menu Trigger */}
           <button
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="md:hidden p-2 rounded-xl bg-[#0c1017]/80 text-[#94a3b8] hover:text-white border border-white/10 transition-colors backdrop-blur-md"
+            className="md:hidden p-2.5 rounded-xl bg-[#0c1017]/80 text-[#94a3b8] hover:text-white border border-white/10 transition-colors backdrop-blur-md min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95 touch-manipulation"
             aria-label="Toggle Station Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-4 h-4 text-[#38bdf8]" /> : <Menu className="w-4 h-4" />}
@@ -75,7 +75,7 @@ export function SectionNavigation() {
                     jumpToSection(sec.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`p-2 rounded-lg text-left text-xs font-mono transition-all border ${
+                  className={`p-2.5 rounded-xl text-left text-xs font-mono transition-all border touch-manipulation ${
                     isActive
                       ? 'bg-[#38bdf8]/20 text-[#38bdf8] border-[#38bdf8]'
                       : 'bg-[#121620] text-[#94a3b8] border-white/5 hover:text-white'
