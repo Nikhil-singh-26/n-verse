@@ -202,15 +202,6 @@ export function WelcomeIntro() {
         <div className="absolute bottom-5 left-5 text-white/15 font-mono text-xs select-none">└</div>
         <div className="absolute bottom-5 right-5 text-white/15 font-mono text-xs select-none">┘</div>
 
-        {/* Blueprint coordinate indicators */}
-        <div className="hidden md:flex absolute bottom-5 left-12 items-center gap-3 text-[10px] font-mono text-white/30 tracking-widest uppercase">
-          <span>SEC // 01</span>
-          <span className="w-1 h-1 rounded-full bg-[#00f0ff]/50" />
-          <span>ELEV: 2.10m</span>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>3D STUDIO THRESHOLD</span>
-        </div>
-
         <div className="hidden md:flex absolute bottom-5 right-12 items-center gap-2 text-[10px] font-mono text-white/30 tracking-widest uppercase">
           <span>PRESS ENTER OR CLICK TO CONTINUE</span>
           <CornerDownRight className="w-3 h-3 text-white/40" />
