@@ -225,7 +225,7 @@ export function WelcomeIntro() {
         <button
           type="button"
           onClick={handleEnterStudio}
-          className="text-xs font-mono text-white/50 hover:text-white border border-white/10 hover:border-white/25 bg-white/[0.03] hover:bg-white/[0.08] rounded-lg px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00f0ff] cursor-pointer active:scale-95"
+          className="text-xs font-mono text-white/50 hover:text-white border border-white/10 hover:border-white/25 bg-white/3 hover:bg-white/8 rounded-lg px-3 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00f0ff] cursor-pointer active:scale-95"
           aria-label="Skip introduction and enter studio"
         >
           Skip intro
@@ -239,7 +239,7 @@ export function WelcomeIntro() {
           className="max-w-2xl mx-auto flex flex-col items-center gap-4 sm:gap-6"
         >
           {/* Subtle Architectural Category Marker */}
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-white/10 bg-white/[0.03] text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#00f0ff]/90">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-white/10 bg-white/3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#00f0ff]/90">
             <span className="w-1 h-1 rounded-full bg-[#00f0ff]" />
             <span>THRESHOLD // 01</span>
           </div>
@@ -265,7 +265,7 @@ export function WelcomeIntro() {
               ref={ctaRef}
               type="button"
               onClick={handleEnterStudio}
-              className="group relative inline-flex items-center gap-3 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border border-white/20 bg-white/[0.06] hover:bg-white/[0.12] hover:border-[#00f0ff]/60 text-xs sm:text-sm font-mono text-white transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_24px_rgba(0,240,255,0.22)] active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff]"
+              className="group relative inline-flex items-center gap-3 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl border border-white/20 bg-white/6 hover:bg-white/1.2 hover:border-[#00f0ff]/60 text-xs sm:text-sm font-mono text-white transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_24px_rgba(0,240,255,0.22)] active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff]"
               aria-label="Enter the 3D studio experience"
             >
               <span className="tracking-wider">Enter the studio</span>
