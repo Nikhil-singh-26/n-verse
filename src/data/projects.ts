@@ -107,31 +107,35 @@ export const projectsData: ProjectData[] = [
     id: 'know-via',
     slug: 'know-via',
     title: 'Know Via',
-    tagline: 'Contextual Mobile Knowledge Engine & Linked Research Notes (Android APK)',
-    shortDescription: 'Mobile knowledge management app in APK format with markdown editing, bidirectional backlinks, and concept graphs.',
-    description: 'A standalone Android mobile application (distributed as an APK) allowing developers and researchers to capture notes in markdown, interconnect ideas through bidirectional links, and explore associative concept graphs on the go.',
+    tagline: 'Local-First Document Learning, Spaced Repetition & Revision Suite',
+    shortDescription: 'Privacy-first document revision ecosystem combining Google Gemini AI, deterministic SM-2 spaced repetition, and Drift SQLite storage.',
+    description: 'A local-first document learning and knowledge management application designed for active recall. Rather than acting as just a PDF reader with an attached chatbot, Know Via turns imported study materials into a personalized revision ecosystem: grounded Gemini AI Q&A, deterministic SuperMemo-2 (SM-2) spaced repetition flashcards, interactive multiple-choice quizzes, persistent study notes, and privacy-first local Drift SQLite storage.',
     status: 'Active Development',
-    category: 'Mobile Application (Android APK)',
+    category: 'Mobile Application (Flutter & Gemini AI)',
     featured: true,
-    purpose: 'Empowers engineers to organize structured technical notes on Android, cross-reference interconnected concepts, and eliminate information silos through a local-first associative backlinking system.',
-    technologies: ['Android / APK', 'Flutter', 'Dart', 'SQLite', 'Markdown', 'Graph Visualizer'],
+    purpose: 'Transforms imported PDFs, study materials, and notes into an active recall revision ecosystem powered by grounded Gemini 2.5 Flash AI, deterministic SM-2 spaced repetition flashcards, and interactive knowledge-check quizzes.',
+    technologies: ['Flutter 3.x', 'Dart 3', 'Google Gemini 2.5 Flash', 'Drift SQLite (v8)', 'Riverpod', 'SuperMemo-2 (SM-2)', 'Speech to Text', 'Material 3'],
     keyFunctionality: [
-      'Distraction-free mobile Markdown editor with live preview, syntax highlighting, and formatting tools',
-      'Bidirectional backlink graph linking references across documentation nodes',
-      'Local-first offline SQLite storage with instant search indexing and zero cloud dependency',
-      'Standalone Android APK distribution packaged for direct installation and testing'
+      'Source-Grounded Document AI: Multi-turn Q&A and suggested contextual prompts powered by Google Gemini 2.5 Flash',
+      'Deterministic SM-2 Spaced Repetition: 3D animated flip cards with interval and ease factor calculations based on user recall ratings',
+      'Interactive Knowledge Check Quizzes: 4-option MCQ generation with detailed explanations, scoring, and mistake review',
+      'Universal Document Ingestion: Imports PDFs, TXT, MD, CSV, JSON, and images with full offline reader and search',
+      'Privacy-First Local Persistence: Powered by Drift SQLite (Schema v8) keeping all documents and study progress on-device'
     ],
-    repositoryUrl: 'https://github.com/Nikhil-singh-26/know-via',
+    repositoryUrl: 'https://github.com/Nikhil-singh-26/knowvia',
+    liveDemoUrl: 'https://github.com/Nikhil-singh-26/knowvia/releases',
     links: {
-      github: 'https://github.com/Nikhil-singh-26/know-via'
+      github: 'https://github.com/Nikhil-singh-26/knowvia',
+      live: 'https://github.com/Nikhil-singh-26/knowvia/releases',
+      demo: 'https://github.com/Nikhil-singh-26/knowvia/releases'
     },
     details: {
-      problemStatement: 'Desktop knowledge tools lack distraction-free offline mobile counterparts, making quick capture on Android cumbersome.',
-      architectureOverview: 'Packaged as a standalone Android APK built with Flutter and SQLite for local-first storage, providing fast bidirectional link indexing and graph rendering without relying on cloud services. (Source code and APK builds available on GitHub).',
+      problemStatement: 'Learners collect numerous PDFs, research articles, lecture slides, and study notes, but reading them once rarely leads to long-term retention while cloud-based AI tools risk document privacy.',
+      architectureOverview: 'Engineered with Flutter 3.x, Dart 3, and Riverpod using Drift SQLite (Schema v8) for 100% local persistence of documents, notes, flashcard intervals, and quiz history. Grounded AI queries communicate on-demand with Google Gemini 2.5 Flash over encrypted HTTPS without intermediate tracking servers.',
       highlights: [
-        'Local-first SQLite storage delivering sub-10ms search results offline',
-        'Associative link parser dynamically resolving internal [[WikiLinks]]',
-        'Zero-telemetry privacy-first architecture with standalone APK installation'
+        'Deterministic SuperMemo-2 (SM-2) algorithm calculating ease factors and due-deck intervals',
+        'Source-grounded Gemini 2.5 Flash Q&A with customizable user API key storage in local preferences',
+        'Local-first Drift SQLite database architecture with zero third-party cloud data transmission'
       ]
     }
   }

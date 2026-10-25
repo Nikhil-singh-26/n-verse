@@ -140,7 +140,7 @@ export function ProjectHUD() {
               target="_blank"
               rel="noopener noreferrer"
               className="p-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 hover:text-white transition-colors"
-              title="Observe Live Application"
+              title={currentProject.id === 'know-via' ? 'Verify Official Releases & APK' : 'Observe Live Application'}
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </a>

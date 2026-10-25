@@ -488,16 +488,16 @@ export function drawProjectManuscript(
     ctx.fillText('Target: Asphalt Distress (94.2%)', roadTopX - 150, diagCenterY + 76);
     ctx.fillText('Target: Surface Pothole (89.6%)', roadTopX + 20, diagCenterY + 38);
   } else if (project.id === 'know-via') {
-    // 4. Know Via: Associative Synapse Graph & Android Mobile APK
+    // 4. Know Via: Local-First Document Learning, Spaced Repetition & Revision Suite
     const hubX = diagCenterX;
     const hubY = diagCenterY - 15;
 
     const nodes = [
-      { x: hubX, y: hubY, r: 28, label: 'Central Concept' },
-      { x: hubX - 170, y: hubY - 55, r: 20, label: 'Android APK' },
-      { x: hubX - 150, y: hubY + 65, r: 18, label: 'SQLite Store' },
-      { x: hubX + 165, y: hubY - 50, r: 22, label: 'Markdown Notes' },
-      { x: hubX + 155, y: hubY + 60, r: 19, label: 'Backlink Graph' }
+      { x: hubX, y: hubY, r: 28, label: 'Document Engine' },
+      { x: hubX - 170, y: hubY - 55, r: 20, label: 'Gemini 2.5 Flash' },
+      { x: hubX - 150, y: hubY + 65, r: 18, label: 'Drift SQLite (v8)' },
+      { x: hubX + 165, y: hubY - 50, r: 22, label: 'SM-2 Flashcards' },
+      { x: hubX + 155, y: hubY + 60, r: 19, label: 'MCQ Quizzes' }
     ];
 
     // Connection lines
@@ -523,7 +523,7 @@ export function drawProjectManuscript(
 
       ctx.font = 'bold 17px "Georgia", serif';
       ctx.fillStyle = '#22140a';
-      ctx.fillText(nd.label, nd.x - nd.r - 12, nd.y + nd.r + 20);
+      ctx.fillText(nd.label, nd.x - nd.r - 14, nd.y + nd.r + 20);
     });
   }
 
@@ -589,7 +589,11 @@ export function drawProjectManuscript(
 
     ctx.font = 'bold 20px "Courier New", monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('✦ OBSERVE RUNNING APPARATUS', btn2X + 28, btn2Y + 40);
+    if (project.id === 'know-via') {
+      ctx.fillText('✦ VERIFY RELEASES & APK', btn2X + 44, btn2Y + 40);
+    } else {
+      ctx.fillText('✦ OBSERVE RUNNING APPARATUS', btn2X + 28, btn2Y + 40);
+    }
   } else if (project.id === 'know-via') {
     ctx.fillStyle = '#1e2430';
     ctx.fill();
@@ -599,7 +603,7 @@ export function drawProjectManuscript(
 
     ctx.font = 'bold 20px "Courier New", monospace';
     ctx.fillStyle = '#e2e8f0';
-    ctx.fillText('📦 ANDROID APK REPOSITORY', btn2X + 32, btn2Y + 40);
+    ctx.fillText('📦 VERIFY RELEASES & APK', btn2X + 44, btn2Y + 40);
   } else {
     ctx.fillStyle = '#1e2430';
     ctx.fill();

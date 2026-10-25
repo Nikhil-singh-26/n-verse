@@ -118,7 +118,7 @@ export function WebGLFallback() {
                       className="px-3 py-1.5 rounded-lg bg-[#00f0ff]/20 text-xs font-mono text-[#00f0ff] flex items-center gap-1.5"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Live</span>
+                      <span>{project.id === 'know-via' ? 'Releases' : 'Live'}</span>
                     </a>
                   )}
                 </div>

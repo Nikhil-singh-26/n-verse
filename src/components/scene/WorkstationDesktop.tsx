@@ -137,7 +137,7 @@ export function WorkstationDesktop() {
       '[PROFILE] Full-stack engineer crafting practical, high-performance web & mobile systems.',
       '[CORE_STACK] Next.js • React • TypeScript • Node.js • Express • MongoDB • Flutter',
       '[ACADEMICS] B.Tech in Computer Science & Engineering (2024–2028) @ GEC Bilaspur (CGPA: 7.6)',
-      '[PROJECTS] 01 The Brew Club • 02 Shrinka URL • 03 RoadVision • 04 KnowVia (APK)',
+      '[PROJECTS] 01 The Brew Club • 02 Shrinka URL • 03 RoadVision • 04 Know Via (AI Study Suite)',
       '[STATUS] Open for software engineering internships and high-impact roles.',
       '─────────────────────────────────────────────────────────────────────────────',
       "Type 'help' to inspect available commands (skills, projects, education, resume, contact)."
@@ -176,7 +176,7 @@ export function WorkstationDesktop() {
       '[PROFILE] Full-stack engineer crafting practical, high-performance web & mobile systems.',
       '[CORE_STACK] Next.js • React • TypeScript • Node.js • Express • MongoDB • Flutter',
       '[ACADEMICS] B.Tech in Computer Science & Engineering (2024–2028) @ GEC Bilaspur (CGPA: 7.6)',
-      '[PROJECTS] 01 The Brew Club • 02 Shrinka URL • 03 RoadVision • 04 KnowVia (APK)',
+      '[PROJECTS] 01 The Brew Club • 02 Shrinka URL • 03 RoadVision • 04 Know Via (AI Study Suite)',
       '[STATUS] Open for software engineering internships and high-impact roles.',
       '─────────────────────────────────────────────────────────────────────────────',
       "Type 'help' to inspect available commands (skills, projects, education, resume, contact)."
@@ -362,7 +362,7 @@ export function WorkstationDesktop() {
         '  01. The Brew Club - Creator tipping & crowdfunding platform (Next.js, MongoDB)',
         '  02. Shrinka URL   - High-speed URL shortener & analytics (https://shrinka-url.vercel.app/)',
         '  03. RoadVision    - AI computer vision road hazard detection (GitHub repository)',
-        '  04. Know Via      - Contextual knowledge engine & markdown graph (Android APK on GitHub)'
+        '  04. Know Via      - Local-first document learning & revision suite (Releases: https://github.com/Nikhil-singh-26/knowvia/releases)'
       );
     } else if (lower === 'about' || lower === 'cat about.txt' || lower === 'bio') {
       newEntry.push(

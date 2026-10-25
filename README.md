@@ -54,7 +54,7 @@ I also implemented draggable windows, click-to-focus window layering, and a Wind
 
 - I built a desk-mounted projector that casts a cyan light beam onto the wall.
 - Project cards include demo links, source repositories, and technology tags.
-- The projects featured are **The Brew Club**, **EcoTrack AI**, **Know Via**, and **RoadVision**.
+- The projects featured are **The Brew Club**, **Shrinka URL**, **RoadVision**, and **Know Via**.
 - I provide case-study routes at `/projects/[slug]`.
 
 ### 5. Achievements — Milestones

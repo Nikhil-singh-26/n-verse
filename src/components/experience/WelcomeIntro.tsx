@@ -238,11 +238,6 @@ export function WelcomeIntro() {
           ref={titleGroupRef}
           className="max-w-2xl mx-auto flex flex-col items-center gap-4 sm:gap-6"
         >
-          {/* Subtle Architectural Category Marker */}
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-white/10 bg-white/3 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-[#00f0ff]/90">
-            <span className="w-1 h-1 rounded-full bg-[#00f0ff]" />
-            <span>THRESHOLD // 01</span>
-          </div>
 
           {/* Strong Primary Wordmark Treatment */}
           <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold tracking-tight font-['Outfit'] text-[#f8fafc] leading-none select-none">

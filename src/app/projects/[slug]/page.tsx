@@ -88,7 +88,7 @@ export default async function ProjectPage({
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#00f0ff]/20 hover:bg-[#00f0ff]/30 text-xs font-mono text-[#00f0ff] border border-[#00f0ff]/50 transition-colors shadow-[0_0_15px_rgba(0,240,255,0.25)]"
             >
               <ExternalLink className="w-4 h-4" />
-              <span>Live Demonstration</span>
+              <span>{project.id === 'know-via' ? 'Verify Releases & APK' : 'Live Demonstration'}</span>
             </a>
           )}
         </div>
